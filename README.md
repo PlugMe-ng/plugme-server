@@ -1,2 +1,2 @@
 # plugme-server
-This is the (monolithic) server for the PlugMe project
+This is the (monolithic) server for the PlugMe project.
