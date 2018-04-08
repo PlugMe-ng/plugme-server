@@ -1,0 +1,17 @@
+{
+    "name": "plugme-server",
+    "version": "0.0.1",
+    "description": "This is the core server for PlugMe",
+    "main": "index.js",
+    "engines": {
+      "node": "9.7.1",
+      "npm": "5.6.0",
+      "yarn": "1.5.1"
+    },
+    "scripts": {
+      "test": ""
+    },
+    "repository": "https://github.com/PlugMe-ng/plugme-server",
+    "author": "Franklin Chieze <chieze.franklin@gmail.com>"
+  }
+  
