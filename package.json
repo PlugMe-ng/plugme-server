@@ -38,6 +38,10 @@
     "rimraf": "^2.6.2"
   },
   "devDependencies": {
-    "nodemon": "^1.17.3"
+    "eslint": "^4.9.0",
+    "eslint-config-airbnb-base": "^12.1.0",
+    "eslint-plugin-import": "^2.7.0",
+    "nodemon": "^1.17.3",
+    "pre-commit": "^1.2.2"
   }
 }
