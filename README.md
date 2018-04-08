@@ -1,6 +1,8 @@
 # plugme-server
 This is the core server for the PlugMe project.
 
+[![Build Status](https://travis-ci.org/PlugMe-ng/plugme-server.svg?branch=master)](https://travis-ci.org/PlugMe-ng/plugme-server)
+
 Imagine, a platform where developers (for example) can both share work they’ve done as content, and use those works they’ve shared as portfolio to get new job opportunities. It all starts with developers being able to subscribe to a plan and as such post any amount of content and/or apply to as many job opportunities as they would like (depending on parameters of plans subscribed for) using tags (like `json`, `php`, `python` etc.)
 
 PlugMe seeks to be such a platform.
