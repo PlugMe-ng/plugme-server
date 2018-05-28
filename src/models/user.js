@@ -27,13 +27,19 @@ module.exports = (sequelize, DataTypes) => {
         notEmpty: true
       }
     },
+    facebookId: {
+      type: DataTypes.STRING,
+      allowNull: true,
+      // unique: true
+    },
     googleId: {
       type: DataTypes.STRING,
-      allowNull: false,
-      unique: true,
-      validate: {
-        notEmpty: true
-      }
+      allowNull: true,
+      // unique: true
+    },
+    password: {
+      type: DataTypes.STRING,
+      allowNull: true,
     },
     photo: {
       type: DataTypes.STRING,
