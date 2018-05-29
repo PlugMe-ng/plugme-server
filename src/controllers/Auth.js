@@ -69,7 +69,7 @@ export default class Auth {
       }
 
       const user = await models.User.create({
-        name: req.body.name,
+        displayName: req.body.displayName,
         email: req.body.email,
         password: await bcrypt.hash(
           req.body.password,
