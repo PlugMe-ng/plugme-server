@@ -38,16 +38,17 @@ export default {
   },
   user0: {
     displayName: 'user0',
-    email: 'user0@andela.com',
-    githubUsername: 'user0',
+    email: 'user0@gmail.com',
+    facebookId: 123450,
     googleId: 123450,
+    password: 'password0',
     photo: 'https://www.myphotos.com/0',
     role: 'admin',
     slackId: 1234560
   },
   user1: {
     displayName: 'user1',
-    email: 'user1@andela.com',
+    email: 'user1@gmail.com',
     githubUsername: 'user1',
     googleId: 123451,
     photo: 'https://www.myphotos.com/1',
@@ -55,7 +56,7 @@ export default {
   },
   user2: {
     displayName: 'user2',
-    email: 'user2@andela.com',
+    email: 'user2@gmail.com',
     githubUsername: 'user2',
     googleId: 123452,
     photo: 'https://www.myphotos.com/2',
@@ -63,7 +64,7 @@ export default {
   },
   user3: {
     displayName: 'user3',
-    email: 'user3@andela.com',
+    email: 'user3@gmail.com',
     githubUsername: 'user3',
     googleId: 123453,
     photo: 'https://www.myphotos.com/3',
@@ -71,7 +72,7 @@ export default {
   },
   user4: {
     displayName: 'user4',
-    email: 'user4@andela.com',
+    email: 'user4@gmail.com',
     githubUsername: 'user4',
     googleId: 123454,
     photo: 'https://www.myphotos.com/4',
@@ -79,7 +80,7 @@ export default {
   },
   user5: {
     displayName: 'user5',
-    email: 'user5@andela.com',
+    email: 'user5@gmail.com',
     githubUsername: 'user5',
     googleId: 123455,
     photo: 'https://www.myphotos.com/5',
@@ -125,7 +126,7 @@ export default {
     slackId: 123456
   },
   user1WithoutDisplayName: {
-    email: 'user1@andela.com',
+    email: 'user1@gmail.com',
     githubUsername: 'user1',
     googleId: 12345,
     photo: 'https://www.myphotos.com/1',
@@ -133,21 +134,21 @@ export default {
   },
   user1WithoutGithubUsername: {
     displayName: 'user1',
-    email: 'user1@andela.com',
+    email: 'user1@gmail.com',
     googleId: 12345,
     photo: 'https://www.myphotos.com/1',
     slackId: 123456
   },
   user1WithoutGoogleId: {
     displayName: 'user1',
-    email: 'user1@andela.com',
+    email: 'user1@gmail.com',
     githubUsername: 'user1',
     photo: 'https://www.myphotos.com/1',
     slackId: 123456
   },
   user1WithoutSlackId: {
     displayName: 'user1',
-    email: 'user1@andela.com',
+    email: 'user1@gmail.com',
     githubUsername: 'user1',
     googleId: 12345,
     photo: 'https://www.myphotos.com/1',
