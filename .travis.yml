@@ -1,3 +1,6 @@
+after_success: 
+  - npm run coveralls
+  - npm run codecov
 before_script:
   - psql -c 'drop database if exists plugme_test;' -U postgres
   - psql -c 'create database plugme_test;' -U postgres
