@@ -23,13 +23,19 @@ module.exports = {
           notEmpty: true
         }
       },
+      facebookId: {
+        type: Sequelize.STRING,
+        allowNull: true,
+        // unique: true,
+      },
       googleId: {
         type: Sequelize.STRING,
-        allowNull: false,
-        unique: true,
-        validate: {
-          notEmpty: true
-        }
+        allowNull: true,
+        // unique: true,
+      },
+      password: {
+        type: Sequelize.STRING,
+        allowNull: true,
       },
       photo: {
         type: Sequelize.STRING,

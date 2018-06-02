@@ -21,6 +21,9 @@ import express from 'express';
 import logger from 'morgan';
 import path from 'path';
 
+import middleware from './middleware';
+import routes from './routes';
+
 dotenv.config();
 
 const env = process.env.NODE_ENV || 'development';
@@ -31,7 +34,9 @@ const app = express();
 app.set('port', port);
 
 // Log requests to the console.
-app.use(logger('dev'));
+if (env !== 'test') {
+  app.use(logger('dev'));
+}
 
 // CORS
 /*
@@ -54,9 +59,9 @@ app.use((req, res, next) => {
   next();
 });
 
-app.get('/', (req, res) => {
-  res.send('Hello World!');
-});
+app.use(middleware.api);
+
+routes(app);
 
 // 404 error handler
 app.use((req, res) =>
@@ -64,4 +69,4 @@ app.use((req, res) =>
 
 app.listen(port);
 
-// export default app;
+export default app;
