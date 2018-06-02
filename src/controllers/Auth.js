@@ -68,6 +68,12 @@ export default class Auth {
         throw new Error('User with the same email already exists.');
       }
 
+      // first user added to the DB has to be an admin
+      const dbResult = await models.User.findAndCountAll();
+      if (dbResult.count === 0) {
+        req.body.role = 'admin';
+      }
+
       const user = await models.User.create({
         ...req.body,
         password: await bcrypt.hash(
