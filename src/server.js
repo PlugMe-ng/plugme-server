@@ -61,6 +61,10 @@ app.use((req, res, next) => {
 
 app.use(middleware.api);
 
+app.get('/', (req, res) => {
+  res.send('Welcome to PlugMe Server');
+});
+
 routes(app);
 
 // 404 error handler
