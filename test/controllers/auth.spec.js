@@ -3,6 +3,7 @@
  *
  * @author Franklin Chieze
  *
+ * @requires NPM:bcrypt
  * @requires NPM:chai
  * @requires NPM:chai-http
  * @requires ../mock
@@ -10,6 +11,7 @@
  * @requires ../../build/server
  */
 
+import bcrypt from 'bcrypt';
 import chai from 'chai';
 import chaiHttp from 'chai-http';
 
@@ -28,7 +30,13 @@ describe('AuthController', () => {
 
   describe('POST: /v1/auth/signin', (done) => {
     beforeEach(async () => {
-      await models.User.create(mock.user1);
+      await models.User.create({
+        ...mock.user1,
+        password: await bcrypt.hash(
+          mock.user1.password,
+          process.env.NODE_ENV === 'production' ? 10 : 1
+        )
+      });
     });
     it('should return a user token on successful sign in', (done) => {
       chai.request(server)
@@ -229,7 +237,13 @@ describe('AuthController', () => {
 
   describe('POST: /v1/auth/signup', (done) => {
     beforeEach(async () => {
-      await models.User.create(mock.user1);
+      await models.User.create({
+        ...mock.user1,
+        password: await bcrypt.hash(
+          mock.user1.password,
+          process.env.NODE_ENV === 'production' ? 10 : 1
+        )
+      });
     });
     it('should not register a user with an existing email', (done) => {
       chai.request(server)
