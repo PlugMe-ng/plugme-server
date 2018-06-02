@@ -69,8 +69,7 @@ export default class Auth {
       }
 
       const user = await models.User.create({
-        displayName: req.body.displayName,
-        email: req.body.email,
+        ...req.body,
         password: await bcrypt.hash(
           req.body.password,
           process.env.NODE_ENV === 'production' ? 10 : 1
