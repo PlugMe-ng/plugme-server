@@ -43,22 +43,9 @@ describe('AuthController', () => {
           expect(res.body.data.user.displayName)
             .to.equal(mock.user1.displayName);
           expect(res.body.data.user.email).to.equal(mock.user1.email);
+          expect(res.body.data.user.password).to.be.undefined;
           res.body.data.should.have.property('userToken');
           expect(res.body.errors).to.be.undefined;
-          done();
-        });
-    });
-    it('should not sign in user without display name', (done) => {
-      chai.request(server)
-        .post('/v1/auth/signin')
-        .send(mock.user1WithoutDisplayName)
-        .end((err, res) => {
-          res.should.have.status(200);
-          res.body.should.have.property('errors');
-          expect(res.body.errors).to.be.an('Array');
-          expect(res.body.errors)
-            .to.include('The displayName field is required.');
-          expect(res.body.data).to.be.undefined;
           done();
         });
     });
@@ -118,16 +105,16 @@ describe('AuthController', () => {
           done();
         });
     });
-    it('should not sign in user without google id', (done) => {
+    it('should not sign in user without password', (done) => {
       chai.request(server)
         .post('/v1/auth/signin')
-        .send(mock.user1WithoutGoogleId)
+        .send(mock.user1WithoutPassword)
         .end((err, res) => {
           res.should.have.status(200);
           res.body.should.have.property('errors');
           expect(res.body.errors).to.be.an('Array');
           expect(res.body.errors)
-            .to.include('The googleId field is required.');
+            .to.include('The password field is required.');
           expect(res.body.data).to.be.undefined;
           done();
         });
@@ -148,6 +135,7 @@ describe('AuthController', () => {
           expect(res.body.data.user.displayName)
             .to.equal(mock.user1.displayName);
           expect(res.body.data.user.email).to.equal(mock.user1.email);
+          expect(res.body.data.user.password).to.be.undefined;
           res.body.data.should.have.property('userToken');
           expect(res.body.errors).to.be.undefined;
           done();
@@ -223,58 +211,16 @@ describe('AuthController', () => {
           done();
         });
     });
-    it('should not register a user with non-andela email', (done) => {
+    it('should not register a user without password', (done) => {
       chai.request(server)
         .post('/v1/auth/signup')
-        .send(mock.user1WithNonAndelaEmail)
+        .send(mock.user1WithoutPassword)
         .end((err, res) => {
           res.should.have.status(200);
           res.body.should.have.property('errors');
           expect(res.body.errors).to.be.an('Array');
           expect(res.body.errors)
-            .to.include('Email address must be @andela.com.');
-          expect(res.body.data).to.be.undefined;
-          done();
-        });
-    });
-    it('should not register a user without github username', (done) => {
-      chai.request(server)
-        .post('/v1/auth/signup')
-        .send(mock.user1WithoutGithubUsername)
-        .end((err, res) => {
-          res.should.have.status(200);
-          res.body.should.have.property('errors');
-          expect(res.body.errors).to.be.an('Array');
-          expect(res.body.errors)
-            .to.include('The githubUsername field is required.');
-          expect(res.body.data).to.be.undefined;
-          done();
-        });
-    });
-    it('should not register a user without google id', (done) => {
-      chai.request(server)
-        .post('/v1/auth/signup')
-        .send(mock.user1WithoutGoogleId)
-        .end((err, res) => {
-          res.should.have.status(200);
-          res.body.should.have.property('errors');
-          expect(res.body.errors).to.be.an('Array');
-          expect(res.body.errors)
-            .to.include('The googleId field is required.');
-          expect(res.body.data).to.be.undefined;
-          done();
-        });
-    });
-    it('should not register a user without slack id', (done) => {
-      chai.request(server)
-        .post('/v1/auth/signup')
-        .send(mock.user1WithoutSlackId)
-        .end((err, res) => {
-          res.should.have.status(200);
-          res.body.should.have.property('errors');
-          expect(res.body.errors).to.be.an('Array');
-          expect(res.body.errors)
-            .to.include('The slackId field is required.');
+            .to.include('The password field is required.');
           expect(res.body.data).to.be.undefined;
           done();
         });

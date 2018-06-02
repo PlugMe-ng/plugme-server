@@ -9,6 +9,7 @@
 import Validator from 'validatorjs';
 
 const facebookSigninUserRules = {
+  email: 'required|email',
   facebookId: 'numeric',
 };
 const facebookSignupUserRules = {
@@ -19,6 +20,7 @@ const facebookSignupUserRules = {
 };
 
 const googleSigninUserRules = {
+  email: 'required|email',
   googleId: 'numeric',
 };
 const googleSignupUserRules = {

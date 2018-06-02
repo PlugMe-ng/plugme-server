@@ -44,31 +44,24 @@ export default {
     password: 'password0',
     photo: 'https://www.myphotos.com/0',
     role: 'admin',
-    slackId: 1234560
   },
   user1: {
     displayName: 'user1',
     email: 'user1@gmail.com',
-    githubUsername: 'user1',
-    googleId: 123451,
+    password: 'password1',
     photo: 'https://www.myphotos.com/1',
-    slackId: 1234561
   },
   user2: {
     displayName: 'user2',
     email: 'user2@gmail.com',
-    githubUsername: 'user2',
     googleId: 123452,
     photo: 'https://www.myphotos.com/2',
-    slackId: 1234562
   },
   user3: {
     displayName: 'user3',
     email: 'user3@gmail.com',
-    githubUsername: 'user3',
-    googleId: 123453,
+    facebookId: 123453,
     photo: 'https://www.myphotos.com/3',
-    slackId: 1234563
   },
   user4: {
     displayName: 'user4',
@@ -76,7 +69,6 @@ export default {
     githubUsername: 'user4',
     googleId: 123454,
     photo: 'https://www.myphotos.com/4',
-    slackId: 1234564
   },
   user5: {
     displayName: 'user5',
@@ -84,7 +76,6 @@ export default {
     githubUsername: 'user5',
     googleId: 123455,
     photo: 'https://www.myphotos.com/5',
-    slackId: 1234565
   },
   user1WithNonAndelaEmail: {
     displayName: 'user1',
@@ -92,65 +83,38 @@ export default {
     githubUsername: 'user1',
     googleId: 12345,
     photo: 'https://www.myphotos.com/1',
-    slackId: 123456
   },
   user1WithMalformedEmail: {
     displayName: 'user1',
-    email: 'user1@andelacom',
-    githubUsername: 'user1',
-    googleId: 12345,
+    email: 'user1@gmailcom',
+    password: 'password1',
     photo: 'https://www.myphotos.com/1',
-    slackId: 123456
   },
   user2WithMalformedEmail: {
     displayName: 'user2',
-    email: 'user2andela.com',
-    githubUsername: 'user2',
-    googleId: 12345,
+    email: 'user2gmail.com',
+    googleId: 123452,
     photo: 'https://www.myphotos.com/2',
-    slackId: 123456
   },
   user3WithMalformedEmail: {
     displayName: 'user3',
-    email: 'user3@andela.',
-    githubUsername: 'user3',
-    googleId: 12345,
+    email: 'user3@gmail.',
+    facebookId: 123453,
     photo: 'https://www.myphotos.com/3',
-    slackId: 123456
-  },
-  user1WithoutEmail: {
-    displayName: 'user1',
-    githubUsername: 'user1',
-    googleId: 12345,
-    photo: 'https://www.myphotos.com/1',
-    slackId: 123456
   },
   user1WithoutDisplayName: {
     email: 'user1@gmail.com',
-    githubUsername: 'user1',
-    googleId: 12345,
+    password: 'password1',
     photo: 'https://www.myphotos.com/1',
-    slackId: 123456
   },
-  user1WithoutGithubUsername: {
+  user1WithoutEmail: {
+    displayName: 'user1',
+    password: 'password1',
+    photo: 'https://www.myphotos.com/1',
+  },
+  user1WithoutPassword: {
     displayName: 'user1',
     email: 'user1@gmail.com',
-    googleId: 12345,
-    photo: 'https://www.myphotos.com/1',
-    slackId: 123456
-  },
-  user1WithoutGoogleId: {
-    displayName: 'user1',
-    email: 'user1@gmail.com',
-    githubUsername: 'user1',
-    photo: 'https://www.myphotos.com/1',
-    slackId: 123456
-  },
-  user1WithoutSlackId: {
-    displayName: 'user1',
-    email: 'user1@gmail.com',
-    githubUsername: 'user1',
-    googleId: 12345,
     photo: 'https://www.myphotos.com/1',
   },
 };

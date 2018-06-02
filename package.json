@@ -26,7 +26,7 @@
     "start:dev": "NODE_ENV=development nodemon ./build/server",
     "start2:dev": "NODE_ENV=development nodemon --require babel-register ./build/server.js",
     "test": "",
-    "test:dev": ""
+    "test:dev": "NODE_ENV=development npm run build && NODE_ENV=test ./node_modules/mocha/bin/_mocha 'test/**/*.js' --compilers js:babel-core/register --timeout 10000 --exit"
   },
   "pre-commit": [
     "eslint"
