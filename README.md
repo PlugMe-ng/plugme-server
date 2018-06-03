@@ -3,6 +3,7 @@ This is the core server for the PlugMe project.
 
 [![Build Status](https://travis-ci.org/PlugMe-ng/plugme-server.svg?branch=staging)](https://travis-ci.org/PlugMe-ng/plugme-server)
 [![Hound CI](https://camo.githubusercontent.com/23ee7a697b291798079e258bbc25434c4fac4f8b/68747470733a2f2f696d672e736869656c64732e696f2f62616467652f50726f7465637465645f62792d486f756e642d6138373364312e737667)](https://houndci.com)
+[![codecov](https://codecov.io/gh/PlugMe-ng/plugme-server/branch/staging/graph/badge.svg)](https://codecov.io/gh/PlugMe-ng/plugme-server)
 
 Imagine, a platform where developers (for example) can both share work they’ve done as content, and use those works they’ve shared as portfolio to get new job opportunities. It all starts with developers being able to subscribe to a plan and as such post any amount of content and/or apply to as many job opportunities as they would like (depending on parameters of plans subscribed for) using tags (like `json`, `php`, `python` etc.)
 
