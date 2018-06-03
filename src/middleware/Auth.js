@@ -28,7 +28,7 @@ export default class Auth {
   */
   async authenticateUser(req, res, next) {
     try {
-      const userToken = req.headers['x-teams-user-token'];
+      const userToken = req.headers['x-plugme-user-token'];
       if (!userToken) {
         throw new Error('Request has no user token header.');
       }
