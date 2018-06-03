@@ -2,6 +2,7 @@
 This is the core server for the PlugMe project.
 
 [![Build Status](https://travis-ci.org/PlugMe-ng/plugme-server.svg?branch=staging)](https://travis-ci.org/PlugMe-ng/plugme-server)
+[![Coverage Status](https://coveralls.io/repos/github/PlugMe-ng/plugme-server/badge.svg?branch=staging)](https://coveralls.io/github/PlugMe-ng/plugme-server?branch=staging)
 [![codecov](https://codecov.io/gh/PlugMe-ng/plugme-server/branch/staging/graph/badge.svg)](https://codecov.io/gh/PlugMe-ng/plugme-server)
 [![Hound CI](https://camo.githubusercontent.com/23ee7a697b291798079e258bbc25434c4fac4f8b/68747470733a2f2f696d672e736869656c64732e696f2f62616467652f50726f7465637465645f62792d486f756e642d6138373364312e737667)](https://houndci.com)
 
