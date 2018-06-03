@@ -106,7 +106,9 @@ function generatePaginationMeta(req, dbResult, limit = 20, offset = 0) {
  */
 function updateUserAttributes(user, req) {
   user = user.get();
-  user.isYou = (user.id === req.user.id);
+  if (req && req.user) {
+    user.isYou = (user.id === req.user.id);
+  }
   delete user.password;
   return user;
 }

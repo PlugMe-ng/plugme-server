@@ -39,7 +39,7 @@ export default class Auth {
         await bcrypt.compare(req.body.password, user.password);
         if (isCorrectPassword) {
           const userToken = jwt.sign({ email: user.email }, config.SECRET);
-          const updatedUser = helpers.Misc.updateUserAttributes(user);
+          const updatedUser = helpers.Misc.updateUserAttributes(user, req);
           return res.sendSuccess({ user: updatedUser, userToken });
         }
 
@@ -83,7 +83,7 @@ export default class Auth {
       });
 
       const userToken = jwt.sign({ email: user.email }, config.SECRET);
-      const updatedUser = helpers.Misc.updateUserAttributes(user);
+      const updatedUser = helpers.Misc.updateUserAttributes(user, req);
 
       return res.sendSuccess({ user: updatedUser, userToken });
     } catch (error) {
