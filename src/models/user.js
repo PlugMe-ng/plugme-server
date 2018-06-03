@@ -12,6 +12,10 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.UUID,
       defaultValue: DataTypes.UUIDV4
     },
+    blocked: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false
+    },
     displayName: {
       type: DataTypes.STRING,
       allowNull: false,
@@ -51,6 +55,10 @@ module.exports = (sequelize, DataTypes) => {
         'admin', 'disabled', 'member'
       ],
       defaultValue: 'member'
+    },
+    verified: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false
     },
   });
 
