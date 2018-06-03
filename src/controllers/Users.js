@@ -82,7 +82,7 @@ export default class Users {
         // eslint-disable-next-line no-restricted-syntax
         for (const user of users) {
           // eslint-disable-next-line no-await-in-loop
-          const u = await helpers.Misc.updateUserAttributes(user);
+          const u = await helpers.Misc.updateUserAttributes(user, req);
           updatedUsers.push(u);
         }
 
@@ -107,7 +107,7 @@ export default class Users {
   async getById(req, res) {
     try {
       const user =
-      await helpers.Misc.updateUserAttributes(req.existingUser);
+      await helpers.Misc.updateUserAttributes(req.existingUser, req);
 
       return res.sendSuccess({ user });
     } catch (error) {
