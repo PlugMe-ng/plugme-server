@@ -125,9 +125,70 @@ export default class Users {
    * @returns { object } response
    */
   async updateById(req, res) {
-    // it should be possible to also update the user's role here, right?
-    return res.status(200).send({
-      data: { name: 'user1' }
-    });
+    try {
+      // the only properties you can update using this endpoint are:
+      // 'displayName', 'blocked', 'photo', 'role'
+
+      const fieldsToUpdate = {};
+
+      if (typeof req.body.blocked !== 'undefined') {
+        // only an admin can update 'blocked'
+        if (req.user.role !== 'admin') {
+          throw new
+          Error('You need admin privilege to block or unblock a user.');
+        }
+
+        // a user cannot update their own 'blocked'
+        if (req.existingUser.id === req.user.id) {
+          throw new
+          Error('You cannot block or unblock yourself.');
+        }
+
+        fieldsToUpdate.blocked = req.body.blocked;
+      }
+
+      // only an admin can update 'role'
+      if (typeof req.body.role !== 'undefined') {
+        // only an admin can update 'role'
+        if (req.user.role !== 'admin') {
+          throw new
+          Error('You need admin privilege to assign roles to a user.');
+        }
+
+        // a user cannot update their own 'role'
+        if (req.existingUser.id === req.user.id) {
+          throw new
+          Error('You cannot assign roles to yourself.');
+        }
+
+        fieldsToUpdate.role = req.body.role;
+      }
+
+      if (typeof req.body.displayName !== 'undefined') {
+        // you cannot update another user's 'displayName'
+        if (req.existingUser.id !== req.user.id) {
+          throw new Error('Cannot update another user\'s display name.');
+        }
+
+        fieldsToUpdate.displayName = req.body.displayName;
+      }
+
+      if (typeof req.body.photo !== 'undefined') {
+        // you cannot update another user's 'photo'
+        if (req.existingUser.id !== req.user.id) {
+          throw new Error('Cannot update another user\'s photo.');
+        }
+
+        fieldsToUpdate.photo = req.body.photo;
+      }
+
+      const updatedUser = await req.existingUser.update(fieldsToUpdate);
+      const user =
+      await helpers.Misc.updateUserAttributes(updatedUser, req);
+
+      return res.sendSuccess({ user });
+    } catch (error) {
+      return res.sendFailure([error.message]);
+    }
   }
 }

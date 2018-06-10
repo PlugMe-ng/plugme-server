@@ -41,6 +41,13 @@ const signupUserRules = {
   photo: 'string',
 };
 
+const updateUserRules = {
+  displayName: 'string',
+  blocked: 'boolean',
+  photo: 'string',
+  role: 'string',
+};
+
 /**
 * Middleware for validations
 * @class Validate
@@ -78,6 +85,25 @@ export default class Validate {
       ...validation.errors.get('email'),
       ...validation.errors.get('password'),
       ...validation.errors.get('photo'),
+    ]));
+    validation.passes(() => next());
+  }
+
+  /**
+  * Validate update user data
+  * @param {object} req express request object
+  * @param {object} res express response object
+  * @param {object} next the next middleware or controller
+  *
+  * @returns {any} the next middleware or controller
+  */
+  async updateUser(req, res, next) {
+    const validation = new Validator(req.body, updateUserRules);
+    validation.fails(() => res.sendFailure([
+      ...validation.errors.get('displayName'),
+      ...validation.errors.get('blocked'),
+      ...validation.errors.get('photo'),
+      ...validation.errors.get('role'),
     ]));
     validation.passes(() => next());
   }
