@@ -16,6 +16,35 @@ _More info to follow_
 
 To see the technology stack utilized by this project checkout [Technology Stack](https://github.com/PlugMe-ng/plugme-server/wiki/Technology-Stack).
 
+## Setting up the project locally
+
+The project has been configured with some npm scripts entries for setting up and starting the project for development locally.
+
+### Prerequisite
+The environment variables (dev and test database urls, jwt authentication secret, etc.) should be included in the `.env` file as listed in  `.env-sample`
+
+```
+# Install all dependencies
+npm i
+
+# Create the required databases using sequelize
+## Development DB
+npx sequelize db:create
+
+## Test DB
+NODE_ENV=test npx sequelize db:create
+
+# Run migrations
+npm run db:migrate
+```
+
+### Running Tests
+This requires setting up the project as described above
+```
+# Run tests
+npm test
+```
+
 ## Usage
 
 _Coming soon_
