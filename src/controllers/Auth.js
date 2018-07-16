@@ -12,6 +12,7 @@
 
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
+import { OAuth2Client } from 'google-auth-library';
 
 import config from '../config';
 import helpers from '../helpers';
@@ -68,14 +69,9 @@ export default class Auth {
         throw new Error('User with the same email already exists.');
       }
 
-      // first user added to the DB has to be an admin
-      const dbResult = await models.User.findAndCountAll();
-      if (dbResult.count === 0) {
-        req.body.role = 'admin';
-      }
-
+      const { role, verified, ...data } = req.body;
       const user = await models.User.create({
-        ...req.body,
+        ...data,
         password: await bcrypt.hash(
           req.body.password,
           process.env.NODE_ENV === 'production' ? 10 : 1
@@ -88,6 +84,53 @@ export default class Auth {
       return res.sendSuccess({ user: updatedUser, userToken });
     } catch (error) {
       return res.sendFailure([error.message]);
+    }
+  }
+
+
+  /**
+   * @param {Object} req - Express Request Object
+   * @param {Object} res - Express Response Object
+   *
+   * @returns {void}
+   * @memberOf Auth
+   */
+  googleSignIn = async (req, res) => {
+    const { GOOGLE_CLIENT_ID } = process.env;
+    const client = new OAuth2Client(GOOGLE_CLIENT_ID);
+
+    try {
+      const ticket = await client.verifyIdToken({
+        idToken: req.body.idToken,
+        audience: GOOGLE_CLIENT_ID
+      });
+
+      // rare
+      if (!ticket) {
+        throw new Error('Invalid Token or Error Verifying Token');
+      }
+
+      const {
+        email, name, sub, given_name: givenName
+      } = ticket.getPayload();
+
+      return await models.User
+        .findOrCreate({
+          where: { googleId: sub },
+          defaults: {
+            displayName: givenName,
+            email,
+            googleId: sub,
+            fullName: name,
+          }
+        }).spread((user, created) => {
+          const userToken = jwt.sign({ email: user.email }, config.SECRET);
+          const updatedUser = helpers.Misc.updateUserAttributes(user);
+
+          return res.sendSuccess({ user: updatedUser, userToken });
+        });
+    } catch (error) {
+      res.sendFailure([error.message]);
     }
   }
 }

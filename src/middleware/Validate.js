@@ -27,7 +27,7 @@ const googleSignupUserRules = {
   displayName: 'required|string',
   email: 'required|email',
   googleId: 'numeric',
-  photo: 'string',
+  photo: 'string|url',
 };
 
 const signinUserRules = {
@@ -35,10 +35,14 @@ const signinUserRules = {
   password: 'required|string',
 };
 const signupUserRules = {
-  displayName: 'required|string',
+  displayName: 'required|string|between:4,16',
   email: 'required|email',
-  password: 'required|string',
+  password: 'required|string|between:7,25',
   photo: 'string',
+  fullName: 'required|string|between:2,30'
+};
+const tokenSignInRules = {
+  idToken: 'required|string',
 };
 
 /**
@@ -78,6 +82,22 @@ export default class Validate {
       ...validation.errors.get('email'),
       ...validation.errors.get('password'),
       ...validation.errors.get('photo'),
+    ]));
+    validation.passes(() => next());
+  }
+
+  /**
+  * Validate sign up user data
+  * @param {object} req express request object
+  * @param {object} res express response object
+  * @param {object} next the next middleware or controller
+  *
+  * @returns {void}
+  */
+  tokenSignIn(req, res, next) {
+    const validation = new Validator(req.body, tokenSignInRules);
+    validation.fails(() => res.sendFailure([
+      ...validation.errors.get('idToken')
     ]));
     validation.passes(() => next());
   }
