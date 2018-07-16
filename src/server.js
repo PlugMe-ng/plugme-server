@@ -71,6 +71,9 @@ routes(app);
 app.use((req, res) =>
   res.sendFailure([`The endpoint '${req.path}' could not be found.`], 404));
 
-app.listen(port);
+app.listen(port, () => {
+  // TODO: remove this in production
+  console.log(`Server started successfully on port ${port}`);
+});
 
 export default app;
