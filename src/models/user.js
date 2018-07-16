@@ -28,18 +28,16 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false,
       unique: true,
       validate: {
-        notEmpty: true
+        isEmail: true
       }
     },
     facebookId: {
       type: DataTypes.STRING,
       allowNull: true,
-      // unique: true
     },
     googleId: {
       type: DataTypes.STRING,
       allowNull: true,
-      // unique: true
     },
     password: {
       type: DataTypes.STRING,
@@ -48,6 +46,9 @@ module.exports = (sequelize, DataTypes) => {
     photo: {
       type: DataTypes.STRING,
       allowNull: true,
+      validate: {
+        isUrl: true
+      }
     },
     role: {
       type: DataTypes.ENUM,
@@ -60,6 +61,10 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.BOOLEAN,
       defaultValue: false
     },
+    fullName: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    }
   });
 
   User.associate = (models) => {};

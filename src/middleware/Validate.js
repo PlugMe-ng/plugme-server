@@ -82,6 +82,7 @@ export default class Validate {
       ...validation.errors.get('email'),
       ...validation.errors.get('password'),
       ...validation.errors.get('photo'),
+      ...validation.errors.get('fullName')
     ]));
     validation.passes(() => next());
   }
