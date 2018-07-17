@@ -42,7 +42,8 @@ const signupUserRules = {
   fullName: 'required|string|between:2,30'
 };
 const tokenSignInRules = {
-  idToken: 'required|string',
+  token: 'required|string',
+  type: 'required|in:facebook,google'
 };
 
 /**
@@ -98,7 +99,8 @@ export default class Validate {
   tokenSignIn(req, res, next) {
     const validation = new Validator(req.body, tokenSignInRules);
     validation.fails(() => res.sendFailure([
-      ...validation.errors.get('idToken')
+      ...validation.errors.get('token'),
+      ...validation.errors.get('type')
     ]));
     validation.passes(() => next());
   }

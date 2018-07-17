@@ -29,9 +29,9 @@ routes.post(
 );
 
 routes.post(
-  '/token-signin',
+  '/social',
   middleware.validate.tokenSignIn,
-  authController.googleSignIn
+  authController.tokenAuth
 );
 
 export default routes;
