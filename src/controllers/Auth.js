@@ -12,13 +12,12 @@
 
 import axios from 'axios';
 import bcrypt from 'bcrypt';
-import jwt from 'jsonwebtoken';
 import { OAuth2Client } from 'google-auth-library';
 import crypto from 'crypto';
 
-import config from '../config';
-import helpers from '../helpers';
 import models from '../models';
+import { sendVerificationEmail, createJwtToken } from '../helpers/auth';
+import helpers from '../helpers';
 
 /**
 * Controls endpoints for authentication and authorization
@@ -32,7 +31,7 @@ export default class Auth {
    *
    * @returns {object} response object
    */
-  async signin(req, res) {
+  signin = async (req, res) => {
     try {
       const user = await models.User.findOne({
         where: { email: req.body.email },
@@ -41,9 +40,10 @@ export default class Auth {
         const isCorrectPassword =
           await bcrypt.compare(req.body.password, user.password);
         if (isCorrectPassword) {
-          const userToken = jwt.sign({ email: user.email }, config.SECRET);
-          const updatedUser = helpers.Misc.updateUserAttributes(user);
-          return res.sendSuccess({ user: updatedUser, userToken });
+          return res.sendSuccess({
+            user: helpers.Misc.updateUserAttributes(user),
+            userToken: createJwtToken(user)
+          });
         }
 
         throw new Error('No user was found with the supplied credentials.');
@@ -62,7 +62,7 @@ export default class Auth {
   *
   * @returns {object} response object
   */
-  async signup(req, res) {
+  signup = async (req, res) => {
     try {
       const existingUser = await models.User.findOne({
         where: { email: req.body.email }
@@ -79,11 +79,11 @@ export default class Auth {
           process.env.NODE_ENV === 'production' ? 10 : 1
         )
       });
-
-      const userToken = jwt.sign({ email: user.email }, config.SECRET);
-      const updatedUser = helpers.Misc.updateUserAttributes(user);
-
-      return res.sendSuccess({ user: updatedUser, userToken });
+      sendVerificationEmail(user.get());
+      return res.sendSuccess({
+        user: helpers.Misc.updateUserAttributes(user),
+        userToken: createJwtToken(user)
+      });
     } catch (error) {
       return res.sendFailure([error.message]);
     }
@@ -100,20 +100,19 @@ export default class Auth {
   tokenAuth = async (req, res) => {
     const { type, token } = req.body;
     try {
-      const payLoad = await this.fetchPayLoadForSocialAuth(token, type);
+      const payload = await this.getPayloadForSocialAuth(token, type);
       const searchCriteria = type === 'google' ?
-        { googleId: payLoad.googleId } : { facebookId: payLoad.facebookId };
+        { googleId: payload.googleId } : { facebookId: payload.facebookId };
 
       return await models.User
         .findOrCreate({
           where: searchCriteria,
-          defaults: payLoad
-        }).spread((user) => {
-          const userToken = jwt.sign({ email: user.email }, config.SECRET);
-          const updatedUser = helpers.Misc.updateUserAttributes(user);
-
-          return res.sendSuccess({ user: updatedUser, userToken });
-        });
+          defaults: payload
+        }).spread(user =>
+          res.sendSuccess({
+            user: helpers.Misc.updateUserAttributes(user),
+            userToken: createJwtToken(user)
+          }));
     } catch (error) {
       return res.sendFailure([error.message]);
     }
@@ -123,24 +122,24 @@ export default class Auth {
    * Verifies and retrieves the payload required to complete a social
    * authentication from a provider
    * @param {string} idToken - provider token
-   * @param {string} type - provider type
+   * @param {string} providerType - provider type
    *
    * @returns {void}
    * @memberOf Auth
    */
-  fetchPayLoadForSocialAuth = async (idToken, type) => {
-    let payLoad;
-    switch (type) {
+  getPayloadForSocialAuth = async (idToken, providerType) => {
+    let payload;
+    switch (providerType) {
       case 'google':
-        payLoad = this.googleSignIn(idToken);
+        payload = this.getGoogleAuthPayload(idToken);
         break;
       case 'facebook':
-        payLoad = this.fbSignIn(idToken);
+        payload = this.getFbAuthPayload(idToken);
         break;
       default:
         return;
     }
-    return payLoad;
+    return payload;
   }
 
   /**
@@ -151,7 +150,7 @@ export default class Auth {
    * @returns {object} payload
    * @memberOf Auth
    */
-  fbSignIn = async (accessToken) => {
+  getFbAuthPayload = async (accessToken) => {
     const fbProfileUrl = 'https://graph.facebook.com/v3.0/me?fields=id,name,email&access_token=';
     const { FACEBOOK_APP_SECRET: appSecret } = process.env;
     const appSecretProof = crypto.createHmac('sha256', appSecret)
@@ -163,7 +162,8 @@ export default class Auth {
       email: response.data.email,
       facebookId: response.data.id,
       verified: true,
-      googleId: undefined
+      googleId: undefined,
+      fullName: response.data.name
     };
   }
 
@@ -175,7 +175,7 @@ export default class Auth {
    * @returns {object} payload
    * @memberOf Auth
    */
-  googleSignIn = async (idToken) => {
+  getGoogleAuthPayload = async (idToken) => {
     const { GOOGLE_CLIENT_ID } = process.env;
     const client = new OAuth2Client(GOOGLE_CLIENT_ID);
     const ticket = await client.verifyIdToken({
@@ -188,7 +188,8 @@ export default class Auth {
       email: response.email,
       verified: response.email_verified,
       googleId: response.sub,
-      facebookId: undefined
+      facebookId: undefined,
+      fullName: response.name
     };
   }
 }

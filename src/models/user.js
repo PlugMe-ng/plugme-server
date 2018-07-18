@@ -67,7 +67,12 @@ module.exports = (sequelize, DataTypes) => {
     }
   });
 
-  User.associate = (models) => {};
+  User.associate = (models) => {
+    User.hasOne(
+      models.emailVerification,
+      { onDelete: 'CASCADE', onUpdate: 'CASCADE' }
+    );
+  };
 
   return User;
 };
