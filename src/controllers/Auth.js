@@ -36,7 +36,7 @@ export default class Auth {
       const user = await models.User.findOne({
         where: { email: req.body.email },
       });
-      if (user) {
+      if (user && user.password) {
         const isCorrectPassword =
           await bcrypt.compare(req.body.password, user.password);
         if (isCorrectPassword) {
@@ -191,5 +191,72 @@ export default class Auth {
       facebookId: undefined,
       fullName: response.name
     };
+  }
+
+  /**
+   * Verifies user's email address with token sent to user's mailbox
+   * during signup
+   * @param {object} req - express request object
+   * @param {object} res - express response object
+   *
+   * @returns {void}
+   * @memberOf Auth
+   */
+  emailVerification = async (req, res) => {
+    const tokenValidityPeriod = 43200000;
+    const { token } = req.body;
+    try {
+      const record = await models.emailVerification
+        .findOne({ where: { token }, include: [models.User] });
+      if (!record) {
+        throw new Error('Verification token does not exist');
+      }
+      const { createdAt, User: user } = record;
+      const tokenExpirationTime =
+        new Date(createdAt).getTime() + tokenValidityPeriod;
+
+      if (Date.now() > tokenExpirationTime) {
+        record.destroy();
+        throw new Error('Token has expired, Please request a new one');
+      }
+      await user.update({ verified: true });
+      record.destroy();
+      return res.sendSuccess({
+        user: helpers.Misc.updateUserAttributes(user),
+        userToken: createJwtToken(user)
+      });
+    } catch (error) {
+      res.sendFailure([error.message]);
+    }
+  }
+
+  /**
+   * Handles email verification request
+   * @param {object} req - express request object
+   * @param {object} res - express response object
+   *
+   * @returns {void}
+   * @memberOf Auth
+   */
+  requestEmailVerification = async (req, res) => {
+    const { email } = req.body;
+    try {
+      const user = await models.User
+        .findOne({ where: { email }, include: [models.emailVerification] });
+      if (!user) {
+        throw new Error('Invalid credentials');
+      }
+      if (user.verified) {
+        throw new Error('Account has been verified already');
+      }
+      const { emailVerification } = user;
+      if (emailVerification) {
+        await emailVerification.destroy();
+      }
+      sendVerificationEmail(user.get());
+      res.sendSuccess('Verification mail sent successfully');
+    } catch (error) {
+      res.sendFailure([error.message]);
+    }
   }
 }

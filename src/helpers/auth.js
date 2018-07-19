@@ -12,7 +12,7 @@ const sendMail = (emailAddress, mailContent) => {
     from: 'info@plugme.com.ng',
     subject: 'Verify Your PlugMe Account',
     text: mailContent,
-    html: `<em>${mailContent}<em>`
+    html: mailContent
   };
   sendGrid.send(mailData);
 };
@@ -27,10 +27,19 @@ const createVerificationToken = async (user) => {
   return token;
 };
 
+// TODO: customize verification token with html and include FE url link
+const createVerificationMessage = (user, verificationToken) =>
+  `
+    <p>Hi, ${user.fullName}</p>
+
+    <p>Please verify your PlugMe account using the link below</p>
+
+    ${verificationToken}
+  `;
+
 export const sendVerificationEmail = async (user) => {
   const verificationToken = await createVerificationToken(user);
-  // TODO: customize verification token with html and include FE url link
-  sendMail(user.email, verificationToken);
+  sendMail(user.email, createVerificationMessage(user, verificationToken));
 };
 
 export const createJwtToken = user =>

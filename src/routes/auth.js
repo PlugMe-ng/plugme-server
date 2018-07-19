@@ -34,4 +34,16 @@ routes.post(
   authController.tokenAuth
 );
 
+routes.put(
+  '/verify-email',
+  middleware.validate.emailVerification,
+  authController.emailVerification
+);
+
+routes.post(
+  '/verify-email',
+  middleware.validate.requestEmailVerification,
+  authController.requestEmailVerification
+);
+
 export default routes;

@@ -8,28 +8,6 @@
 
 import Validator from 'validatorjs';
 
-const facebookSigninUserRules = {
-  email: 'required|email',
-  facebookId: 'numeric',
-};
-const facebookSignupUserRules = {
-  displayName: 'required|string',
-  email: 'required|email',
-  facebookId: 'string',
-  photo: 'string',
-};
-
-const googleSigninUserRules = {
-  email: 'required|email',
-  googleId: 'numeric',
-};
-const googleSignupUserRules = {
-  displayName: 'required|string',
-  email: 'required|email',
-  googleId: 'numeric',
-  photo: 'string|url',
-};
-
 const signinUserRules = {
   email: 'required|email',
   password: 'required|string',
@@ -44,6 +22,13 @@ const signupUserRules = {
 const tokenSignInRules = {
   token: 'required|string',
   type: 'required|in:facebook,google'
+};
+const emailVerificationRules = {
+  token: 'required|string',
+};
+
+const requestEmailVerificationRules = {
+  email: 'required|email'
 };
 
 /**
@@ -101,6 +86,38 @@ export default class Validate {
     validation.fails(() => res.sendFailure([
       ...validation.errors.get('token'),
       ...validation.errors.get('type')
+    ]));
+    validation.passes(() => next());
+  }
+
+  /**
+  * Validates email verification data
+  * @param {object} req express request object
+  * @param {object} res express response object
+  * @param {object} next the next middleware or controller
+  *
+  * @returns {void}
+  */
+  emailVerification(req, res, next) {
+    const validation = new Validator(req.body, emailVerificationRules);
+    validation.fails(() => res.sendFailure([
+      ...validation.errors.get('token')
+    ]));
+    validation.passes(() => next());
+  }
+
+  /**
+  * Validates email verification request data
+  * @param {object} req express request object
+  * @param {object} res express response object
+  * @param {object} next the next middleware or controller
+  *
+  * @returns {void}
+  */
+  requestEmailVerification(req, res, next) {
+    const validation = new Validator(req.body, requestEmailVerificationRules);
+    validation.fails(() => res.sendFailure([
+      ...validation.errors.get('email')
     ]));
     validation.passes(() => next());
   }
