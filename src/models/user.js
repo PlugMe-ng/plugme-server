@@ -69,7 +69,7 @@ module.exports = (sequelize, DataTypes) => {
 
   User.associate = (models) => {
     User.hasOne(
-      models.emailVerification,
+      models.emailAuthAction,
       { onDelete: 'CASCADE', onUpdate: 'CASCADE' }
     );
   };

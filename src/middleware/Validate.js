@@ -27,8 +27,13 @@ const emailVerificationRules = {
   token: 'required|string',
 };
 
-const requestEmailVerificationRules = {
+const requestEmailAuthActionRules = {
   email: 'required|email'
+};
+
+const passwordResetRules = {
+  token: 'string|required',
+  password: 'required|string|between:7,25',
 };
 
 /**
@@ -107,17 +112,34 @@ export default class Validate {
   }
 
   /**
-  * Validates email verification request data
+  * Validates email auth action request data
   * @param {object} req express request object
   * @param {object} res express response object
   * @param {object} next the next middleware or controller
   *
   * @returns {void}
   */
-  requestEmailVerification(req, res, next) {
-    const validation = new Validator(req.body, requestEmailVerificationRules);
+  emailAuthAction(req, res, next) {
+    const validation = new Validator(req.body, requestEmailAuthActionRules);
     validation.fails(() => res.sendFailure([
       ...validation.errors.get('email')
+    ]));
+    validation.passes(() => next());
+  }
+
+  /**
+  * Validates email auth action request data
+  * @param {object} req express request object
+  * @param {object} res express response object
+  * @param {object} next the next middleware or controller
+  *
+  * @returns {void}
+  */
+  passwordReset(req, res, next) {
+    const validation = new Validator(req.body, passwordResetRules);
+    validation.fails(() => res.sendFailure([
+      ...validation.errors.get('token'),
+      ...validation.errors.get('password')
     ]));
     validation.passes(() => next());
   }

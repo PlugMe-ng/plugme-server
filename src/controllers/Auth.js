@@ -16,7 +16,7 @@ import { OAuth2Client } from 'google-auth-library';
 import crypto from 'crypto';
 
 import models from '../models';
-import { sendVerificationEmail, createJwtToken } from '../helpers/auth';
+import { createJwtToken, sendAuthActionMail } from '../helpers/auth';
 import helpers from '../helpers';
 
 /**
@@ -79,7 +79,7 @@ export default class Auth {
           process.env.NODE_ENV === 'production' ? 10 : 1
         )
       });
-      sendVerificationEmail(user.get());
+      sendAuthActionMail(user.get(), 'verify');
       return res.sendSuccess({
         user: helpers.Misc.updateUserAttributes(user),
         userToken: createJwtToken(user)
@@ -206,8 +206,13 @@ export default class Auth {
     const tokenValidityPeriod = 43200000;
     const { token } = req.body;
     try {
-      const record = await models.emailVerification
-        .findOne({ where: { token }, include: [models.User] });
+      const record = await models.emailAuthAction
+        .findOne({
+          where: { token, type: 'verify' },
+          include: [{
+            model: models.User
+          }]
+        });
       if (!record) {
         throw new Error('Verification token does not exist');
       }
@@ -242,19 +247,111 @@ export default class Auth {
     const { email } = req.body;
     try {
       const user = await models.User
-        .findOne({ where: { email }, include: [models.emailVerification] });
+        .findOne({
+          where: { email },
+          include: [{
+            model: models.emailAuthAction,
+            required: false,
+            where: { type: 'verify' }
+          }]
+        });
       if (!user) {
         throw new Error('Invalid credentials');
       }
       if (user.verified) {
         throw new Error('Account has been verified already');
       }
-      const { emailVerification } = user;
-      if (emailVerification) {
-        await emailVerification.destroy();
+      const { emailAuthAction } = user;
+      if (emailAuthAction) {
+        await emailAuthAction.destroy();
       }
-      sendVerificationEmail(user.get());
-      res.sendSuccess('Verification mail sent successfully');
+      sendAuthActionMail(user.get(), 'verify');
+      res.sendSuccess({
+        message: 'Verification mail sent successfully'
+      });
+    } catch (error) {
+      res.sendFailure([error.message]);
+    }
+  }
+
+  /**
+   * Handles password reset request
+   * @param {object} req - express request object
+   * @param {object} res - express response object
+   *
+   * @returns {void}
+   * @memberOf Auth
+   */
+  requestPasswordReset = async (req, res) => {
+    const { email } = req.body;
+    try {
+      const user = await models.User
+        .findOne({
+          where: { email },
+          include: [{
+            model: models.emailAuthAction,
+            required: false,
+            where: { type: 'reset' }
+          }]
+        });
+      if (!user) {
+        throw new Error('Invalid credentials');
+      }
+      const { emailAuthAction } = user;
+      if (emailAuthAction) {
+        emailAuthAction.destroy();
+      }
+      sendAuthActionMail(user.get(), 'reset');
+      res.sendSuccess({
+        message: 'Password reset mail sent successfully'
+      });
+    } catch (error) {
+      res.sendFailure([error.message]);
+    }
+  }
+
+  /**
+   * @param {object} req - express request object
+   * @param {object} res - express response object
+   *
+   * @returns {void}
+   * @memberOf Auth
+   */
+  passwordReset = async (req, res) => {
+    const tokenValidityPeriod = 43200000;
+    const { token, password } = req.body;
+    try {
+      const record = await models.emailAuthAction
+        .findOne({
+          where: { token, type: 'reset' },
+          include: [{
+            model: models.User
+          }]
+        });
+      if (!record) {
+        throw new Error('Reset token does not exist');
+      }
+      const { createdAt, User: user } = record;
+      const tokenExpirationTime =
+        new Date(createdAt).getTime() + tokenValidityPeriod;
+
+      if (Date.now() > tokenExpirationTime) {
+        record.destroy();
+        throw new Error('Reset Token has expired, Please request a new one');
+      }
+      await user.update({
+        password: await bcrypt.hash(
+          password,
+          process.env.NODE_ENV === 'production' ? 10 : 1
+        )
+      });
+      record.destroy();
+      return res.sendSuccess({
+        message: 'Password Reset successful'
+      }, 200, {
+        user: helpers.Misc.updateUserAttributes(user),
+        userToken: createJwtToken(user)
+      });
     } catch (error) {
       res.sendFailure([error.message]);
     }

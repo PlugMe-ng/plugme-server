@@ -42,8 +42,20 @@ routes.put(
 
 routes.post(
   '/verify-email',
-  middleware.validate.requestEmailVerification,
+  middleware.validate.emailAuthAction,
   authController.requestEmailVerification
+);
+
+routes.post(
+  '/reset-password',
+  middleware.validate.emailAuthAction,
+  authController.requestPasswordReset
+);
+
+routes.put(
+  '/reset-password',
+  middleware.validate.passwordReset,
+  authController.passwordReset
 );
 
 export default routes;
