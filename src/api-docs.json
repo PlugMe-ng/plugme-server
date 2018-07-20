@@ -1,0 +1,870 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "version": "1.0",
+    "title": "PlugMe",
+    "description": "PlugMe Server"
+  },
+  "host": "plugme-staging.herokuapp.com",
+  "basePath": "/v1/auth",
+  "schemes": [
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/signup": {
+      "post": {
+        "description": "TODO: Add Description",
+        "summary": "Sign Up",
+        "tags": [
+          "Misc"
+        ],
+        "operationId": "SignupPost",
+        "produces": [
+          "application/json"
+        ],
+        "consumes": [
+          "application/x-www-form-urlencoded"
+        ],
+        "parameters": [
+          {
+            "name": "Content-Type",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "description": ""
+          },
+          {
+            "name": "displayName",
+            "in": "formData",
+            "required": true,
+            "type": "string",
+            "description": ""
+          },
+          {
+            "name": "email",
+            "in": "formData",
+            "required": true,
+            "type": "string",
+            "description": ""
+          },
+          {
+            "name": "password",
+            "in": "formData",
+            "required": true,
+            "type": "string",
+            "description": ""
+          },
+          {
+            "name": "fullName",
+            "in": "formData",
+            "required": true,
+            "type": "string",
+            "description": ""
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SignUpFailedRequest"
+            },
+            "examples": {
+              "application/json": {
+                "errors": [
+                  "The displayName field is required.",
+                  "The email field is required.",
+                  "The password field is required.",
+                  "The fullName field is required."
+                ]
+              }
+            }
+          }
+        },
+        "security": [],
+        "x-unitTests": [
+          {
+            "request": {
+              "method": "POST",
+              "uri": "/signup",
+              "headers": {
+                "Content-Type": "application/x-www-form-urlencoded"
+              },
+              "body": "displayName=johndoe&email=gutaprupoc@memeil.top&password=password&fullName=John Doe"
+            },
+            "expectedResponse": {
+              "x-allowExtraHeaders": true,
+              "x-bodyMatchMode": "RAW",
+              "x-arrayOrderedMatching": false,
+              "x-arrayCheckCount": false,
+              "x-matchResponseSchema": true,
+              "headers": {
+                "Access-Control-Allow-Origin": "*",
+                "Connection": "keep-alive",
+                "Content-Length": "148",
+                "Content-Type": "application/json; charset=utf-8",
+                "Date": "Fri, 20 Jul 2018 17:33:40 GMT",
+                "Etag": "W/\"94-Cmrm32rAhvxjJbulzZ08CFXhnBQ\"",
+                "Server": "Cowboy",
+                "Via": "1.1 vegur",
+                "X-Powered-By": "Express"
+              },
+              "body": "{\"errors\":[\"The displayName field is required.\",\"The email field is required.\",\"The password field is required.\",\"The fullName field is required.\"]}"
+            },
+            "x-testShouldPass": true,
+            "x-testEnabled": true,
+            "x-testName": "Sign Up",
+            "x-testDescription": "TODO: Add Description"
+          }
+        ],
+        "x-operation-settings": {
+          "CollectParameters": false,
+          "AllowDynamicQueryParameters": false,
+          "AllowDynamicFormParameters": false,
+          "IsMultiContentStreaming": false
+        }
+      }
+    },
+    "/signin": {
+      "post": {
+        "description": "TODO: Add Description",
+        "summary": "Sign In Request",
+        "tags": [
+          "Misc"
+        ],
+        "operationId": "SigninPost",
+        "produces": [
+          "application/json"
+        ],
+        "consumes": [
+          "application/x-www-form-urlencoded"
+        ],
+        "parameters": [
+          {
+            "name": "Content-Type",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "description": ""
+          },
+          {
+            "name": "email",
+            "in": "formData",
+            "required": true,
+            "type": "string",
+            "description": ""
+          },
+          {
+            "name": "password",
+            "in": "formData",
+            "required": true,
+            "type": "string",
+            "description": ""
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/Sign in request  failed fields"
+            },
+            "examples": {
+              "application/json": {
+                "errors": [
+                  "The email field is required.",
+                  "The password field is required."
+                ]
+              }
+            }
+          }
+        },
+        "security": [],
+        "x-unitTests": [
+          {
+            "request": {
+              "method": "POST",
+              "uri": "/signin",
+              "headers": {
+                "Content-Type": "application/x-www-form-urlencoded"
+              },
+              "body": "email=gutaprupoc@memeil.top&password=incorrect password"
+            },
+            "expectedResponse": {
+              "x-allowExtraHeaders": true,
+              "x-bodyMatchMode": "RAW",
+              "x-arrayOrderedMatching": false,
+              "x-arrayCheckCount": false,
+              "x-matchResponseSchema": true,
+              "headers": {
+                "Access-Control-Allow-Origin": "*",
+                "Connection": "keep-alive",
+                "Content-Length": "77",
+                "Content-Type": "application/json; charset=utf-8",
+                "Date": "Fri, 20 Jul 2018 17:49:29 GMT",
+                "Etag": "W/\"4d-QI8bz/DtkN1YjGFWUQcYNA8b3yc\"",
+                "Server": "Cowboy",
+                "Via": "1.1 vegur",
+                "X-Powered-By": "Express"
+              },
+              "body": "{\"errors\":[\"The email field is required.\",\"The password field is required.\"]}"
+            },
+            "x-testShouldPass": true,
+            "x-testEnabled": true,
+            "x-testName": "Sign In Request",
+            "x-testDescription": "TODO: Add Description"
+          }
+        ],
+        "x-operation-settings": {
+          "CollectParameters": false,
+          "AllowDynamicQueryParameters": false,
+          "AllowDynamicFormParameters": false,
+          "IsMultiContentStreaming": false
+        }
+      }
+    },
+    "/verify-email": {
+      "put": {
+        "description": "Verifies account with the token sent to the user's mail during registration",
+        "summary": "Verify Account",
+        "tags": [
+          "Misc"
+        ],
+        "operationId": "VerifyEmailPut",
+        "produces": [
+          "application/json"
+        ],
+        "consumes": [
+          "application/x-www-form-urlencoded"
+        ],
+        "parameters": [
+          {
+            "name": "Content-Type",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "description": ""
+          },
+          {
+            "name": "token",
+            "in": "formData",
+            "required": true,
+            "type": "string",
+            "description": ""
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/Verify account  failed"
+            },
+            "examples": {
+              "application/json": {
+                "errors": [
+                  "The token field is required."
+                ]
+              }
+            }
+          }
+        },
+        "security": [],
+        "x-unitTests": [
+          {
+            "request": {
+              "method": "PUT",
+              "uri": "/verify-email",
+              "headers": {
+                "Content-Type": "application/x-www-form-urlencoded"
+              },
+              "body": "token=4da94b94481823429305ebf32b60c737694d59b3"
+            },
+            "expectedResponse": {
+              "x-allowExtraHeaders": true,
+              "x-bodyMatchMode": "RAW",
+              "x-arrayOrderedMatching": false,
+              "x-arrayCheckCount": false,
+              "x-matchResponseSchema": true,
+              "headers": {
+                "Access-Control-Allow-Origin": "*",
+                "Connection": "keep-alive",
+                "Content-Length": "43",
+                "Content-Type": "application/json; charset=utf-8",
+                "Date": "Fri, 20 Jul 2018 17:57:51 GMT",
+                "Etag": "W/\"2b-FCe1voQtB4/+J8ka2j1yjRYf0YE\"",
+                "Server": "Cowboy",
+                "Via": "1.1 vegur",
+                "X-Powered-By": "Express"
+              },
+              "body": "{\"errors\":[\"The token field is required.\"]}"
+            },
+            "x-testShouldPass": true,
+            "x-testEnabled": true,
+            "x-testName": "Verify Account",
+            "x-testDescription": "Verifies account with the token sent to the user's mail during registration"
+          }
+        ],
+        "x-operation-settings": {
+          "CollectParameters": false,
+          "AllowDynamicQueryParameters": false,
+          "AllowDynamicFormParameters": false,
+          "IsMultiContentStreaming": false
+        }
+      },
+      "post": {
+        "description": "TODO: Add Description",
+        "summary": "Request Verification Mail",
+        "tags": [
+          "Misc"
+        ],
+        "operationId": "VerifyEmailPost",
+        "produces": [
+          "application/json"
+        ],
+        "consumes": [
+          "application/x-www-form-urlencoded"
+        ],
+        "parameters": [
+          {
+            "name": "Content-Type",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "description": ""
+          },
+          {
+            "name": "email",
+            "in": "formData",
+            "required": true,
+            "type": "string",
+            "description": ""
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/Request verification mail  failed"
+            },
+            "examples": {
+              "application/json": {
+                "errors": [
+                  "The email field is required."
+                ]
+              }
+            }
+          }
+        },
+        "security": [],
+        "x-unitTests": [
+          {
+            "request": {
+              "method": "POST",
+              "uri": "/verify-email",
+              "headers": {
+                "Content-Type": "application/x-www-form-urlencoded"
+              },
+              "body": "email=gutaprupoc@memeil.top"
+            },
+            "expectedResponse": {
+              "x-allowExtraHeaders": true,
+              "x-bodyMatchMode": "RAW",
+              "x-arrayOrderedMatching": false,
+              "x-arrayCheckCount": false,
+              "x-matchResponseSchema": true,
+              "headers": {
+                "Access-Control-Allow-Origin": "*",
+                "Connection": "keep-alive",
+                "Content-Length": "43",
+                "Content-Type": "application/json; charset=utf-8",
+                "Date": "Fri, 20 Jul 2018 18:03:27 GMT",
+                "Etag": "W/\"2b-Om/uOVJaStw+HN3zLcGIPa1jjQc\"",
+                "Server": "Cowboy",
+                "Via": "1.1 vegur",
+                "X-Powered-By": "Express"
+              },
+              "body": "{\"errors\":[\"The email field is required.\"]}"
+            },
+            "x-testShouldPass": true,
+            "x-testEnabled": true,
+            "x-testName": "Request Verification Mail",
+            "x-testDescription": "TODO: Add Description"
+          }
+        ],
+        "x-operation-settings": {
+          "CollectParameters": false,
+          "AllowDynamicQueryParameters": false,
+          "AllowDynamicFormParameters": false,
+          "IsMultiContentStreaming": false
+        }
+      }
+    },
+    "/reset-password": {
+      "put": {
+        "description": "TODO: Add Description",
+        "summary": "Reset Password",
+        "tags": [
+          "Misc"
+        ],
+        "operationId": "ResetPasswordPut",
+        "produces": [
+          "application/json"
+        ],
+        "consumes": [
+          "application/x-www-form-urlencoded"
+        ],
+        "parameters": [
+          {
+            "name": "Content-Type",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "description": ""
+          },
+          {
+            "name": "token",
+            "in": "formData",
+            "required": true,
+            "type": "string",
+            "description": ""
+          },
+          {
+            "name": "password",
+            "in": "formData",
+            "required": true,
+            "type": "string",
+            "description": ""
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/ResetPassword|Failed"
+            },
+            "examples": {
+              "application/json": {
+                "errors": [
+                  "The token field is required.",
+                  "The password field is required."
+                ]
+              }
+            }
+          }
+        },
+        "security": [],
+        "x-unitTests": [
+          {
+            "request": {
+              "method": "PUT",
+              "uri": "/reset-password",
+              "headers": {
+                "Content-Type": "application/x-www-form-urlencoded"
+              },
+              "body": "token=65c06cbd61f5729d367a2720d7791adfefbb2892&password=password222"
+            },
+            "expectedResponse": {
+              "x-allowExtraHeaders": true,
+              "x-bodyMatchMode": "RAW",
+              "x-arrayOrderedMatching": false,
+              "x-arrayCheckCount": false,
+              "x-matchResponseSchema": true,
+              "headers": {
+                "Access-Control-Allow-Origin": "*",
+                "Connection": "keep-alive",
+                "Content-Length": "77",
+                "Content-Type": "application/json; charset=utf-8",
+                "Date": "Fri, 20 Jul 2018 18:09:45 GMT",
+                "Etag": "W/\"4d-dtsQCsRqaPdIiPgQfSRxDTL6nGA\"",
+                "Server": "Cowboy",
+                "Via": "1.1 vegur",
+                "X-Powered-By": "Express"
+              },
+              "body": "{\"errors\":[\"The token field is required.\",\"The password field is required.\"]}"
+            },
+            "x-testShouldPass": true,
+            "x-testEnabled": true,
+            "x-testName": "Reset Password",
+            "x-testDescription": "TODO: Add Description"
+          }
+        ],
+        "x-operation-settings": {
+          "CollectParameters": false,
+          "AllowDynamicQueryParameters": false,
+          "AllowDynamicFormParameters": false,
+          "IsMultiContentStreaming": false
+        }
+      },
+      "post": {
+        "description": "TODO: Add Description",
+        "summary": "Request Password Reset",
+        "tags": [
+          "Misc"
+        ],
+        "operationId": "ResetPasswordPost",
+        "produces": [
+          "application/json"
+        ],
+        "consumes": [
+          "application/x-www-form-urlencoded"
+        ],
+        "parameters": [
+          {
+            "name": "Content-Type",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "description": ""
+          },
+          {
+            "name": "email",
+            "in": "formData",
+            "required": true,
+            "type": "string",
+            "description": ""
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/RequestPasswordReset|Failed"
+            },
+            "examples": {
+              "application/json": {
+                "errors": [
+                  "The email field is required."
+                ]
+              }
+            }
+          }
+        },
+        "security": [],
+        "x-unitTests": [
+          {
+            "request": {
+              "method": "POST",
+              "uri": "/reset-password",
+              "headers": {
+                "Content-Type": "application/x-www-form-urlencoded"
+              },
+              "body": "email=gutaprupoc@memeil.top"
+            },
+            "expectedResponse": {
+              "x-allowExtraHeaders": true,
+              "x-bodyMatchMode": "RAW",
+              "x-arrayOrderedMatching": false,
+              "x-arrayCheckCount": false,
+              "x-matchResponseSchema": true,
+              "headers": {
+                "Access-Control-Allow-Origin": "*",
+                "Connection": "keep-alive",
+                "Content-Length": "43",
+                "Content-Type": "application/json; charset=utf-8",
+                "Date": "Fri, 20 Jul 2018 18:06:52 GMT",
+                "Etag": "W/\"2b-Om/uOVJaStw+HN3zLcGIPa1jjQc\"",
+                "Server": "Cowboy",
+                "Via": "1.1 vegur",
+                "X-Powered-By": "Express"
+              },
+              "body": "{\"errors\":[\"The email field is required.\"]}"
+            },
+            "x-testShouldPass": true,
+            "x-testEnabled": true,
+            "x-testName": "Request Password Reset",
+            "x-testDescription": "TODO: Add Description"
+          }
+        ],
+        "x-operation-settings": {
+          "CollectParameters": false,
+          "AllowDynamicQueryParameters": false,
+          "AllowDynamicFormParameters": false,
+          "IsMultiContentStreaming": false
+        }
+      }
+    },
+    "/social": {
+      "post": {
+        "description": "This route is meant to complete a Social Auth Process ('Facebook', 'Google') from the front end. Simulating this by consuming the API might be a bit difficult",
+        "summary": "Social Auth",
+        "tags": [
+          "Misc"
+        ],
+        "operationId": "SocialPost",
+        "produces": [
+          "application/json"
+        ],
+        "consumes": [
+          "application/x-www-form-urlencoded"
+        ],
+        "parameters": [
+          {
+            "name": "Content-Type",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "description": ""
+          },
+          {
+            "name": "token",
+            "in": "formData",
+            "required": true,
+            "type": "string",
+            "description": ""
+          },
+          {
+            "name": "type",
+            "in": "formData",
+            "required": true,
+            "type": "string",
+            "description": ""
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SocialAuth|Failed"
+            },
+            "examples": {
+              "application/json": {
+                "errors": [
+                  "The token field is required.",
+                  "The type field is required."
+                ]
+              }
+            }
+          }
+        },
+        "security": [],
+        "x-unitTests": [
+          {
+            "request": {
+              "method": "POST",
+              "uri": "/social",
+              "headers": {
+                "Content-Type": "application/x-www-form-urlencoded"
+              },
+              "body": "token=token&type=google"
+            },
+            "expectedResponse": {
+              "x-allowExtraHeaders": true,
+              "x-bodyMatchMode": "RAW",
+              "x-arrayOrderedMatching": false,
+              "x-arrayCheckCount": false,
+              "x-matchResponseSchema": true,
+              "headers": {
+                "Access-Control-Allow-Origin": "*",
+                "Connection": "keep-alive",
+                "Content-Length": "73",
+                "Content-Type": "application/json; charset=utf-8",
+                "Date": "Fri, 20 Jul 2018 18:33:28 GMT",
+                "Etag": "W/\"49-ACO/LdKRnwzjSqGSIjFbXygoCNo\"",
+                "Server": "Cowboy",
+                "Via": "1.1 vegur",
+                "X-Powered-By": "Express"
+              },
+              "body": "{\"errors\":[\"The token field is required.\",\"The type field is required.\"]}"
+            },
+            "x-testShouldPass": true,
+            "x-testEnabled": true,
+            "x-testName": "Social Auth",
+            "x-testDescription": "This route is meant to complete a Social Auth Process ('Facebook', 'Google') from the front end. Simulating this by consuming the API might be a bit difficult"
+          }
+        ],
+        "x-operation-settings": {
+          "CollectParameters": false,
+          "AllowDynamicQueryParameters": false,
+          "AllowDynamicFormParameters": false,
+          "IsMultiContentStreaming": false
+        }
+      }
+    }
+  },
+  "definitions": {
+    "SignUpFailedRequest": {
+      "title": "Sign Up Failed Request",
+      "example": {
+        "errors": [
+          "The displayName field is required.",
+          "The email field is required.",
+          "The password field is required.",
+          "The fullName field is required."
+        ]
+      },
+      "type": "object",
+      "properties": {
+        "errors": {
+          "description": "",
+          "example": [
+            "The displayName field is required.",
+            "The email field is required.",
+            "The password field is required.",
+            "The fullName field is required."
+          ],
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "errors"
+      ]
+    },
+    "Sign in request  failed fields": {
+      "title": "Sign In Request - Failed Fields",
+      "example": {
+        "errors": [
+          "The email field is required.",
+          "The password field is required."
+        ]
+      },
+      "type": "object",
+      "properties": {
+        "errors": {
+          "description": "",
+          "example": [
+            "The email field is required.",
+            "The password field is required."
+          ],
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "errors"
+      ]
+    },
+    "Verify account  failed": {
+      "title": "Verify Account - Failed",
+      "example": {
+        "errors": [
+          "The token field is required."
+        ]
+      },
+      "type": "object",
+      "properties": {
+        "errors": {
+          "description": "",
+          "example": [
+            "The token field is required."
+          ],
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "errors"
+      ]
+    },
+    "Request verification mail  failed": {
+      "title": "Request Verification Mail - Failed",
+      "example": {
+        "errors": [
+          "The email field is required."
+        ]
+      },
+      "type": "object",
+      "properties": {
+        "errors": {
+          "description": "",
+          "example": [
+            "The email field is required."
+          ],
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "errors"
+      ]
+    },
+    "RequestPasswordReset|Failed": {
+      "title": "Request Password Reset | Failed",
+      "example": {
+        "errors": [
+          "The email field is required."
+        ]
+      },
+      "type": "object",
+      "properties": {
+        "errors": {
+          "description": "",
+          "example": [
+            "The email field is required."
+          ],
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "errors"
+      ]
+    },
+    "ResetPassword|Failed": {
+      "title": "Reset Password | Failed",
+      "example": {
+        "errors": [
+          "The token field is required.",
+          "The password field is required."
+        ]
+      },
+      "type": "object",
+      "properties": {
+        "errors": {
+          "description": "",
+          "example": [
+            "The token field is required.",
+            "The password field is required."
+          ],
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "errors"
+      ]
+    },
+    "SocialAuth|Failed": {
+      "title": "Social Auth | Failed",
+      "example": {
+        "errors": [
+          "The token field is required.",
+          "The type field is required."
+        ]
+      },
+      "type": "object",
+      "properties": {
+        "errors": {
+          "description": "",
+          "example": [
+            "The token field is required.",
+            "The type field is required."
+          ],
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "errors"
+      ]
+    }
+  }
+}

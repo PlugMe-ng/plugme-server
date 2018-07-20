@@ -20,9 +20,11 @@ import dotenv from 'dotenv';
 import express from 'express';
 import logger from 'morgan';
 import path from 'path';
+import swaggerUI from 'swagger-ui-express';
 
 import middleware from './middleware';
 import routes from './routes';
+import apiDocs from './api-docs.json';
 
 dotenv.config();
 
@@ -52,6 +54,8 @@ app.use(cors());
 // Parse incoming requests data
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
+
+app.use('/api-docs', swaggerUI.serve, swaggerUI.setup(apiDocs));
 
 // set content type
 app.use((req, res, next) => {
