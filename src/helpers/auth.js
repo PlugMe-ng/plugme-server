@@ -34,7 +34,11 @@ const createVerificationMessage = (user, verificationToken) =>
 
     <p>Please verify your PlugMe account using the link below</p>
 
-    ${verificationToken}
+    <a href="https://plugme-client.herokuapp.com/verify-account?token=${verificationToken}">Verify your account</a>
+
+    <p>If the link above does not work, copy and paste the link below in your browser<p>
+
+    https://plugme-client.herokuapp.com/verify-account?token=${verificationToken}
   `;
 
 export const sendVerificationEmail = async (user) => {
