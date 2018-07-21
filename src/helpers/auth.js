@@ -65,6 +65,11 @@ const createPasswordResetMail = (user, token) =>
     subject: 'Reset Your PlugMe Account Password'
   });
 
+export const generateUserName = (name) => {
+  const randomInt = crypto.randomBytes(20).readUInt16BE();
+  return `${name.substr(0, name.indexOf(' '))}${randomInt}`.toLowerCase();
+};
+
 export const createJwtToken = user =>
   jwt.sign({ email: user.email }, config.SECRET);
 

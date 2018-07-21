@@ -16,7 +16,7 @@ import { OAuth2Client } from 'google-auth-library';
 import crypto from 'crypto';
 
 import models from '../models';
-import { createJwtToken, sendAuthActionMail } from '../helpers/auth';
+import { createJwtToken, sendAuthActionMail, generateUserName } from '../helpers/auth';
 import helpers from '../helpers';
 
 /**
@@ -67,13 +67,6 @@ export default class Auth {
   */
   signup = async (req, res) => {
     try {
-      const existingUser = await models.User.findOne({
-        where: { email: req.body.email }
-      });
-      if (existingUser) {
-        throw new Error('User with the same email already exists.');
-      }
-
       const { role, verified, ...data } = req.body;
       const user = await models.User.create({
         ...data,
@@ -87,7 +80,7 @@ export default class Auth {
         user: helpers.Misc.updateUserAttributes(user),
       });
     } catch (error) {
-      return res.sendFailure([error.message]);
+      return res.sendFailure(['Username or email already exists', error.message]);
     }
   }
 
@@ -109,7 +102,10 @@ export default class Auth {
       return await models.User
         .findOrCreate({
           where: searchCriteria,
-          defaults: payload
+          defaults: {
+            ...payload,
+            username: generateUserName(payload.fullName)
+          }
         }).spread(user =>
           res.sendSuccess({
             user: helpers.Misc.updateUserAttributes(user),
@@ -160,7 +156,6 @@ export default class Auth {
     const response = await axios
       .get(`${fbProfileUrl}${accessToken}&appsecret_proof=${appSecretProof}`);
     return {
-      displayName: response.data.name,
       email: response.data.email,
       facebookId: response.data.id,
       verified: true,
@@ -186,7 +181,6 @@ export default class Auth {
     });
     const response = ticket.getPayload();
     return {
-      displayName: response.given_name,
       email: response.email,
       verified: response.email_verified,
       googleId: response.sub,

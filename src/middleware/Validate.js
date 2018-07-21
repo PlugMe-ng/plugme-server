@@ -13,7 +13,7 @@ const signinUserRules = {
   password: 'required|string',
 };
 const signupUserRules = {
-  displayName: 'required|string|between:4,16',
+  username: 'required|between:4,16|alpha_dash',
   email: 'required|email',
   password: 'required|string|between:7,25',
   photo: 'string',
@@ -69,7 +69,7 @@ export default class Validate {
   async signupUser(req, res, next) {
     const validation = new Validator(req.body, signupUserRules);
     validation.fails(() => res.sendFailure([
-      ...validation.errors.get('displayName'),
+      ...validation.errors.get('username'),
       ...validation.errors.get('email'),
       ...validation.errors.get('password'),
       ...validation.errors.get('photo'),

@@ -1,13 +1,15 @@
 module.exports = {
   up: (queryInterface, Sequelize) =>
-    queryInterface.addColumn('emailVerifications', 'type', {
-      type: Sequelize.ENUM,
-      values: ['verify', 'reset']
-    }).then(() =>
-      queryInterface.renameTable('emailVerifications', 'emailAuthActions')),
+    queryInterface.renameTable('emailVerifications', 'emailAuthActions')
+      .then(() =>
+        queryInterface.addColumn('emailAuthActions', 'type', {
+          type: Sequelize.ENUM,
+          values: ['verify', 'reset']
+        })),
 
   down: (queryInterface, Sequelize) =>
-    queryInterface.renameTable('emailAuthActions', 'emailVerifications')
-      .then(() =>
-        queryInterface.removeColumn('emailVerifications', 'type'))
+    queryInterface.removeColumn('emailAuthActions', 'type')
+      .then(() => queryInterface
+        .sequelize.query('DROP TYPE "enum_emailAuthActions_type";'))
+      .then(() => queryInterface.renameTable('emailAuthActions', 'emailVerifications'))
 };
