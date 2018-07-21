@@ -32,18 +32,28 @@ export default class Users {
   }
 
   /**
-   * @method getById
-   * @desc This method get the user with the specified user ID
+   * @method getByUserName
+   * @desc This method get the user with the specified username
    *
    * @param { object } req request
    * @param { object } res response
    *
    * @returns { object } response
    */
-  async getById(req, res) {
-    return res.status(200).send({
-      data: { name: 'user1' }
-    });
+  async getByUsername(req, res) {
+    try {
+      const user = await models.User.findOne({
+        where: { username: req.params.username }
+      });
+      if (!user) {
+        throw new Error('User not found');
+      }
+      return res.sendSuccess({
+        ...helpers.Misc.updateUserAttributes(user)
+      });
+    } catch (error) {
+      return res.sendFailure([error.message]);
+    }
   }
 
   /**
