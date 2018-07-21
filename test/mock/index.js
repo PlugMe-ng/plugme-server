@@ -47,8 +47,9 @@ export default {
   },
   user1: {
     displayName: 'user1',
-    email: 'user1@gmail.com',
+    email: 'user15002@gmail.com',
     password: 'password1',
+    fullName: 'John Doe',
     photo: 'https://www.myphotos.com/1',
   },
   user2: {

@@ -23,6 +23,14 @@ const should = chai.should();
 const { expect } = chai;
 chai.use(chaiHttp);
 
+before((done) => {
+  models.sequelize.sync({ force: true }).then(() => {
+    done(null);
+  }).catch((error) => {
+    done(error);
+  });
+});
+
 describe('AuthController', () => {
   beforeEach(async () => {
     await models.User.destroy({ where: {} });
@@ -32,9 +40,10 @@ describe('AuthController', () => {
     beforeEach(async () => {
       await models.User.create({
         ...mock.user1,
+        verified: true,
         password: await bcrypt.hash(
           mock.user1.password,
-          process.env.NODE_ENV === 'production' ? 10 : 1
+          1
         )
       });
     });
@@ -144,7 +153,6 @@ describe('AuthController', () => {
             .to.equal(mock.user1.displayName);
           expect(res.body.data.user.email).to.equal(mock.user1.email);
           expect(res.body.data.user.password).to.be.undefined;
-          res.body.data.should.have.property('userToken');
           expect(res.body.errors).to.be.undefined;
           done();
         });
