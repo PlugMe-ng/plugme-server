@@ -157,7 +157,7 @@ describe('AuthController', () => {
           done();
         });
     });
-    it('should not register a user without display name', (done) => {
+    it('should not register a user without username', (done) => {
       chai.request(server)
         .post('/v1/auth/signup')
         .send(mock.user1WithoutDisplayName)
@@ -166,7 +166,7 @@ describe('AuthController', () => {
           res.body.should.have.property('errors');
           expect(res.body.errors).to.be.an('Array');
           expect(res.body.errors)
-            .to.include('The displayName field is required.');
+            .to.include('The username field is required.');
           expect(res.body.data).to.be.undefined;
           done();
         });
@@ -262,7 +262,7 @@ describe('AuthController', () => {
           res.body.should.have.property('errors');
           expect(res.body.errors).to.be.an('Array');
           expect(res.body.errors)
-            .to.include('User with the same email already exists.');
+            .to.include('Username or email already exists');
           expect(res.body.data).to.be.undefined;
           done();
         });
