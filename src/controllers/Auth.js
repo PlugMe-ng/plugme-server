@@ -40,10 +40,13 @@ export default class Auth {
         const isCorrectPassword =
           await bcrypt.compare(req.body.password, user.password);
         if (isCorrectPassword) {
-          return res.sendSuccess({
-            user: helpers.Misc.updateUserAttributes(user),
-            userToken: createJwtToken(user)
-          });
+          return user.verified ?
+            res.sendSuccess({
+              user: helpers.Misc.updateUserAttributes(user),
+              userToken: createJwtToken(user)
+            }) : res.sendSuccess({
+              user: helpers.Misc.updateUserAttributes(user)
+            });
         }
 
         throw new Error('No user was found with the supplied credentials.');
@@ -82,7 +85,6 @@ export default class Auth {
       sendAuthActionMail(user.get(), 'verify');
       return res.sendSuccess({
         user: helpers.Misc.updateUserAttributes(user),
-        userToken: createJwtToken(user)
       });
     } catch (error) {
       return res.sendFailure([error.message]);
@@ -266,7 +268,7 @@ export default class Auth {
         await emailAuthAction.destroy();
       }
       sendAuthActionMail(user.get(), 'verify');
-      res.sendSuccess({
+      return res.sendSuccess({
         message: 'Verification mail sent successfully'
       });
     } catch (error) {
@@ -302,7 +304,7 @@ export default class Auth {
         emailAuthAction.destroy();
       }
       sendAuthActionMail(user.get(), 'reset');
-      res.sendSuccess({
+      return res.sendSuccess({
         message: 'Password reset mail sent successfully'
       });
     } catch (error) {
@@ -343,7 +345,8 @@ export default class Auth {
         password: await bcrypt.hash(
           password,
           process.env.NODE_ENV === 'production' ? 10 : 1
-        )
+        ),
+        verified: true
       });
       record.destroy();
       return res.sendSuccess({
