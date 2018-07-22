@@ -43,13 +43,24 @@ export default class Users {
   async getByUsername(req, res) {
     try {
       const user = await models.User.findOne({
-        where: { username: req.params.username }
+        where: { username: req.params.username },
+        attributes: { exclude: ['password'] },
+        include: [{
+          model: models.User,
+          as: 'fans',
+          attributes: {
+            exclude: ['password'],
+          },
+          through: {
+            attributes: []
+          }
+        }]
       });
       if (!user) {
         throw new Error('User not found');
       }
       return res.sendSuccess({
-        ...helpers.Misc.updateUserAttributes(user)
+        ...user.get()
       });
     } catch (error) {
       return res.sendFailure([error.message]);
