@@ -36,11 +36,11 @@ const createVerificationMessage = (user, verificationToken) => ({
 
     <p>Please verify your PlugMe account using the link below</p>
 
-    <a href="https://plugme-client.herokuapp.com/verify-account?token=${verificationToken}">Verify your account</a>
+    <a href="https://plugme-client-staging.herokuapp.com/verify-account?token=${verificationToken}">Verify your account</a>
 
     <p>If the link above does not work, copy and paste the link below in your browser<p>
 
-    https://plugme-client.herokuapp.com/verify-account?token=${verificationToken}
+    https://plugme-client-staging.herokuapp.com/verify-account?token=${verificationToken}
   `,
   subject: 'Verify Your PlugMe Account'
 });
@@ -52,11 +52,11 @@ const createPasswordResetMail = (user, token) =>
     
     <p>You requested a password reset, click the link below to reset your password</p>
     
-    <a href="https://plugme-client.herokuapp.com/password-reset?token=${token}">Reset your password</a>
+    <a href="https://plugme-client-staging.herokuapp.com/password-reset?token=${token}">Reset your password</a>
     
     <p>If the link above does not work, copy and paste the link below in your browser<p>
     
-    https://plugme-client.herokuapp.com/password-reset?token=${token}
+    https://plugme-client-staging.herokuapp.com/password-reset?token=${token}
     
     <p>Note that the link is valid for 12 hours</p>
     
