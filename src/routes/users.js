@@ -20,6 +20,7 @@ routes.get('/:username', usersController.getByUsername);
 
 routes.use(middleware.auth.authenticateUser);
 
+routes.post('/:username/fans', usersController.addFan);
 routes.get('/', middleware.pagination, usersController.get);
 routes.put('/:userId', usersController.updateById);
 routes.delete('/:userId', usersController.deleteById);

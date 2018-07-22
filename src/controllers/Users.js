@@ -124,4 +124,34 @@ export default class Users {
       data: { name: 'user1' }
     });
   }
+
+  /**
+   * @method addFan
+   * @desc This method adds a user to the fans of the specified username
+   *
+   * @param { object } req request
+   * @param { object } res response
+   *
+   * @returns { object } response
+   */
+  addFan = async (req, res) => {
+    const { username } = req.params;
+    try {
+      const user = await models.User.findOne({
+        where: { username }
+      });
+      if (!user) {
+        throw new Error('No user found with the specified username');
+      }
+      if (!user.verified) {
+        throw new Error('Specified user has not verified their account');
+      }
+      user.addFan(req.userObj);
+      res.sendSuccess({
+        message: 'You are now a fan of the user'
+      });
+    } catch (error) {
+      res.sendFailure([error.message]);
+    }
+  }
 }

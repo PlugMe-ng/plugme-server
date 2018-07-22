@@ -73,6 +73,16 @@ module.exports = (sequelize, DataTypes) => {
       models.emailAuthAction,
       { onDelete: 'CASCADE', onUpdate: 'CASCADE' }
     );
+
+    User.belongsToMany(
+      models.User,
+      {
+        through: 'UserFans',
+        as: 'fans',
+        foreignKey: 'UserId',
+        otherKey: 'fanId'
+      }
+    );
   };
 
   return User;
