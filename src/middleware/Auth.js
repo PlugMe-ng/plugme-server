@@ -28,23 +28,27 @@ export default class Auth {
   */
   async authenticateUser(req, res, next) {
     try {
-      const userToken = req.headers['x-teams-user-token'];
+      let userToken = req.headers.authorization;
       if (!userToken) {
-        throw new Error('Request has no user token header.');
+        throw new Error('User is not authenticated.');
       }
+      userToken = req.headers.authorization.slice(7);
 
       const userData = jwt.verify(userToken, config.SECRET);
       const user = await models.User.findOne({
         where: { email: userData.email }
       });
 
-      if (user) {
-        req.user = user.get();
-        req.userObj = user;
-        return next();
+      if (!user) {
+        throw new Error('User is not authenticated.');
+      }
+      if (!user.verified) {
+        throw new Error('Account is not verified');
       }
 
-      throw new Error('User is not authenticated.');
+      req.user = user.get();
+      req.userObj = user;
+      return next();
     } catch (error) {
       return res.sendFailure([error.message]);
     }
