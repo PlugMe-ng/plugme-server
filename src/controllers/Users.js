@@ -157,7 +157,15 @@ export default class Users {
       if (!user.verified) {
         throw new Error('Specified user has not verified their account');
       }
-      user.addFan(req.userObj);
+      const { userObj: currentUser } = req;
+      if (await user.hasFan(currentUser)) {
+        await user.removeFan(currentUser);
+        res.sendSuccess({
+          message: 'You are no longer a fan of this user'
+        });
+        return;
+      }
+      await user.addFan(req.userObj);
       res.sendSuccess({
         message: 'You are now a fan of the user'
       });
