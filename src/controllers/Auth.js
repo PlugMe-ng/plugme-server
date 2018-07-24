@@ -96,8 +96,7 @@ export default class Auth {
     const { type, token } = req.body;
     try {
       const payload = await this.getPayloadForSocialAuth(token, type);
-      const searchCriteria = type === 'google' ?
-        { googleId: payload.googleId } : { facebookId: payload.facebookId };
+      const searchCriteria = { email: payload.email };
 
       return await models.User
         .findOrCreate({
