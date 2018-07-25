@@ -54,6 +54,15 @@ export default class Users {
           through: {
             attributes: []
           }
+        }, {
+          model: models.User,
+          as: 'fansOf',
+          attributes: {
+            exclude: ['password'],
+          },
+          through: {
+            attributes: []
+          }
         }]
       });
       if (!user) {
