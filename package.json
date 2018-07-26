@@ -9,27 +9,18 @@
     "yarn": "1.5.1"
   },
   "scripts": {
-    "build": "npm run remove-build && npm run build:server && npm run db:reset && npm run db:migrate",
+    "build": "npm run remove-build && npm run build:server",
     "build:server": "./node_modules/.bin/babel -d ./build ./src -s --copy-files",
-    "build-and-start": "npm run build && npm start",
-    "build-and-start:dev": "npm run build && npm run start:dev",
     "codecov": "nyc report --reporter=text-lcov > coverage.lcov && codecov",
     "db:migrate": "./node_modules/.bin/sequelize db:migrate",
-    "db:migrate:test": "NODE_ENV=test ./node_modules/.bin/sequelize db:migrate",
     "db:reset": "./node_modules/.bin/sequelize db:migrate:undo:all && ./node_modules/.bin/sequelize db:migrate",
-    "db:reset:test": "NODE_ENV=test ./node_modules/.bin/sequelize db:migrate:undo:all && NODE_ENV=test ./node_modules/.bin/sequelize db:migrate",
     "eslint": "./node_modules/.bin/eslint src",
     "eslint-fix": "./node_modules/.bin/eslint --fix src",
-    "heroku-postbuild": "npm run build",
+    "heroku-postbuild": "npm run build && npm run db:migrate",
     "remove-build": "./node_modules/.bin/rimraf ./build",
     "start": "NODE_ENV=production ./node_modules/.bin/forever -m 5 ./build/server.js",
-    "start2": "node --require babel-register ./build/server.js",
-    "start3:dev": "NODE_ENV=development nodemon ./build/server",
-    "start2:dev": "NODE_ENV=development nodemon --require babel-register ./build/server.js",
     "start:dev": "nodemon src/server.js --exec babel-node",
-    "test2:dev": "NODE_ENV=development npm run build && NODE_ENV=test nyc --reporter=html --reporter=text ./node_modules/mocha/bin/_mocha 'test/**/*.js' --compilers js:babel-core/register --timeout 10000 --exit",
-    "test:dev": "NODE_ENV=development npm run build && NODE_ENV=test ./node_modules/mocha/bin/_mocha 'test/**/*.js' --compilers js:babel-core/register --timeout 10000 --exit",
-    "test": "npm run db:reset:test && NODE_ENV=test nyc -r=text -r=html mocha test/**/*.js --compilers babel-register --exit"
+    "test": "NODE_ENV=test nyc -r=text -r=html mocha test/**/*.js --require babel-register --exit"
   },
   "pre-commit": [
     "eslint"
@@ -37,9 +28,12 @@
   "repository": "https://github.com/PlugMe-ng/plugme-server",
   "author": "Franklin Chieze <chieze.franklin@gmail.com>",
   "dependencies": {
+    "@sendgrid/mail": "^6.3.1",
+    "axios": "^0.18.0",
     "babel-cli": "^6.26.0",
     "babel-core": "^6.26.0",
     "babel-loader": "^7.1.4",
+    "babel-plugin-transform-class-properties": "^6.24.1",
     "babel-plugin-transform-object-rest-spread": "^6.26.0",
     "babel-preset-env": "^1.7.0",
     "babel-register": "^6.26.0",
@@ -50,7 +44,9 @@
     "cors": "^2.8.4",
     "dotenv": "^5.0.1",
     "express": "^4.16.3",
+    "express-trimmer": "0.0.3",
     "forever": "^0.15.3",
+    "google-auth-library": "^1.6.1",
     "jsonwebtoken": "^8.2.1",
     "mocha": "^5.2.0",
     "morgan": "^1.9.0",
@@ -59,9 +55,11 @@
     "rimraf": "^2.6.2",
     "sequelize": "^4.37.7",
     "sequelize-cli": "^4.0.0",
+    "swagger-ui-express": "^3.0.10",
     "validatorjs": "^3.14.2"
   },
   "devDependencies": {
+    "babel-eslint": "^8.2.6",
     "codecov": "^3.0.2",
     "coveralls": "^3.0.1",
     "eslint": "^4.9.0",

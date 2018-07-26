@@ -23,6 +23,14 @@ const should = chai.should();
 const { expect } = chai;
 chai.use(chaiHttp);
 
+before((done) => {
+  models.sequelize.sync({ force: true }).then(() => {
+    done(null);
+  }).catch((error) => {
+    done(error);
+  });
+});
+
 describe('AuthController', () => {
   beforeEach(async () => {
     await models.User.destroy({ where: {} });
@@ -32,9 +40,10 @@ describe('AuthController', () => {
     beforeEach(async () => {
       await models.User.create({
         ...mock.user1,
+        verified: true,
         password: await bcrypt.hash(
           mock.user1.password,
-          process.env.NODE_ENV === 'production' ? 10 : 1
+          1
         )
       });
     });
@@ -144,12 +153,11 @@ describe('AuthController', () => {
             .to.equal(mock.user1.displayName);
           expect(res.body.data.user.email).to.equal(mock.user1.email);
           expect(res.body.data.user.password).to.be.undefined;
-          res.body.data.should.have.property('userToken');
           expect(res.body.errors).to.be.undefined;
           done();
         });
     });
-    it('should not register a user without display name', (done) => {
+    it('should not register a user without username', (done) => {
       chai.request(server)
         .post('/v1/auth/signup')
         .send(mock.user1WithoutDisplayName)
@@ -158,7 +166,7 @@ describe('AuthController', () => {
           res.body.should.have.property('errors');
           expect(res.body.errors).to.be.an('Array');
           expect(res.body.errors)
-            .to.include('The displayName field is required.');
+            .to.include('The username field is required.');
           expect(res.body.data).to.be.undefined;
           done();
         });
@@ -254,7 +262,7 @@ describe('AuthController', () => {
           res.body.should.have.property('errors');
           expect(res.body.errors).to.be.an('Array');
           expect(res.body.errors)
-            .to.include('User with the same email already exists.');
+            .to.include('Username or email already exists');
           expect(res.body.data).to.be.undefined;
           done();
         });

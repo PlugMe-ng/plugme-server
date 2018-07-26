@@ -32,18 +32,48 @@ export default class Users {
   }
 
   /**
-   * @method getById
-   * @desc This method get the user with the specified user ID
+   * @method getByUserName
+   * @desc This method get the user with the specified username
    *
    * @param { object } req request
    * @param { object } res response
    *
    * @returns { object } response
    */
-  async getById(req, res) {
-    return res.status(200).send({
-      data: { name: 'user1' }
-    });
+  async getByUsername(req, res) {
+    try {
+      const user = await models.User.findOne({
+        where: { username: req.params.username },
+        attributes: { exclude: ['password'] },
+        include: [{
+          model: models.User,
+          as: 'fans',
+          attributes: {
+            exclude: ['password'],
+          },
+          through: {
+            attributes: []
+          }
+        }, {
+          model: models.User,
+          as: 'fansOf',
+          attributes: {
+            exclude: ['password'],
+          },
+          through: {
+            attributes: []
+          }
+        }]
+      });
+      if (!user) {
+        throw new Error('User not found');
+      }
+      return res.sendSuccess({
+        ...user.get()
+      });
+    } catch (error) {
+      return res.sendFailure([error.message]);
+    }
   }
 
   /**
@@ -113,5 +143,43 @@ export default class Users {
     return res.status(200).send({
       data: { name: 'user1' }
     });
+  }
+
+  /**
+   * @method addFan
+   * @desc This method adds a user to the fans of the specified username
+   *
+   * @param { object } req request
+   * @param { object } res response
+   *
+   * @returns { object } response
+   */
+  addFan = async (req, res) => {
+    const { username } = req.params;
+    try {
+      const user = await models.User.findOne({
+        where: { username }
+      });
+      if (!user) {
+        throw new Error('No user found with the specified username');
+      }
+      if (!user.verified) {
+        throw new Error('Specified user has not verified their account');
+      }
+      const { userObj: currentUser } = req;
+      if (await user.hasFan(currentUser)) {
+        await user.removeFan(currentUser);
+        res.sendSuccess({
+          message: 'You are no longer a fan of this user'
+        });
+        return;
+      }
+      await user.addFan(req.userObj);
+      res.sendSuccess({
+        message: 'You are now a fan of the user'
+      });
+    } catch (error) {
+      res.sendFailure([error.message]);
+    }
   }
 }

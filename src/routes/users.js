@@ -16,25 +16,12 @@ import middleware from '../middleware';
 const usersController = new Users();
 const routes = new Router();
 
+routes.get('/:username', usersController.getByUsername);
+
 routes.use(middleware.auth.authenticateUser);
 
-/**
-   * @swagger
-   * /v1/users:
-   *   get:
-   *     description: Return an array of existing users
-   *     produces:
-   *      - application/json
-   *     responses:
-   *       200:
-   *         description: users
-   *         schema:
-   *           type: object
-   *           items:
-   *             $ref: '#/definitions/ResponseBody'
-   */
+routes.post('/:username/fans', usersController.addFan);
 routes.get('/', middleware.pagination, usersController.get);
-routes.get('/:userId', usersController.getById);
 routes.put('/:userId', usersController.updateById);
 routes.delete('/:userId', usersController.deleteById);
 

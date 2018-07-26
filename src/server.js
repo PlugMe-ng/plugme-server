@@ -20,9 +20,12 @@ import dotenv from 'dotenv';
 import express from 'express';
 import logger from 'morgan';
 import path from 'path';
+import swaggerUI from 'swagger-ui-express';
+import trimmer from 'express-trimmer';
 
 import middleware from './middleware';
 import routes from './routes';
+import apiDocs from './api-docs.json';
 
 dotenv.config();
 
@@ -53,17 +56,21 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 
+app.use('/api-docs', swaggerUI.serve, swaggerUI.setup(apiDocs));
+
+app.use(middleware.api);
+
 // set content type
 app.use((req, res, next) => {
   res.header('Content-Type', 'application/json');
   next();
 });
 
-app.use(middleware.api);
-
 app.get('/', (req, res) => {
   res.sendSuccess(['Welcome to PlugMe Server']);
 });
+
+app.use(trimmer);
 
 routes(app);
 

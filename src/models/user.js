@@ -16,9 +16,10 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.BOOLEAN,
       defaultValue: false
     },
-    displayName: {
+    username: {
       type: DataTypes.STRING,
       allowNull: false,
+      unique: true,
       validate: {
         notEmpty: true
       }
@@ -28,18 +29,16 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false,
       unique: true,
       validate: {
-        notEmpty: true
+        isEmail: true
       }
     },
     facebookId: {
       type: DataTypes.STRING,
       allowNull: true,
-      // unique: true
     },
     googleId: {
       type: DataTypes.STRING,
       allowNull: true,
-      // unique: true
     },
     password: {
       type: DataTypes.STRING,
@@ -48,6 +47,9 @@ module.exports = (sequelize, DataTypes) => {
     photo: {
       type: DataTypes.STRING,
       allowNull: true,
+      validate: {
+        isUrl: true
+      }
     },
     role: {
       type: DataTypes.ENUM,
@@ -60,9 +62,38 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.BOOLEAN,
       defaultValue: false
     },
+    fullName: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    }
   });
 
-  User.associate = (models) => {};
+  User.associate = (models) => {
+    User.hasOne(
+      models.emailAuthAction,
+      { onDelete: 'CASCADE', onUpdate: 'CASCADE' }
+    );
+
+    User.belongsToMany(
+      models.User,
+      {
+        through: 'UserFans',
+        as: 'fans',
+        foreignKey: 'UserId',
+        otherKey: 'fanId'
+      }
+    );
+
+    User.belongsToMany(
+      models.User,
+      {
+        through: 'UserFans',
+        as: { singular: 'fanOf', plural: 'fansOf' },
+        foreignKey: 'fanId',
+        otherKey: 'UserId'
+      }
+    );
+  };
 
   return User;
 };
