@@ -74,5 +74,41 @@ export default {
     } catch (error) {
       return res.sendFailure([error.message]);
     }
+  },
+
+  addComment: async (req, res) => {
+    const { contentId } = req.params;
+    const { userObj } = req;
+    try {
+      const content = await models.content.findById(contentId);
+      if (!content) {
+        throw new Error('Specified content does not exist');
+      }
+      const comment = await models.comment.create(req.body);
+      await comment.setUser(userObj);
+      await comment.setContent(content);
+      return res.sendSuccess(comment.get());
+    } catch (error) {
+      return res.sendFailure([error.message]);
+    }
+  },
+
+  deleteComment: async (req, res) => {
+    const { commentId } = req.params;
+    try {
+      const comment = await models.comment.findById(commentId);
+      if (!comment) {
+        throw new Error('Specified comment does not exist');
+      }
+      if (comment.UserId !== req.user.id) {
+        throw new Error('This comment was added by another user');
+      }
+      await comment.destroy();
+      return res.sendSuccess({
+        message: 'Comment has been deleted succesfully'
+      });
+    } catch (error) {
+      return res.sendFailure([error.message]);
+    }
   }
 };

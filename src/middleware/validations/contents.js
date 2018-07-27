@@ -15,6 +15,10 @@ const contentCreationRules = {
   tags: 'array|required'
 };
 
+const addCommentRules = {
+  text: 'required|string|max:90'
+};
+
 /**
 * Middleware for validations
 * @class Validate
@@ -35,6 +39,22 @@ class Validate {
       ...validation.errors.get('description'),
       ...validation.errors.get('mediaUrls'),
       ...validation.errors.get('tags')
+    ]));
+    validation.passes(() => next());
+  }
+
+  /**
+  * validates content creation data
+  * @param {object} req express request object
+  * @param {object} res express response object
+  * @param {object} next the next middleware or controller
+  *
+  * @returns {any} the next middleware or controller
+  */
+  async addComment(req, res, next) {
+    const validation = new Validator(req.body, addCommentRules);
+    validation.fails(() => res.sendFailure([
+      ...validation.errors.get('text'),
     ]));
     validation.passes(() => next());
   }

@@ -37,4 +37,17 @@ routes.delete(
   controllers.contents.deleteContent
 );
 
+routes.post(
+  '/:contentId/comments',
+  middleware.auth.authenticateUser,
+  validations.addComment,
+  controllers.contents.addComment
+);
+
+routes.delete(
+  '/:contentId/comments/:commentId',
+  middleware.auth.authenticateUser,
+  controllers.contents.deleteComment
+);
+
 export default routes;
