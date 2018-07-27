@@ -53,7 +53,7 @@ export default class Users {
           },
           through: {
             attributes: []
-          }
+          },
         }, {
           model: models.User,
           as: 'fansOf',
@@ -63,6 +63,19 @@ export default class Users {
           through: {
             attributes: []
           }
+        }, {
+          model: models.content,
+          as: 'contents',
+          include: [{
+            model: models.User,
+            as: 'likers',
+            attributes: {
+              exclude: ['password'],
+            },
+            through: {
+              attributes: []
+            }
+          }]
         }]
       });
       if (!user) {
