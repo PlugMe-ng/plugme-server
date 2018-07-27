@@ -96,6 +96,14 @@ module.exports = (sequelize, DataTypes) => {
         otherKey: 'UserId'
       }
     );
+
+    User.hasMany(
+      models.content,
+      {
+        as: 'contents',
+        foreignKey: 'authorId'
+      }
+    );
   };
 
   return User;

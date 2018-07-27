@@ -39,6 +39,7 @@
     "babel-register": "^6.26.0",
     "bcrypt": "^2.0.1",
     "body-parser": "^1.18.2",
+    "capitalize": "^1.0.0",
     "chai": "^4.1.2",
     "chai-http": "^4.0.0",
     "cors": "^2.8.4",

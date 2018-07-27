@@ -9,8 +9,12 @@
 
 import Auth from './Auth';
 import Users from './Users';
+import contents from './contents';
+import tags from './tags';
 
 export default {
   Auth,
-  Users
+  Users,
+  contents,
+  tags
 };

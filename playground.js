@@ -1,0 +1,1 @@
+// ['Basketry', 'Weaving', 'Sculpting', 'Pottery', 'Figurines', 'Bronze Work'].forEach((element) => { models.minorTag.create({ title: element }).then((tag) => { tag.setCategory('cf19874d-160b-4804-a0fa-5c94308a5637'); }); });
