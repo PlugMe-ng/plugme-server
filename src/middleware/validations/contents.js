@@ -12,7 +12,8 @@ const contentCreationRules = {
   title: 'required|string',
   description: 'required|string',
   mediaUrls: 'array',
-  tags: 'array|required'
+  tags: 'array|required',
+  mediaType: 'required_with:mediaUrls|in:video,image'
 };
 
 const addCommentRules = {
@@ -38,7 +39,8 @@ class Validate {
       ...validation.errors.get('title'),
       ...validation.errors.get('description'),
       ...validation.errors.get('mediaUrls'),
-      ...validation.errors.get('tags')
+      ...validation.errors.get('tags'),
+      ...validation.errors.get('mediaType')
     ]));
     validation.passes(() => next());
   }

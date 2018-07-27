@@ -19,6 +19,10 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.ARRAY(DataTypes.STRING),
       defaultValue: [],
     },
+    mediaType: {
+      type: DataTypes.ENUM,
+      values: ['image', 'video'],
+    }
   }, {});
   content.associate = (models) => {
     content.belongsTo(models.User, { as: 'author', foreignKey: 'authorId' });
