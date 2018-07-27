@@ -31,5 +31,28 @@ export default {
       }
       res.sendFailure([error.message]);
     }
+  },
+
+  likeContent: async (req, res) => {
+    try {
+      const { userObj } = req;
+      const { contentId } = req.params;
+      const content = await models.content.findById(contentId);
+      if (!content) {
+        throw new Error('Specified content does not exist');
+      }
+      if (await content.hasLiker(userObj)) {
+        await content.removeLiker(userObj);
+        return res.sendSuccess({
+          message: 'You have successfully unliked this content'
+        });
+      }
+      await content.addLiker(userObj);
+      return res.sendSuccess({
+        message: 'You have successfully liked this content'
+      });
+    } catch (error) {
+      res.sendFailure([error.message]);
+    }
   }
 };

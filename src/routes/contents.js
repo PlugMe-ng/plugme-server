@@ -25,4 +25,10 @@ routes.post(
   controllers.contents.createContent
 );
 
+routes.post(
+  '/:contentId/like',
+  middleware.auth.authenticateUser,
+  controllers.contents.likeContent
+);
+
 export default routes;

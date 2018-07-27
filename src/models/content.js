@@ -28,6 +28,12 @@ module.exports = (sequelize, DataTypes) => {
       foreignKey: 'contentId',
       otherKey: 'tagId'
     });
+    content.belongsToMany(models.User, {
+      through: 'contents_users_likes',
+      as: 'likers',
+      foreignKey: 'contentId',
+      otherKey: 'userId'
+    });
   };
   return content;
 };
