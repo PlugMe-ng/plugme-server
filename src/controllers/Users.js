@@ -43,7 +43,7 @@ export default class Users {
   async getByUsername(req, res) {
     try {
       const user = await models.User.findOne({
-        where: { username: req.params.username },
+        where: { username: req.params.username.toLowerCase() },
         attributes: { exclude: ['password'] },
         include: [{
           model: models.User,
