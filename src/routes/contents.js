@@ -31,4 +31,10 @@ routes.post(
   controllers.contents.likeContent
 );
 
+routes.delete(
+  '/:contentId',
+  middleware.auth.authenticateUser,
+  controllers.contents.deleteContent
+);
+
 export default routes;
