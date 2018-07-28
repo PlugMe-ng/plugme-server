@@ -57,7 +57,7 @@ export default {
           }, {
             model: models.User,
             as: 'likers',
-            attributes: ['id', 'username', 'fullName'],
+            attributes: ['id'],
             through: {
               attributes: []
             }
@@ -84,6 +84,9 @@ export default {
           }
         ]
       });
+      if (!content) {
+        throw new Error('Specified content does not exist');
+      }
       return res.sendSuccess(content);
     } catch (error) {
       return res.sendFailure([error.message]);
@@ -92,12 +95,7 @@ export default {
 
   likeContent: async (req, res) => {
     try {
-      const { userObj } = req;
-      const { contentId } = req.params;
-      const content = await models.content.findById(contentId);
-      if (!content) {
-        throw new Error('Specified content does not exist');
-      }
+      const { userObj, content } = req;
       if (await content.hasLiker(userObj)) {
         await content.removeLiker(userObj);
         return res.sendSuccess({
@@ -130,14 +128,10 @@ export default {
   },
 
   deleteContent: async (req, res) => {
-    const { contentId } = req.params;
+    const { content, user } = req;
     try {
-      const content = await models.content.findById(contentId);
-      if (!content) {
-        throw new Error('Specified content does not exist');
-      }
       // TODO: allow an admin to delete a content here
-      if (content.authorId !== req.user.id) {
+      if (content.authorId !== user.id) {
         throw new Error('This content is owned by another user');
       }
       await content.destroy();
@@ -150,13 +144,8 @@ export default {
   },
 
   addComment: async (req, res) => {
-    const { contentId } = req.params;
-    const { userObj } = req;
+    const { userObj, content } = req;
     try {
-      const content = await models.content.findById(contentId);
-      if (!content) {
-        throw new Error('Specified content does not exist');
-      }
       const comment = await models.comment.create(req.body);
       await comment.setUser(userObj);
       await comment.setContent(content);

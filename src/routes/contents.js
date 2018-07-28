@@ -34,6 +34,7 @@ routes.get(
 routes.post(
   '/:contentId/like',
   middleware.auth.authenticateUser,
+  validations.contentExists,
   controllers.contents.likeContent
 );
 
@@ -48,6 +49,7 @@ routes.post(
 routes.delete(
   '/:contentId',
   middleware.auth.authenticateUser,
+  validations.contentExists,
   controllers.contents.deleteContent
 );
 
@@ -55,6 +57,7 @@ routes.post(
   '/:contentId/comments',
   middleware.auth.authenticateUser,
   validations.addComment,
+  validations.contentExists,
   controllers.contents.addComment
 );
 

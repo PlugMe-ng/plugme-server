@@ -2,7 +2,7 @@ module.exports = (sequelize, DataTypes) => {
   const flag = sequelize.define('flag', {
     info: {
       type: DataTypes.TEXT,
-      allowNull: true,
+      allowNull: false,
     },
   }, {
     tableName: 'contents_users_flags'
