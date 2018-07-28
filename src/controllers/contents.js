@@ -37,6 +37,9 @@ export default {
     const { contentId } = req.params;
     try {
       const { userObj } = req;
+      if (userObj) {
+        await userObj.addViewedContent(contentId);
+      }
       const content = await models.content.findById(contentId, {
         include: [
           {
@@ -55,6 +58,13 @@ export default {
             model: models.User,
             as: 'likers',
             attributes: ['id', 'username', 'fullName'],
+            through: {
+              attributes: []
+            }
+          }, {
+            model: models.User,
+            as: 'viewers',
+            attributes: ['id'],
             through: {
               attributes: []
             }

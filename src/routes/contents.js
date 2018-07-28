@@ -27,6 +27,7 @@ routes.post(
 
 routes.get(
   '/:contentId',
+  middleware.auth.optionalUserAuthentication,
   controllers.contents.getContent
 );
 

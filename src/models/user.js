@@ -112,6 +112,13 @@ module.exports = (sequelize, DataTypes) => {
       otherKey: 'contentId'
     });
 
+    User.belongsToMany(models.content, {
+      through: 'contents_users_views',
+      as: 'viewedContents',
+      foreignKey: 'userId',
+      otherKey: 'contentId'
+    });
+
     User.hasMany(models.comment);
   };
 

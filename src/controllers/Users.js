@@ -69,7 +69,14 @@ export default class Users {
           include: [{
             model: models.User,
             as: 'likers',
-            attributes: ['username', 'id', 'fullName'],
+            attributes: ['id'],
+            through: {
+              attributes: []
+            }
+          }, {
+            model: models.User,
+            as: 'viewers',
+            attributes: ['id'],
             through: {
               attributes: []
             }
