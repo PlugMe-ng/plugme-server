@@ -42,7 +42,15 @@ export default {
           {
             model: models.User,
             as: 'author',
-            attributes: ['id', 'username', 'fullName']
+            attributes: ['id', 'username', 'fullName'],
+            include: [{
+              model: models.User,
+              as: 'fans',
+              attributes: ['id', 'username', 'fullName'],
+              through: {
+                attributes: []
+              }
+            }]
           }, {
             model: models.User,
             as: 'likers',
