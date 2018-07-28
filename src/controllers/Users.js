@@ -69,12 +69,12 @@ export default class Users {
           include: [{
             model: models.User,
             as: 'likers',
-            attributes: {
-              exclude: ['password'],
-            },
+            attributes: ['username', 'id', 'fullName'],
             through: {
               attributes: []
             }
+          }, {
+            model: models.comment
           }]
         }]
       });
