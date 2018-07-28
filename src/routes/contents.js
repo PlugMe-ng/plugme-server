@@ -25,6 +25,11 @@ routes.post(
   controllers.contents.createContent
 );
 
+routes.get(
+  '/:contentId',
+  controllers.contents.getContent
+);
+
 routes.post(
   '/:contentId/like',
   middleware.auth.authenticateUser,

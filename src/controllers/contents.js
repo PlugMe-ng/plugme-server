@@ -29,7 +29,46 @@ export default {
       if (content) {
         content.destroy();
       }
-      res.sendFailure([error.message]);
+      return res.sendFailure([error.message]);
+    }
+  },
+
+  getContent: async (req, res) => {
+    const { contentId } = req.params;
+    try {
+      const { userObj } = req;
+      const content = await models.content.findById(contentId, {
+        include: [
+          {
+            model: models.User,
+            as: 'author',
+            attributes: ['id', 'username', 'fullName']
+          }, {
+            model: models.User,
+            as: 'likers',
+            attributes: ['id', 'username', 'fullName'],
+            through: {
+              attributes: []
+            }
+          }, {
+            model: models.comment,
+            include: [{
+              model: models.User,
+              attributes: ['id', 'username', 'fullName']
+            }]
+          }, {
+            model: models.minorTag,
+            as: 'tags',
+            attributes: ['id', 'title'],
+            through: {
+              attributes: []
+            }
+          }
+        ]
+      });
+      return res.sendSuccess(content);
+    } catch (error) {
+      return res.sendFailure([error.message]);
     }
   },
 
