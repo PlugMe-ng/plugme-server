@@ -37,6 +37,14 @@ routes.post(
   controllers.contents.likeContent
 );
 
+routes.post(
+  '/:contentId/flags',
+  middleware.auth.authenticateUser,
+  validations.flagContent,
+  validations.contentExists,
+  controllers.contents.flagContent
+);
+
 routes.delete(
   '/:contentId',
   middleware.auth.authenticateUser,

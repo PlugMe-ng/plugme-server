@@ -113,6 +113,22 @@ export default {
     }
   },
 
+  flagContent: async (req, res) => {
+    const { content, userObj } = req;
+    try {
+      await content.addFlagger(userObj, {
+        through: {
+          info: req.body.info
+        }
+      });
+      return res.sendSuccess({
+        message: 'Content has been successfully reported'
+      });
+    } catch (error) {
+      return res.sendFailure([error.message]);
+    }
+  },
+
   deleteContent: async (req, res) => {
     const { contentId } = req.params;
     try {

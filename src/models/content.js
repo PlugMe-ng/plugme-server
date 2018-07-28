@@ -44,6 +44,12 @@ module.exports = (sequelize, DataTypes) => {
       foreignKey: 'contentId',
       otherKey: 'userId'
     });
+    content.belongsToMany(models.User, {
+      through: models.flag,
+      as: 'flaggers', // yeah, I know
+      foreignKey: 'contentId',
+      otherKey: 'userId'
+    });
     content.hasMany(models.comment);
   };
   return content;

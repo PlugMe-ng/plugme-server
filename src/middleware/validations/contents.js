@@ -7,6 +7,7 @@
  */
 
 import Validator from 'validatorjs';
+import models from '../../models';
 
 const contentCreationRules = {
   title: 'required|string',
@@ -59,6 +60,47 @@ class Validate {
       ...validation.errors.get('text'),
     ]));
     validation.passes(() => next());
+  }
+
+  /**
+  * validates content flagging data
+  * @param {object} req express request object
+  * @param {object} res express response object
+  * @param {object} next the next middleware or controller
+  *
+  * @returns {any} the next middleware or controller
+  */
+  async flagContent(req, res, next) {
+    const validation = new Validator(req.body, {
+      info: 'required|string'
+    });
+    validation.fails(() => res.sendFailure([
+      ...validation.errors.get('info'),
+    ]));
+    validation.passes(() => next());
+  }
+
+  /**
+  * validates if a content exists
+  * @param {object} req express request object
+  * @param {object} res express response object
+  * @param {object} next the next middleware or controller
+  *
+  * @returns {any} the next middleware or controller
+  */
+  async contentExists(req, res, next) {
+    const { contentId } = req.params;
+    let content;
+    try {
+      content = await models.content.findById(contentId);
+    } catch (error) {
+      return res.sendFailure([`Invalid contentId - ${error.message}`]);
+    }
+    if (!content) {
+      return res.sendFailure(['Specified content does not exist']);
+    }
+    req.content = content;
+    return next();
   }
 }
 
