@@ -26,6 +26,14 @@ routes.post(
 );
 
 routes.get(
+  '/',
+  middleware.auth.optionalUserAuthentication,
+  middleware.pagination,
+  middleware.sort,
+  controllers.contents.get
+);
+
+routes.get(
   '/:contentId',
   middleware.auth.optionalUserAuthentication,
   controllers.contents.getContent

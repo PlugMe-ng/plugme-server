@@ -1,4 +1,5 @@
 import models from '../models';
+import helpers from '../helpers';
 
 export default {
   createContent: async (req, res) => {
@@ -29,6 +30,60 @@ export default {
       if (content) {
         content.destroy();
       }
+      return res.sendFailure([error.message]);
+    }
+  },
+
+  get: async (req, res) => {
+    const { limit, offset } = req.meta.pagination;
+    const { attribute, order } = req.meta.sort;
+    try {
+      const dbResult = await models.content.findAndCountAll();
+      const contents = await models.content.findAll({
+        limit,
+        offset,
+        order: [[attribute, order]],
+        include: [{
+          model: models.comment,
+          attributes: ['id']
+        }, {
+          model: models.User,
+          as: 'author',
+          attributes: ['fullName']
+        }, {
+          model: models.User,
+          as: 'viewers',
+          attributes: ['id'],
+          through: {
+            attributes: []
+          }
+        }, {
+          model: models.User,
+          as: 'likers',
+          attributes: ['id'],
+          through: {
+            attributes: []
+          }
+        }, {
+          model: models.minorTag,
+          attributes: ['id', 'title'],
+          as: 'tags',
+          through: {
+            attributes: []
+          }
+        }]
+      });
+      if (contents) {
+        const pagination = helpers.Misc.generatePaginationMeta(
+          req,
+          dbResult,
+          limit,
+          offset
+        );
+        return res.sendSuccess({ contents }, 200, { pagination });
+      }
+      throw new Error('Could not retrieve content from the db');
+    } catch (error) {
       return res.sendFailure([error.message]);
     }
   },
