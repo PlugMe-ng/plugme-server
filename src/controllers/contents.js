@@ -96,6 +96,7 @@ export default {
         await userObj.addViewedContent(contentId);
       }
       const content = await models.content.findById(contentId, {
+        order: [[models.comment, 'createdAt', 'ASC']],
         include: [
           {
             model: models.User,

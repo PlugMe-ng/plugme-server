@@ -11,6 +11,31 @@ import helpers from '../helpers';
 import models from '../models';
 
 const { Op } = models.Sequelize;
+
+const contentAssociations = {
+  model: models.content,
+  attributes: ['id'],
+  as: 'contents',
+  include: [{
+    model: models.User,
+    as: 'likers',
+    attributes: ['id'],
+    through: {
+      attributes: []
+    }
+  }, {
+    model: models.User,
+    as: 'viewers',
+    attributes: ['id'],
+    through: {
+      attributes: []
+    }
+  }, {
+    model: models.comment,
+    attributes: ['id']
+  }]
+};
+
 /**
 * Users controller class
 * @class Users
@@ -45,24 +70,17 @@ export default class Users {
       const user = await models.User.findOne({
         where: { username: req.params.username.toLowerCase() },
         attributes: { exclude: ['password'] },
+        order: [[{ model: models.content, as: 'contents' }, 'createdAt', 'DESC']],
         include: [{
           model: models.User,
           as: 'fans',
+          include: [contentAssociations],
           attributes: {
             exclude: ['password'],
           },
           through: {
             attributes: []
           },
-        }, {
-          model: models.User,
-          as: 'fansOf',
-          attributes: {
-            exclude: ['password'],
-          },
-          through: {
-            attributes: []
-          }
         }, {
           model: models.content,
           as: 'contents',
@@ -81,16 +99,29 @@ export default class Users {
               attributes: []
             }
           }, {
-            model: models.comment
+            model: models.comment,
+            attributes: ['id']
+          }, {
+            model: models.minorTag,
+            attributes: ['id', 'title'],
+            as: 'tags',
+            through: {
+              attributes: []
+            }
           }]
         }]
       });
       if (!user) {
         throw new Error('User not found');
       }
-      return res.sendSuccess({
-        ...user.get()
+      const userFans = await user.getFansOf({
+        attributes: { exclude: ['password'] },
+        include: [contentAssociations],
+        joinTableAttributes: []
       });
+      const data = user.get();
+      data.fansOf = userFans;
+      return res.sendSuccess(data);
     } catch (error) {
       return res.sendFailure([error.message]);
     }
