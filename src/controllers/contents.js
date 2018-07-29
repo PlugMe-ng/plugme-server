@@ -15,7 +15,7 @@ export default {
           as: 'author',
           attributes: ['fullName', 'username']
         }, {
-          model: models.minorTag,
+          model: models.tag,
           as: 'tags',
           attributes: ['title'],
           through: {
@@ -49,7 +49,7 @@ export default {
         }, {
           model: models.User,
           as: 'author',
-          attributes: ['fullName']
+          attributes: ['fullName', 'username', 'id']
         }, {
           model: models.User,
           as: 'viewers',
@@ -65,7 +65,7 @@ export default {
             attributes: []
           }
         }, {
-          model: models.minorTag,
+          model: models.tag,
           attributes: ['id', 'title'],
           as: 'tags',
           through: {
@@ -131,7 +131,7 @@ export default {
               attributes: ['id', 'username', 'fullName']
             }]
           }, {
-            model: models.minorTag,
+            model: models.tag,
             as: 'tags',
             attributes: ['id', 'title'],
             through: {

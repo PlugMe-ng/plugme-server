@@ -26,7 +26,7 @@ module.exports = (sequelize, DataTypes) => {
   }, {});
   content.associate = (models) => {
     content.belongsTo(models.User, { as: 'author', foreignKey: 'authorId' });
-    content.belongsToMany(models.minorTag, {
+    content.belongsToMany(models.tag, {
       through: 'contentTags',
       as: 'tags',
       foreignKey: 'contentId',

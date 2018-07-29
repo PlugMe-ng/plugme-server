@@ -1,7 +1,7 @@
 import capitalize from 'capitalize';
 
 module.exports = (sequelize, DataTypes) => {
-  const minorTag = sequelize.define('minorTag', {
+  const tag = sequelize.define('tag', {
     id: {
       primaryKey: true,
       type: DataTypes.UUID,
@@ -19,18 +19,24 @@ module.exports = (sequelize, DataTypes) => {
         return capitalize.words(title);
       },
     },
-  }, {});
-  minorTag.associate = (models) => {
-    minorTag.belongsTo(models.majorTag, {
+  }, {
+    tableName: 'tags'
+  });
+  tag.associate = (models) => {
+    tag.belongsTo(models.tag, {
       foreignKey: 'categoryId',
       as: 'category'
     });
-    minorTag.belongsToMany(models.content, {
+    tag.hasMany(models.tag, {
+      as: 'minorTags',
+      foreignKey: 'categoryId'
+    });
+    tag.belongsToMany(models.content, {
       through: 'contentTags',
       as: 'contents',
       foreignKey: 'tagId',
       otherKey: 'contentId'
     });
   };
-  return minorTag;
+  return tag;
 };
