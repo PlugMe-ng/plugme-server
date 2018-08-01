@@ -127,6 +127,12 @@ module.exports = (sequelize, DataTypes) => {
     });
 
     User.hasMany(models.comment);
+    User.belongsToMany(models.tag, {
+      as: 'interestTags',
+      through: 'users_tags_interest',
+      foreignKey: 'userId',
+      otherKey: 'tagId'
+    });
   };
 
   return User;

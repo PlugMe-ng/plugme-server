@@ -37,6 +37,12 @@ module.exports = (sequelize, DataTypes) => {
       foreignKey: 'tagId',
       otherKey: 'contentId'
     });
+    tag.belongsToMany(models.User, {
+      through: 'users_tags_interest',
+      as: 'interestedUsers',
+      foreignKey: 'tagId',
+      otherKey: 'userId'
+    });
   };
   return tag;
 };

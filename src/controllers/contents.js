@@ -1,8 +1,93 @@
 import models from '../models';
 import helpers from '../helpers';
 
-export default {
-  createContent: async (req, res) => {
+const contentAssociations = [{
+  model: models.comment,
+  attributes: ['id', 'UserId']
+}, {
+  model: models.User,
+  as: 'author',
+  attributes: ['fullName', 'username', 'id']
+}, {
+  model: models.User,
+  as: 'viewers',
+  attributes: ['id'],
+  through: {
+    attributes: []
+  }
+}, {
+  model: models.User,
+  as: 'likers',
+  attributes: ['id'],
+  through: {
+    attributes: []
+  }
+}, {
+  model: models.tag,
+  attributes: ['id', 'title'],
+  as: 'tags',
+  through: {
+    attributes: []
+  }
+}];
+
+/**
+ * @class ContentsController
+ */
+class ContentsController {
+  /**
+   * Gets the list of contents based on user's interest tags
+   *
+   * @param {Object} req
+   * @param {Object} res
+   *
+   * @returns {void}
+   * @memberOf ContentsController
+   */
+  getUserGallery = async (req, res) => {
+    // const { limit, offset } = req.meta.pagination;
+    // const { attribute, order } = req.meta.sort;
+    const { userObj: user } = req;
+
+    try {
+      const tags = await user.getInterestTags({
+        joinTableAttributes: [],
+        order: [[{ model: models.content, as: 'contents' }, 'createdAt', 'DESC']],
+        include: [{
+          model: models.content,
+          as: 'contents',
+          include: contentAssociations,
+          through: {
+            attributes: []
+          }
+        }]
+      });
+
+      let contents = [];
+      tags.forEach((tag) => {
+        contents = [...contents, ...tag.contents];
+      });
+
+      // remove duplicates
+      contents = contents.filter((content, index, self) =>
+        self.map(obj => obj.id).indexOf(content.id) === index);
+
+      return res.sendSuccess(contents);
+    } catch (error) {
+      return res.sendFailure([error.message]);
+    }
+  }
+
+  /**
+   * Creates a new content
+   *
+   * @param {Object} req
+   * @param {Object} res
+   *
+   * @returns {void}
+   * @memberOf ContentsController
+   */
+  createContent = async (req, res) => {
     let content;
     try {
       const { userObj } = req;
@@ -32,46 +117,31 @@ export default {
       }
       return res.sendFailure([error.message]);
     }
-  },
+  }
 
-  get: async (req, res) => {
+  /**
+   * Gets all contents
+   *
+   * @param {Object} req
+   * @param {Object} res
+   *
+   * @returns {void}
+   * @memberOf ContentsController
+   */
+  get = async (req, res) => {
     const { limit, offset } = req.meta.pagination;
     const { attribute, order } = req.meta.sort;
+
+    // if (req.userObj) {
+    //   return this.getUserGallery(req, res);
+    // }
     try {
       const dbResult = await models.content.findAndCountAll();
       const contents = await models.content.findAll({
         limit,
         offset,
         order: [[attribute, order]],
-        include: [{
-          model: models.comment,
-          attributes: ['id']
-        }, {
-          model: models.User,
-          as: 'author',
-          attributes: ['fullName', 'username', 'id']
-        }, {
-          model: models.User,
-          as: 'viewers',
-          attributes: ['id'],
-          through: {
-            attributes: []
-          }
-        }, {
-          model: models.User,
-          as: 'likers',
-          attributes: ['id'],
-          through: {
-            attributes: []
-          }
-        }, {
-          model: models.tag,
-          attributes: ['id', 'title'],
-          as: 'tags',
-          through: {
-            attributes: []
-          }
-        }]
+        include: contentAssociations
       });
       if (contents) {
         const pagination = helpers.Misc.generatePaginationMeta(
@@ -86,9 +156,18 @@ export default {
     } catch (error) {
       return res.sendFailure([error.message]);
     }
-  },
+  }
 
-  getContent: async (req, res) => {
+  /**
+   * Gets a single content
+   *
+   * @param {Object} req
+   * @param {Object} res
+   *
+   * @returns {void}
+   * @memberOf ContentsController
+   */
+  getContent = async (req, res) => {
     const { contentId } = req.params;
     try {
       const { userObj } = req;
@@ -147,9 +226,18 @@ export default {
     } catch (error) {
       return res.sendFailure([error.message]);
     }
-  },
+  }
 
-  likeContent: async (req, res) => {
+  /**
+   * Handles content liking action
+   *
+   * @param {Object} req
+   * @param {Object} res
+   *
+   * @returns {void}
+   * @memberOf ContentsController
+   */
+  likeContent = async (req, res) => {
     try {
       const { userObj, content } = req;
       if (await content.hasLiker(userObj)) {
@@ -165,9 +253,18 @@ export default {
     } catch (error) {
       return res.sendFailure([error.message]);
     }
-  },
+  }
 
-  flagContent: async (req, res) => {
+  /**
+   * Handles content flagging action
+   *
+   * @param {Object} req
+   * @param {Object} res
+   *
+   * @returns {void}
+   * @memberOf ContentsController
+   */
+  flagContent = async (req, res) => {
     const { content, userObj } = req;
     try {
       await content.addFlagger(userObj, {
@@ -181,9 +278,18 @@ export default {
     } catch (error) {
       return res.sendFailure([error.message]);
     }
-  },
+  }
 
-  deleteContent: async (req, res) => {
+  /**
+   * Handles content deletion action
+   *
+   * @param {Object} req
+   * @param {Object} res
+   *
+   * @returns {void}
+   * @memberOf ContentsController
+   */
+  deleteContent = async (req, res) => {
     const { content, user } = req;
     try {
       // TODO: allow an admin to delete a content here
@@ -197,9 +303,18 @@ export default {
     } catch (error) {
       return res.sendFailure([error.message]);
     }
-  },
+  }
 
-  addComment: async (req, res) => {
+  /**
+   * Handles adding comment to a content
+   *
+   * @param {Object} req
+   * @param {Object} res
+   *
+   * @returns {void}
+   * @memberOf ContentsController
+   */
+  addComment = async (req, res) => {
     const { userObj, content } = req;
     try {
       const comment = await models.comment.create(req.body);
@@ -209,9 +324,18 @@ export default {
     } catch (error) {
       return res.sendFailure([error.message]);
     }
-  },
+  }
 
-  deleteComment: async (req, res) => {
+  /**
+   * Handles comment deletion
+   *
+   * @param {Object} req
+   * @param {Object} res
+   *
+   * @returns {void}
+   * @memberOf ContentsController
+   */
+  deleteComment = async (req, res) => {
     const { commentId } = req.params;
     try {
       const comment = await models.comment.findById(commentId);
@@ -229,4 +353,6 @@ export default {
       return res.sendFailure([error.message]);
     }
   }
-};
+}
+
+export default new ContentsController();

@@ -65,7 +65,7 @@ const userAssociations = [{
     }
   }, {
     model: models.comment,
-    attributes: ['id']
+    attributes: ['id', 'UserId']
   }, {
     model: models.tag,
     attributes: ['id', 'title'],
