@@ -11,50 +11,52 @@
 import { Router } from 'express';
 
 import Auth from '../controllers/Auth';
-import middleware from '../middleware';
+import validate from '../middleware/validations';
+
+const { auth: validations } = validate;
 
 const authController = new Auth();
 const routes = new Router();
 
 routes.post(
   '/signin',
-  middleware.validate.signinUser,
+  validations.signinUser,
   authController.signin
 );
 
 routes.post(
   '/signup',
-  middleware.validate.signupUser,
+  validations.signupUser,
   authController.signup
 );
 
 routes.post(
   '/social',
-  middleware.validate.tokenSignIn,
+  validations.tokenSignIn,
   authController.tokenAuth
 );
 
 routes.put(
   '/verify-email',
-  middleware.validate.emailVerification,
+  validations.emailVerification,
   authController.emailVerification
 );
 
 routes.post(
   '/verify-email',
-  middleware.validate.emailAuthAction,
+  validations.emailAuthAction,
   authController.requestEmailVerification
 );
 
 routes.post(
   '/reset-password',
-  middleware.validate.emailAuthAction,
+  validations.emailAuthAction,
   authController.requestPasswordReset
 );
 
 routes.put(
   '/reset-password',
-  middleware.validate.passwordReset,
+  validations.passwordReset,
   authController.passwordReset
 );
 

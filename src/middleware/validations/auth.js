@@ -40,7 +40,7 @@ const passwordResetRules = {
 * Middleware for validations
 * @class Validate
 */
-export default class Validate {
+class Validate {
   /**
   * Validate sign in user data
   * @param {object} req express request object
@@ -144,3 +144,5 @@ export default class Validate {
     validation.passes(() => next());
   }
 }
+
+export default new Validate();
