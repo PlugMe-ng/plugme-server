@@ -1,3 +1,5 @@
+import uuid from 'uuid/v4';
+
 import models from '../models';
 import helpers from '../helpers';
 
@@ -10,18 +12,21 @@ const contentAssociations = [{
   attributes: ['fullName', 'username', 'id']
 }, {
   model: models.User,
-  as: 'viewers',
+  as: 'likers',
   attributes: ['id'],
   through: {
     attributes: []
   }
 }, {
   model: models.User,
-  as: 'likers',
+  as: 'viewers',
   attributes: ['id'],
   through: {
     attributes: []
   }
+}, {
+  model: models.view,
+  attributes: ['id'],
 }, {
   model: models.tag,
   attributes: ['id', 'title'],
@@ -30,6 +35,32 @@ const contentAssociations = [{
     attributes: []
   }
 }];
+
+const addViewEntry = async (user, contentId) => {
+  const userLastView = await models.view.findOne({
+    order: [['createdAt', 'DESC']],
+    where: {
+      userId: user.id,
+      contentId
+    }
+  });
+  if (!userLastView) {
+    await user.addViewedContent(contentId, {
+      through: {
+        id: uuid()
+      }
+    });
+    return;
+  }
+  const midnight = new Date().setHours(0, 0, 0);
+  if (midnight > new Date(userLastView.createdAt).getTime()) {
+    await models.view.create({
+      userId: user.id,
+      contentId,
+      id: uuid()
+    });
+  }
+};
 
 /**
  * @class ContentsController
@@ -137,22 +168,25 @@ class ContentsController {
     // }
     try {
       const dbResult = await models.content.findAndCountAll();
-      const contents = await models.content.findAll({
+      let contents = await models.content.findAll({
         limit,
         offset,
         order: [[attribute, order]],
         include: contentAssociations
       });
-      if (contents) {
-        const pagination = helpers.Misc.generatePaginationMeta(
-          req,
-          dbResult,
-          limit,
-          offset
-        );
-        return res.sendSuccess({ contents }, 200, { pagination });
-      }
-      throw new Error('Could not retrieve content from the db');
+      contents = contents.map((content) => {
+        content = content.get({ plain: true });
+        content.totalViews = content.views.length;
+        delete content.views;
+        return content;
+      });
+      const pagination = helpers.Misc.generatePaginationMeta(
+        req,
+        dbResult,
+        limit,
+        offset
+      );
+      return res.sendSuccess({ contents }, 200, { pagination });
     } catch (error) {
       return res.sendFailure([error.message]);
     }
@@ -172,9 +206,9 @@ class ContentsController {
     try {
       const { userObj } = req;
       if (userObj) {
-        await userObj.addViewedContent(contentId);
+        await addViewEntry(userObj, contentId);
       }
-      const content = await models.content.findById(contentId, {
+      let content = await models.content.findById(contentId, {
         order: [[models.comment, 'createdAt', 'ASC']],
         include: [
           {
@@ -196,6 +230,9 @@ class ContentsController {
             through: {
               attributes: []
             }
+          }, {
+            model: models.view,
+            attributes: ['id'],
           }, {
             model: models.User,
             as: 'viewers',
@@ -222,6 +259,9 @@ class ContentsController {
       if (!content) {
         throw new Error('Specified content does not exist');
       }
+      content = content.get({ plain: true });
+      content.totalViews = content.views.length;
+      delete content.views;
       return res.sendSuccess(content);
     } catch (error) {
       return res.sendFailure([error.message]);

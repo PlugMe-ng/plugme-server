@@ -24,12 +24,8 @@ const contentAssociations = {
       attributes: []
     }
   }, {
-    model: models.User,
-    as: 'viewers',
+    model: models.view,
     attributes: ['id'],
-    through: {
-      attributes: []
-    }
   }, {
     model: models.comment,
     attributes: ['id']
@@ -57,6 +53,9 @@ const userAssociations = [{
       attributes: []
     }
   }, {
+    model: models.view,
+    attributes: ['id'],
+  }, {
     model: models.User,
     as: 'viewers',
     attributes: ['id'],
@@ -82,7 +81,7 @@ const getUserCummulativeData = (user) => {
   let totalContentComments = 0;
   user.contents.forEach((content) => {
     totalContentLikes += content.likers.length;
-    totalContentViews += content.viewers.length;
+    totalContentViews += content.views.length;
     totalContentComments += content.comments.length;
   });
   delete user.contents;
@@ -145,7 +144,9 @@ export default class Users {
 
       user.contents.forEach((content) => {
         user.totalLikes += content.likers.length;
-        user.totalViews += content.viewers.length;
+        user.totalViews += content.views.length;
+        content.totalViews = content.views.length;
+        delete content.views;
       });
 
       user.fans.forEach(getUserCummulativeData);

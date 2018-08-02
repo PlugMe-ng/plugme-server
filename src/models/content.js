@@ -39,7 +39,7 @@ module.exports = (sequelize, DataTypes) => {
       otherKey: 'userId'
     });
     content.belongsToMany(models.User, {
-      through: 'contents_users_views',
+      through: models.view,
       as: 'viewers',
       foreignKey: 'contentId',
       otherKey: 'userId'
@@ -50,6 +50,7 @@ module.exports = (sequelize, DataTypes) => {
       foreignKey: 'contentId',
       otherKey: 'userId'
     });
+    content.hasMany(models.view);
     content.hasMany(models.comment);
   };
   return content;
