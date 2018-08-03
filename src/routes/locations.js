@@ -10,8 +10,6 @@ import controllers from '../controllers';
 
 const routes = new Router();
 
-routes.get('/', controllers.tags.getTags);
-
-routes.get('/minor', controllers.tags.getMinorTags);
+routes.get('/', controllers.locations.getAllLocations);
 
 export default routes;

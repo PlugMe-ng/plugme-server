@@ -133,6 +133,9 @@ module.exports = (sequelize, DataTypes) => {
       foreignKey: 'userId',
       otherKey: 'tagId'
     });
+    User.hasMany(models.opportunity, {
+      foreignKey: 'pluggerId'
+    });
   };
 
   return User;

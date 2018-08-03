@@ -11,10 +11,14 @@ import Auth from './Auth';
 import Users from './Users';
 import contents from './contents';
 import tags from './tags';
+import opportunities from './opportunities';
+import locations from './locations';
 
 export default {
   Auth,
   Users,
   contents,
-  tags
+  tags,
+  opportunities,
+  locations
 };
