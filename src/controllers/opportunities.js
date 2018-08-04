@@ -1,3 +1,5 @@
+import { Op } from 'sequelize';
+
 import models from '../models';
 import helpers from '../helpers';
 
@@ -71,15 +73,23 @@ class Controller {
 
     try {
       const opportunities = await models.opportunity.findAndCount({
+        distinct: true,
         limit,
         offset,
         order: [[attribute, order]],
+        ...(filter.budget && { where: { budget: { [Op.lte]: filter.budget } } }),
         include: [{
           model: models.location,
-          attributes: ['id', 'name'],
+          // attributes: ['id', 'name'],
+          ...(filter.location && {
+            where: { name: { [Op.iLike]: filter.location } }
+          }),
           include: [{
             model: models.country,
-            attributes: ['id', 'name']
+            // attributes: ['id', 'name'],
+            ...(filter.country && {
+              where: { name: { [Op.iLike]: filter.country } }
+            }),
           }]
         }, {
           model: models.tag,
