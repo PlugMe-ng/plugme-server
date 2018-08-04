@@ -30,4 +30,6 @@ routes.get(
   controller.get
 );
 
+routes.get('/:opportunityId', controller.getOpportunityById);
+
 export default routes;

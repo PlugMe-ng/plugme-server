@@ -103,6 +103,48 @@ class Controller {
       return res.sendFailure([error.message]);
     }
   }
+
+  /**
+   * @method getOpportunityById
+   * @desc gets an opportunity with the specified id
+   *
+   * @param { object } req request
+   * @param { object } res response
+   *
+   * @returns { object } response
+   */
+  getOpportunityById = async (req, res) => {
+    const { opportunityId } = req.params;
+    try {
+      const opportunity = await models.opportunity.findById(opportunityId, {
+        include: [{
+          model: models.User,
+          as: 'plugger',
+          attributes: ['id', 'username', 'fullName']
+        }, {
+          model: models.tag,
+          attributes: ['id', 'title'],
+          as: 'tags',
+          through: {
+            attributes: []
+          }
+        }, {
+          model: models.location,
+          attributes: ['id', 'name'],
+          include: [{
+            model: models.country,
+            attributes: ['id', 'name']
+          }]
+        }]
+      });
+      if (!opportunity) {
+        throw new Error('Specified opportunity does not exist');
+      }
+      return res.sendSuccess(opportunity);
+    } catch (error) {
+      return res.sendFailure([error.message]);
+    }
+  }
 }
 
 export default new Controller();
