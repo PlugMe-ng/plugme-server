@@ -82,6 +82,22 @@ class Controller {
             attributes: ['id', 'name']
           }]
         }, {
+          model: models.tag,
+          as: 'tags',
+          attributes: ['id', 'title'],
+          ...(filter.tags && {
+            where: {
+              title: {
+                [Op.iLike]: {
+                  [Op.any]: filter.tags.split(',').map(tag => tag.trim())
+                }
+              }
+            }
+          }),
+          through: {
+            attributes: []
+          }
+        }, {
           model: models.User,
           attributes: ['id', 'username', 'fullName'],
           as: 'plugger',
