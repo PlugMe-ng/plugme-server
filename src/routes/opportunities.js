@@ -10,6 +10,7 @@ import controllers from '../controllers';
 import middleware from '../middleware';
 
 const { validations: { opportunities: validation } } = middleware;
+const { opportunities: controller } = controllers;
 
 const routes = new Router();
 
@@ -18,7 +19,15 @@ routes.post(
   middleware.auth.authenticateUser,
   validation.createOpportunity,
   validation.verifyTags,
-  controllers.opportunities.createOpportunity
+  controller.createOpportunity
+);
+
+routes.get(
+  '/',
+  middleware.pagination,
+  middleware.sort,
+  middleware.filter,
+  controller.get
 );
 
 export default routes;

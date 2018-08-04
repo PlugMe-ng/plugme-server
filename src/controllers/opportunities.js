@@ -1,4 +1,5 @@
 import models from '../models';
+import helpers from '../helpers';
 
 /**
  * @class Controller
@@ -50,6 +51,55 @@ class Controller {
       if (opportunity) {
         await opportunity.destroy();
       }
+      return res.sendFailure([error.message]);
+    }
+  }
+
+  /**
+   * @method get
+   * @desc This method gets an array of users
+   *
+   * @param { object } req request
+   * @param { object } res response
+   *
+   * @returns { object } response
+   */
+  get = async (req, res) => {
+    const { limit, offset } = req.meta.pagination;
+    const { attribute, order } = req.meta.sort;
+    const { where: filter } = req.meta.filter;
+
+    try {
+      const opportunities = await models.opportunity.findAndCount({
+        limit,
+        offset,
+        order: [[attribute, order]],
+        include: [{
+          model: models.location,
+          attributes: ['id', 'name'],
+          include: [{
+            model: models.country,
+            attributes: ['id', 'name']
+          }]
+        }, {
+          model: models.User,
+          attributes: ['id', 'username', 'fullName'],
+          as: 'plugger',
+          ...(filter.plugger && {
+            where: { username: filter.plugger.toLowerCase() }
+          }),
+        }]
+      });
+      const pagination = helpers.Misc.generatePaginationMeta(
+        req,
+        opportunities,
+        limit,
+        offset
+      );
+      return res.sendSuccess({
+        opportunities: opportunities.rows
+      }, 200, { pagination });
+    } catch (error) {
       return res.sendFailure([error.message]);
     }
   }
