@@ -1,4 +1,5 @@
 import { Op } from 'sequelize';
+import isUUID from 'validator/lib/isUUID';
 
 import models from '../models';
 import helpers from '../helpers';
@@ -80,15 +81,25 @@ class Controller {
         ...(filter.budget && { where: { budget: { [Op.lte]: filter.budget } } }),
         include: [{
           model: models.location,
-          // attributes: ['id', 'name'],
           ...(filter.location && {
-            where: { name: { [Op.iLike]: filter.location } }
+            where: {
+              ...(isUUID(filter.location, 4) ? {
+                id: filter.location
+              } : {
+                name: { [Op.iLike]: filter.location },
+              }),
+              }
           }),
           include: [{
             model: models.country,
-            // attributes: ['id', 'name'],
             ...(filter.country && {
-              where: { name: { [Op.iLike]: filter.country } }
+              where: {
+                ...(isUUID(filter.country, 4) ? {
+                  id: filter.country
+                } : {
+                  name: { [Op.iLike]: filter.country },
+                }),
+              }
             }),
           }]
         }, {
