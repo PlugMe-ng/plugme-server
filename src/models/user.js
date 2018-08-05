@@ -142,6 +142,12 @@ module.exports = (sequelize, DataTypes) => {
     User.hasMany(models.opportunity, {
       foreignKey: 'pluggerId'
     });
+    User.belongsToMany(models.opportunity, {
+      through: 'users_opportunities_applications',
+      as: 'appliedOpportunities',
+      foreignKey: 'userId',
+      otherKey: 'opportunityId'
+    });
   };
 
   return User;

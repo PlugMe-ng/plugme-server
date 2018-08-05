@@ -31,6 +31,11 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.DATE,
       allowNull: false
     },
+    status: {
+      type: DataTypes.ENUM,
+      values: ['available', 'pending', 'done'],
+      defaultValue: 'available'
+    }
   }, {});
 
   opportunity.associate = (models) => {
@@ -44,6 +49,12 @@ module.exports = (sequelize, DataTypes) => {
       as: 'tags',
       foreignKey: 'opportunityId',
       otherKey: 'tagId'
+    });
+    opportunity.belongsToMany(models.User, {
+      through: 'users_opportunities_applications',
+      as: 'plugEntries',
+      foreignKey: 'opportunityId',
+      otherKey: 'userId'
     });
   };
   return opportunity;
