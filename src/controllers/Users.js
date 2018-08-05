@@ -43,6 +43,20 @@ const userAssociations = [{
     attributes: []
   },
 }, {
+  model: models.tag,
+  as: 'interests',
+  attributes: ['id', 'title'],
+  through: {
+    attributes: []
+  }
+}, {
+  model: models.tag,
+  as: 'skills',
+  attributes: ['id', 'title'],
+  through: {
+    attributes: []
+  }
+}, {
   model: models.content,
   as: 'contents',
   include: [{

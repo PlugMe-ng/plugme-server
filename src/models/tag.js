@@ -43,6 +43,12 @@ module.exports = (sequelize, DataTypes) => {
       foreignKey: 'tagId',
       otherKey: 'userId'
     });
+    tag.belongsToMany(models.User, {
+      as: 'skilledUsers',
+      through: 'users_tags_skills',
+      foreignKey: 'tagId',
+      otherKey: 'userId'
+    });
     tag.belongsToMany(models.opportunity, {
       through: 'opportunities_tags',
       as: 'opportunities',

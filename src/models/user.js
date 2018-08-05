@@ -128,8 +128,14 @@ module.exports = (sequelize, DataTypes) => {
 
     User.hasMany(models.comment);
     User.belongsToMany(models.tag, {
-      as: 'interestTags',
+      as: 'interests',
       through: 'users_tags_interest',
+      foreignKey: 'userId',
+      otherKey: 'tagId'
+    });
+    User.belongsToMany(models.tag, {
+      as: 'skills',
+      through: 'users_tags_skills',
       foreignKey: 'userId',
       otherKey: 'tagId'
     });
