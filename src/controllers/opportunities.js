@@ -81,26 +81,20 @@ class Controller {
         ...(filter.budget && { where: { budget: { [Op.lte]: filter.budget } } }),
         include: [{
           model: models.location,
-          ...(filter.location && {
+          attributes: ['id', 'name', 'countryId'],
+          ...((filter.locationId || filter.countryId) && {
             where: {
-              ...(isUUID(filter.location, 4) ? {
-                id: filter.location
-              } : {
-                name: { [Op.iLike]: filter.location },
+              ...(filter.locationId && {
+                id: filter.locationId
               }),
+              ...(filter.countryId && {
+                countryId: filter.countryId
+              })
             }
           }),
           include: [{
             model: models.country,
-            ...(filter.country && {
-              where: {
-                ...(isUUID(filter.country, 4) ? {
-                  id: filter.country
-                } : {
-                  name: { [Op.iLike]: filter.country },
-                }),
-              }
-            }),
+            attributes: ['id', 'name'],
           }]
         }, {
           model: models.tag,
