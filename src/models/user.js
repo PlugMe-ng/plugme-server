@@ -113,7 +113,7 @@ module.exports = (sequelize, DataTypes) => {
     });
 
     User.belongsToMany(models.content, {
-      through: models.view,
+      through: 'contents_users_views',
       as: 'viewedContents',
       foreignKey: 'userId',
       otherKey: 'contentId'

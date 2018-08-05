@@ -88,7 +88,7 @@ class Controller {
               } : {
                 name: { [Op.iLike]: filter.location },
               }),
-              }
+            }
           }),
           include: [{
             model: models.country,

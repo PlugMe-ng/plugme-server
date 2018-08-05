@@ -14,7 +14,7 @@ const { Op } = models.Sequelize;
 
 const contentAssociations = {
   model: models.content,
-  attributes: ['id'],
+  attributes: ['id', 'totalViews'],
   as: 'contents',
   include: [{
     model: models.User,
@@ -23,9 +23,6 @@ const contentAssociations = {
     through: {
       attributes: []
     }
-  }, {
-    model: models.view,
-    attributes: ['id'],
   }, {
     model: models.comment,
     attributes: ['id']
@@ -67,9 +64,6 @@ const userAssociations = [{
       attributes: []
     }
   }, {
-    model: models.view,
-    attributes: ['id'],
-  }, {
     model: models.User,
     as: 'viewers',
     attributes: ['id'],
@@ -95,7 +89,7 @@ const getUserCummulativeData = (user) => {
   let totalContentComments = 0;
   user.contents.forEach((content) => {
     totalContentLikes += content.likers.length;
-    totalContentViews += content.views.length;
+    totalContentViews += content.totalViews;
     totalContentComments += content.comments.length;
   });
   delete user.contents;
@@ -158,9 +152,7 @@ export default class Users {
 
       user.contents.forEach((content) => {
         user.totalLikes += content.likers.length;
-        user.totalViews += content.views.length;
-        content.totalViews = content.views.length;
-        delete content.views;
+        user.totalViews += content.totalViews;
       });
 
       user.fans.forEach(getUserCummulativeData);

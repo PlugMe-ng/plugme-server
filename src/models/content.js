@@ -22,6 +22,10 @@ module.exports = (sequelize, DataTypes) => {
     mediaType: {
       type: DataTypes.ENUM,
       values: ['image', 'video'],
+    },
+    totalViews: {
+      type: DataTypes.INTEGER,
+      defaultValue: 0
     }
   }, {});
   content.associate = (models) => {
@@ -39,7 +43,7 @@ module.exports = (sequelize, DataTypes) => {
       otherKey: 'userId'
     });
     content.belongsToMany(models.User, {
-      through: models.view,
+      through: 'contents_users_views',
       as: 'viewers',
       foreignKey: 'contentId',
       otherKey: 'userId'
@@ -50,7 +54,6 @@ module.exports = (sequelize, DataTypes) => {
       foreignKey: 'contentId',
       otherKey: 'userId'
     });
-    content.hasMany(models.view);
     content.hasMany(models.comment);
   };
   return content;
