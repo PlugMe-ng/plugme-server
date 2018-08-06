@@ -33,9 +33,11 @@ routes.get(
 routes.get('/:opportunityId', controller.getOpportunityById);
 
 routes.post(
-  '/:opportunityId/apply',
+  '/:opportunityId/applications',
   middleware.auth.authenticateUser,
   controller.opportunityApplication
 );
+
+routes.get('/:opportunityId/applications', controller.getOpportunityApplications);
 
 export default routes;

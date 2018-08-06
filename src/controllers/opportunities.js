@@ -265,6 +265,57 @@ class Controller {
       throw new Error('You can only get plugged to opportunities that fit your indicated skill set');
     }
   }
+
+  /**
+   * @method getOpportunityPlugs
+   * @desc Gets all users that have applied for an opportunity
+   *
+   * @param {Object} req Express Request Object
+   * @param {Object} res Express Response Object
+   *
+   * @returns {void}
+   */
+  getOpportunityApplications = async (req, res) => {
+    const { opportunityId } = req.params;
+    try {
+      const opportunity = await models.opportunity.findById(opportunityId, {
+        attributes: [],
+        include: [{
+          model: models.User,
+          as: 'plugEntries',
+          through: { attributes: [] },
+          attributes: ['id', 'username', 'fullName'],
+          include: [{
+            model: models.content,
+            as: 'contents',
+            attributes: ['totalViews'],
+            include: [{
+              model: models.User,
+              as: 'likers',
+              through: { attributes: [] },
+              attributes: ['id']
+            }]
+          }]
+        }]
+      });
+      if (!opportunity) {
+        throw new Error('Specified opportunity does not exist');
+      }
+      const { plugEntries: users } = opportunity.get({ plain: true });
+      users.forEach((user) => {
+        user.totalViews = 0;
+        user.totalLikes = 0;
+        user.contents.forEach((content) => {
+          user.totalViews += content.totalViews;
+          user.totalLikes += content.likers.length;
+        });
+        delete user.contents;
+      });
+      return res.sendSuccess(users);
+    } catch (error) {
+      return res.sendFailure([error.message]);
+    }
+  }
 }
 
 export default new Controller();
