@@ -40,4 +40,10 @@ routes.post(
 
 routes.get('/:opportunityId/applications', controller.getOpportunityApplications);
 
+routes.post(
+  '/:opportunityId/applications/:userId',
+  middleware.auth.authenticateUser,
+  controller.setOpportunityAchiever
+);
+
 export default routes;

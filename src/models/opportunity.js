@@ -56,6 +56,10 @@ module.exports = (sequelize, DataTypes) => {
       foreignKey: 'opportunityId',
       otherKey: 'userId'
     });
+    opportunity.belongsTo(models.User, {
+      as: 'achiever',
+      foreignKey: 'achieverId'
+    });
   };
   return opportunity;
 };

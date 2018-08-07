@@ -125,6 +125,13 @@ class Controller {
           ...(filter.plugger && {
             where: { username: filter.plugger.toLowerCase() }
           }),
+        }, {
+          model: models.User,
+          attributes: ['id'],
+          as: 'achiever',
+          ...(filter.achiever && {
+            where: { username: { [Op.iLike]: filter.achiever } }
+          })
         }]
       });
       const pagination = helpers.Misc.generatePaginationMeta(
@@ -221,7 +228,7 @@ class Controller {
       }
       const { plugEntries, ...data } = opportunity.get({ plain: true });
       return res.sendSuccess({
-        message: 'Application successful'
+        message: 'Opportunity plugged successfully'
       }, 200, { ...data });
     } catch (error) {
       return res.sendFailure([error.message]);
@@ -312,6 +319,45 @@ class Controller {
         delete user.contents;
       });
       return res.sendSuccess(users);
+    } catch (error) {
+      return res.sendFailure([error.message]);
+    }
+  }
+
+  /**
+   * @method setOpportunityAchiever
+   * @desc Plugs an achiever for an opportunity
+   *
+   * @param {Object} req Express Request Object
+   * @param {Object} res Express Response Object
+   *
+   * @returns {void}
+   */
+  setOpportunityAchiever = async (req, res) => {
+    const { opportunityId, userId } = req.params;
+    const { userObj: plugger } = req;
+
+    try {
+      const opportunity = await models.opportunity.findById(opportunityId);
+      if (!opportunity) {
+        throw new Error('Specified opportunity does not exist');
+      }
+      if (opportunity.pluggerId !== plugger.id) {
+        throw new Error('Specified opportunity was uploaded by another user');
+      }
+      if (opportunity.achieverId) {
+        throw new Error('This opportunity already has an achiever');
+      }
+      if (!(await opportunity.hasPlugEntry(userId))) {
+        throw new Error('Specified user did not apply for this opportuntity');
+      }
+      await opportunity.update({
+        status: 'pending',
+        achieverId: userId
+      });
+      return res.sendSuccess({
+        message: 'Achiever plugged successfully'
+      });
     } catch (error) {
       return res.sendFailure([error.message]);
     }

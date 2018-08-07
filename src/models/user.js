@@ -148,6 +148,10 @@ module.exports = (sequelize, DataTypes) => {
       foreignKey: 'userId',
       otherKey: 'opportunityId'
     });
+    User.hasMany(models.opportunity, {
+      as: 'achievements',
+      foreignKey: 'achieverId'
+    });
   };
 
   return User;
