@@ -27,9 +27,9 @@ routes.post(
 
 routes.get(
   '/',
-  middleware.auth.optionalUserAuthentication,
   middleware.pagination,
   middleware.sort,
+  middleware.filter,
   controllers.contents.get
 );
 

@@ -17,7 +17,7 @@ export default (req, res, next) => {
   req.meta = req.meta || {};
   req.meta.sort = req.meta.sort || {};
 
-  const attribute = req.query['@sort'] || 'updatedAt';
+  const attribute = req.query['@sort'] || 'createdAt';
   const order = req.query['@order'] || 'DESC';
 
   req.meta.sort = { ...req.meta.sort, attribute, order };

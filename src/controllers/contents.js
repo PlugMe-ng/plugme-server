@@ -1,37 +1,7 @@
-import uuid from 'uuid/v4';
+import { Op } from 'sequelize';
 
 import models from '../models';
 import helpers from '../helpers';
-
-const contentAssociations = [{
-  model: models.comment,
-  attributes: ['id', 'UserId']
-}, {
-  model: models.User,
-  as: 'author',
-  attributes: ['fullName', 'username', 'id']
-}, {
-  model: models.User,
-  as: 'likers',
-  attributes: ['id'],
-  through: {
-    attributes: []
-  }
-}, {
-  model: models.User,
-  as: 'viewers',
-  attributes: ['id'],
-  through: {
-    attributes: []
-  }
-}, {
-  model: models.tag,
-  attributes: ['id', 'title'],
-  as: 'tags',
-  through: {
-    attributes: []
-  }
-}];
 
 const addViewEntry = async (user, content) => {
   if (!user) {
@@ -60,49 +30,6 @@ const addViewEntry = async (user, content) => {
  * @class ContentsController
  */
 class ContentsController {
-  /**
-   * Gets the list of contents based on user's interest tags
-   *
-   * @param {Object} req
-   * @param {Object} res
-   *
-   * @returns {void}
-   * @memberOf ContentsController
-   */
-  getUserGallery = async (req, res) => {
-    // const { limit, offset } = req.meta.pagination;
-    // const { attribute, order } = req.meta.sort;
-    const { userObj: user } = req;
-
-    try {
-      const tags = await user.getInterestTags({
-        joinTableAttributes: [],
-        order: [[{ model: models.content, as: 'contents' }, 'createdAt', 'DESC']],
-        include: [{
-          model: models.content,
-          as: 'contents',
-          include: contentAssociations,
-          through: {
-            attributes: []
-          }
-        }]
-      });
-
-      let contents = [];
-      tags.forEach((tag) => {
-        contents = [...contents, ...tag.contents];
-      });
-
-      // remove duplicates
-      contents = contents.filter((content, index, self) =>
-        self.map(obj => obj.id).indexOf(content.id) === index);
-
-      return res.sendSuccess(contents);
-    } catch (error) {
-      return res.sendFailure([error.message]);
-    }
-  }
-
   /**
    * Creates a new content
    *
@@ -158,17 +85,55 @@ class ContentsController {
   get = async (req, res) => {
     const { limit, offset } = req.meta.pagination;
     const { attribute, order } = req.meta.sort;
+    const { where: filter } = req.meta.filter;
 
-    // if (req.userObj) {
-    //   return this.getUserGallery(req, res);
-    // }
     try {
       const contents = await models.content.findAndCountAll({
         distinct: true,
         limit,
         offset,
         order: [[attribute, order]],
-        include: contentAssociations
+        include: [{
+          model: models.comment,
+          attributes: ['id', 'UserId']
+        }, {
+          model: models.User,
+          as: 'author',
+          attributes: ['fullName', 'username', 'id'],
+          ...(filter.author && {
+            where: { username: { [Op.iLike]: filter.author } }
+          })
+        }, {
+          model: models.User,
+          as: 'likers',
+          attributes: ['id'],
+          through: {
+            attributes: []
+          }
+        }, {
+          model: models.User,
+          as: 'viewers',
+          attributes: ['id'],
+          through: {
+            attributes: []
+          }
+        }, {
+          model: models.tag,
+          attributes: ['id', 'title'],
+          as: 'tags',
+          through: {
+            attributes: []
+          },
+          ...(filter.tags && {
+            where: {
+              title: {
+                [Op.iLike]: {
+                  [Op.any]: filter.tags.split(',').map(tag => tag.trim())
+                }
+              }
+            }
+          }),
+        }]
       });
       const pagination = helpers.Misc.generatePaginationMeta(
         req,
