@@ -10,10 +10,10 @@ import Validator from 'validatorjs';
 import models from '../../models';
 
 const opportunityUploadRules = {
-  title: 'required|string|max:200',
+  title: 'required|string|max:36',
   locationId: 'required|string',
   positionNeeded: 'required|string|max:90',
-  responsibilities: 'required|string|max:360',
+  responsibilities: 'required|string|max:900',
   professionalDirection: 'required|string|max:200',
   tags: 'array|required|max:3',
   budget: 'required|numeric',
