@@ -26,6 +26,10 @@ module.exports = (sequelize, DataTypes) => {
     totalViews: {
       type: DataTypes.INTEGER,
       defaultValue: 0
+    },
+    totalLikes: {
+      type: DataTypes.INTEGER,
+      defaultValue: 0
     }
   }, {});
   content.associate = (models) => {

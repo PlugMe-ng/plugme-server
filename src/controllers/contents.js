@@ -116,7 +116,9 @@ class ContentsController {
     let content;
     try {
       const { userObj } = req;
-      content = await models.content.create({ ...req.body, totalViews: 0 });
+      content = await models.content.create({
+        ...req.body, totalViews: 0, totalLikes: 0
+      });
       await content.setAuthor(userObj);
       await content.setTags(req.body.tags);
       content = await models.content.findById(content.id, {
@@ -262,11 +264,13 @@ class ContentsController {
       const { userObj, content } = req;
       if (await content.hasLiker(userObj)) {
         await content.removeLiker(userObj);
+        await content.decrement('totalLikes');
         return res.sendSuccess({
           message: 'You have successfully unliked this content'
         });
       }
       await content.addLiker(userObj);
+      await content.increment('totalLikes');
       return res.sendSuccess({
         message: 'You have successfully liked this content'
       });
