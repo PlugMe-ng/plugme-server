@@ -179,6 +179,10 @@ class Controller {
             model: models.country,
             attributes: ['id', 'name']
           }]
+        }, {
+          model: models.User,
+          as: 'achiever',
+          attributes: ['id', 'username', 'fullName']
         }]
       });
       if (!opportunity) {
