@@ -299,11 +299,9 @@ class Controller {
           include: [{
             model: models.content,
             as: 'contents',
-            attributes: ['totalViews'],
+            attributes: ['totalViews', 'totalLikes'],
             include: [{
-              model: models.User,
-              as: 'likers',
-              through: { attributes: [] },
+              model: models.comment,
               attributes: ['id']
             }]
           }]
@@ -316,9 +314,11 @@ class Controller {
       users.forEach((user) => {
         user.totalViews = 0;
         user.totalLikes = 0;
+        user.totalComments = 0;
         user.contents.forEach((content) => {
           user.totalViews += content.totalViews;
-          user.totalLikes += content.likers.length;
+          user.totalLikes += content.totalLikes;
+          user.totalComments += content.comments.length;
         });
         delete user.contents;
       });
