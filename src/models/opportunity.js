@@ -60,6 +60,7 @@ module.exports = (sequelize, DataTypes) => {
       as: 'achiever',
       foreignKey: 'achieverId'
     });
+    opportunity.hasMany(models.review);
   };
   return opportunity;
 };

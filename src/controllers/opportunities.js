@@ -353,7 +353,7 @@ class Controller {
         throw new Error('This opportunity already has an achiever');
       }
       if (!(await opportunity.hasPlugEntry(userId))) {
-        throw new Error('Specified user did not apply for this opportuntity');
+        throw new Error('Specified user did not apply for this opportunity');
       }
       await opportunity.update({
         status: 'pending',
@@ -364,6 +364,88 @@ class Controller {
       });
     } catch (error) {
       return res.sendFailure([error.message]);
+    }
+  }
+
+  /**
+   * @method reviewOpportunity
+   * @desc Handles posting opportunity reviews
+   *
+   * @param {Object} req Express Request Object
+   * @param {Object} res Express Response Object
+   *
+   * @returns {void}
+   */
+  reviewOpportunity = async (req, res) => {
+    const { opportunityId } = req.params;
+    const { userObj } = req;
+
+    try {
+      const opportunity = await models.opportunity.findById(opportunityId, {
+        include: [{
+          model: models.User,
+          as: 'plugger',
+          attributes: ['id']
+        }, {
+          model: models.User,
+          as: 'achiever',
+          attributes: ['id']
+        }, {
+          model: models.review,
+          attributes: ['id'],
+          include: [{ model: models.User, attributes: ['id'] }]
+        }]
+      });
+
+      this.createOpportunityReviewsChecks(opportunity, userObj);
+
+      const review = await models.review.create(req.body);
+      await review.setOpportunity(opportunity.id);
+      await review.setUser(userObj.id);
+
+      await userObj.update({ hasPendingReview: false });
+      const reviewersIds = [...opportunity.reviews.map(r => r.User.id), userObj.id];
+
+      const userWithPendingReview = [opportunity.plugger, opportunity.achiever]
+        .filter(user => !reviewersIds.includes(user.id))[0];
+
+      if (userWithPendingReview) {
+        await userWithPendingReview.update({ hasPendingReview: true });
+      } else {
+        await opportunity.update({ status: 'done' });
+      }
+      return res.sendSuccess({
+        message: 'Review submitted successfully'
+      });
+    } catch (error) {
+      return res.sendFailure([error.message]);
+    }
+  }
+
+  /**
+   * Extracted method to check if a review can be posted by the user
+   * @param {object} opportunity - opportunity
+   * @param {object} user -  user
+   *
+   * @returns {void}
+   * @memberOf Controller
+   */
+  createOpportunityReviewsChecks = (opportunity, user) => {
+    if (!opportunity) {
+      throw new Error('Specified opportunity does not exist');
+    }
+
+    if (!opportunity.achiever) {
+      throw new Error('This opportunity does not have an achiever yet');
+    }
+
+    if (![opportunity.plugger.id, opportunity.achiever.id].includes(user.id)) {
+      throw new Error('Only the plugger or achiever of this opportunity can post review for it');
+    }
+
+    const reviewersIds = opportunity.reviews.map(review => review.User.id);
+    if (reviewersIds.includes(user.id)) {
+      throw new Error('You have already left a review for this opportuntiy');
     }
   }
 }

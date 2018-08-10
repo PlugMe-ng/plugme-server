@@ -68,6 +68,10 @@ module.exports = (sequelize, DataTypes) => {
     fullName: {
       type: DataTypes.STRING,
       allowNull: false,
+    },
+    hasPendingReview: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false
     }
   });
 
@@ -152,6 +156,7 @@ module.exports = (sequelize, DataTypes) => {
       as: 'achievements',
       foreignKey: 'achieverId'
     });
+    User.hasMany(models.review);
   };
 
   return User;

@@ -17,6 +17,7 @@ const routes = new Router();
 routes.post(
   '/',
   middleware.auth.authenticateUser,
+  middleware.check.userHasPendingReview,
   validation.createOpportunity,
   validation.verifyTags,
   controller.createOpportunity
@@ -35,6 +36,7 @@ routes.get('/:opportunityId', controller.getOpportunityById);
 routes.post(
   '/:opportunityId/applications',
   middleware.auth.authenticateUser,
+  middleware.check.userHasPendingReview,
   controller.opportunityApplication
 );
 
@@ -44,6 +46,13 @@ routes.post(
   '/:opportunityId/applications/:userId',
   middleware.auth.authenticateUser,
   controller.setOpportunityAchiever
+);
+
+routes.post(
+  '/:opportunityId/reviews',
+  middleware.auth.authenticateUser,
+  validation.reviewOpportunity,
+  controller.reviewOpportunity,
 );
 
 export default routes;

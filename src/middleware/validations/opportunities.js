@@ -20,6 +20,11 @@ const opportunityUploadRules = {
   deadline: 'required|date'
 };
 
+const opportunityReviewRules = {
+  comment: 'required|string|max:60',
+  rating: 'required|integer|between:1,5'
+};
+
 /**
 * Middleware for validations
 * @class Validate
@@ -73,6 +78,27 @@ class Validate {
       }
     }
     next();
+  }
+
+  /**
+   * Validates opportunity creation data
+   * @param {any} req - express request object
+   * @param {any} res - express response object
+   * @param {any} next - express next object
+   *
+   * @returns {void}
+   * @memberOf Validate
+   */
+  async reviewOpportunity(req, res, next) {
+    const validation = new Validator(req.body, opportunityReviewRules);
+    validation.fails(() => {
+      let errors = [];
+      Object.keys(opportunityReviewRules).forEach((key) => {
+        errors = [...errors, ...validation.errors.get(key)];
+      });
+      return res.sendFailure(errors);
+    });
+    validation.passes(() => next());
   }
 }
 
