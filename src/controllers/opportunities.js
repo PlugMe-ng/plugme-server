@@ -132,6 +132,8 @@ class Controller {
           ...(filter.achiever && {
             where: { username: { [Op.iLike]: filter.achiever } }
           })
+        }, {
+          model: models.review
         }]
       });
       const pagination = helpers.Misc.generatePaginationMeta(
@@ -183,6 +185,8 @@ class Controller {
           model: models.User,
           as: 'achiever',
           attributes: ['id', 'username', 'fullName']
+        }, {
+          model: models.review,
         }]
       });
       if (!opportunity) {
