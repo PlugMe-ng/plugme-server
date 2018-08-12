@@ -47,6 +47,10 @@ class Validate {
       });
       return res.sendFailure(errors);
     });
+    const now = Date.now();
+    if (new Date(req.body.deadline).getTime() < now) {
+      return res.sendFailure([`Invalid deadline - date must be after ${new Date(now).toDateString()}`]);
+    }
     validation.passes(() => next());
   }
 
