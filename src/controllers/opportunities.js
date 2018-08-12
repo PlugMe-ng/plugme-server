@@ -1,8 +1,107 @@
 import { Op } from 'sequelize';
-import isUUID from 'validator/lib/isUUID';
 
 import models from '../models';
 import helpers from '../helpers';
+
+/**
+ * @description Checks that the opportunity being created is not a
+ * duplicate due to network lag
+ *
+ * @param {Object} userObj - user
+ * @param {Object} req - Express request object
+ *
+ * @returns {void}
+ *
+ * @memberOf Controller
+ */
+const networkLagCheck = async (userObj, req) => {
+  const TIME_CHECK_MIN = 10;
+  const MILLISECONDS_TO_MIN = 60000;
+
+  const lastUploadedOpportunity = (await models.opportunity.findAll({
+    attributes: ['createdAt', 'title'],
+    limit: 1,
+    order: [['createdAt', 'DESC']],
+    where: {
+      pluggerId: userObj.id
+    }
+  }))[0];
+  if (!lastUploadedOpportunity) {
+    return;
+  }
+  const diffTimeLastOpportunity = (
+    new Date().getTime()
+    - new Date(lastUploadedOpportunity.createdAt).getTime()) / MILLISECONDS_TO_MIN;
+
+  if (diffTimeLastOpportunity < TIME_CHECK_MIN &&
+    req.body.title === lastUploadedOpportunity.title) {
+    throw new Error('Duplicate opportunity');
+  }
+};
+
+/**
+   * Extracted method to check if a review can be posted by the user
+   * @param {object} opportunity - opportunity
+   * @param {object} user -  user
+   *
+   * @returns {void}
+   * @memberOf Controller
+   */
+const createOpportunityReviewsChecks = (opportunity, user) => {
+  if (!opportunity) {
+    throw new Error('Specified opportunity does not exist');
+  }
+
+  if (!opportunity.achiever) {
+    throw new Error('This opportunity does not have an achiever yet');
+  }
+
+  if (![opportunity.plugger.id, opportunity.achiever.id].includes(user.id)) {
+    throw new Error('Only the plugger or achiever of this opportunity can post review for it');
+  }
+
+  const reviewersIds = opportunity.reviews.map(review => review.User.id);
+  if (reviewersIds.includes(user.id)) {
+    throw new Error('You have already left a review for this opportuntiy');
+  }
+};
+
+/**
+ * @desc Checks if the specified user can apply for the specified opportunity
+ *
+ * @param {Object} opportunity opportunity
+ * @param {Object} user user
+ * @param {Number} maxEntries
+ *
+ * @returns {void}
+ */
+const opportunityApplicationChecks = async (opportunity, user) => {
+  if (!opportunity) {
+    throw new Error('Opportunity with the specified id does not exist');
+  }
+  if (opportunity.pluggerId === user.id) {
+    throw new Error('You cannot apply for an opportunity you created');
+  }
+  if (opportunity.status !== 'available') {
+    throw new Error('This opportunity has passed');
+  }
+  const userSkills = (await user.getSkills({
+    joinTableAttributes: []
+  })).map(skill => skill.id);
+  const opportunityTags = opportunity.tags.map(tag => tag.id);
+
+  let userCanApply = false;
+  for (let i = 0; i < userSkills.length; i += 1) {
+    const skill = userSkills[i];
+    if (opportunityTags.includes(skill)) {
+      userCanApply = true;
+      break;
+    }
+  }
+  if (!userCanApply) {
+    throw new Error('You can only get plugged to opportunities that fit your indicated skill set');
+  }
+};
 
 /**
  * @class Controller
@@ -22,6 +121,8 @@ class Controller {
     try {
       const { tags, locationId } = req.body;
       const { userObj } = req;
+
+      await networkLagCheck(userObj, req);
 
       opportunity = await models.opportunity.create({ ...req.body, status: 'available' });
       await opportunity.setTags(tags);
@@ -226,7 +327,7 @@ class Controller {
           through: { attributes: [] }
         }]
       });
-      await this.opportunityApplicationChecks(opportunity, userObj);
+      await opportunityApplicationChecks(opportunity, userObj);
 
       await opportunity.addPlugEntry(userObj);
       if (opportunity.plugEntries.length + 1 === MAX_ENTRIES) {
@@ -240,44 +341,6 @@ class Controller {
       }, 200, { ...data });
     } catch (error) {
       return res.sendFailure([error.message]);
-    }
-  }
-
-  /**
-   * @method opportunityApplicationChecks
-   * @desc Checks if the specified user can apply for the specified opportunity
-   *
-   * @param {Object} opportunity opportunity
-   * @param {Object} user user
-   * @param {Number} maxEntries
-   *
-   * @returns {void}
-   */
-  opportunityApplicationChecks = async (opportunity, user) => {
-    if (!opportunity) {
-      throw new Error('Opportunity with the specified id does not exist');
-    }
-    if (opportunity.pluggerId === user.id) {
-      throw new Error('You cannot apply for an opportunity you created');
-    }
-    if (opportunity.status !== 'available') {
-      throw new Error('This opportunity has passed');
-    }
-    const userSkills = (await user.getSkills({
-      joinTableAttributes: []
-    })).map(skill => skill.id);
-    const opportunityTags = opportunity.tags.map(tag => tag.id);
-
-    let userCanApply = false;
-    for (let i = 0; i < userSkills.length; i += 1) {
-      const skill = userSkills[i];
-      if (opportunityTags.includes(skill)) {
-        userCanApply = true;
-        break;
-      }
-    }
-    if (!userCanApply) {
-      throw new Error('You can only get plugged to opportunities that fit your indicated skill set');
     }
   }
 
@@ -401,7 +464,7 @@ class Controller {
         }]
       });
 
-      this.createOpportunityReviewsChecks(opportunity, userObj);
+      createOpportunityReviewsChecks(opportunity, userObj);
 
       const review = await models.review.create(req.body);
       await review.setOpportunity(opportunity.id);
@@ -423,33 +486,6 @@ class Controller {
       });
     } catch (error) {
       return res.sendFailure([error.message]);
-    }
-  }
-
-  /**
-   * Extracted method to check if a review can be posted by the user
-   * @param {object} opportunity - opportunity
-   * @param {object} user -  user
-   *
-   * @returns {void}
-   * @memberOf Controller
-   */
-  createOpportunityReviewsChecks = (opportunity, user) => {
-    if (!opportunity) {
-      throw new Error('Specified opportunity does not exist');
-    }
-
-    if (!opportunity.achiever) {
-      throw new Error('This opportunity does not have an achiever yet');
-    }
-
-    if (![opportunity.plugger.id, opportunity.achiever.id].includes(user.id)) {
-      throw new Error('Only the plugger or achiever of this opportunity can post review for it');
-    }
-
-    const reviewersIds = opportunity.reviews.map(review => review.User.id);
-    if (reviewersIds.includes(user.id)) {
-      throw new Error('You have already left a review for this opportuntiy');
     }
   }
 }
