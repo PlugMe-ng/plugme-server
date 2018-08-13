@@ -109,9 +109,17 @@ function updateUserAttributes(user) {
   return user;
 }
 
+const enhanceErrorMessage = (error) => {
+  if (error instanceof models.sequelize.UniqueConstraintError) {
+    return `${error.parent.detail}`;
+  }
+  return error.message;
+};
+
 export default {
   Misc: {
     generatePaginationMeta,
-    updateUserAttributes
+    updateUserAttributes,
+    enhanceErrorMessage
   }
 };

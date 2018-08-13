@@ -1,6 +1,7 @@
 import { Op } from 'sequelize';
 
 import models from '../models';
+import helpers from '../helpers';
 
 /**
  * @class Controller
@@ -17,16 +18,46 @@ class Controller {
    */
   getTags = async (req, res) => {
     try {
-      const isMajorTagsRequest = req.originalUrl.endsWith('major');
-      const isMinorTagsRequest = req.originalUrl.endsWith('minor');
+      const tags = await models.tag.findAll();
+      return res.sendSuccess(tags);
+    } catch (error) {
+      return res.sendFailure([error.message]);
+    }
+  }
 
+  /**
+   * Retrieves all major tags
+   *
+   * @param {Object} req - Express request object
+   * @param {Object} res -  Express response object
+   *
+   * @returns {void}
+   * @memberOf Controller
+   */
+  getMajorTags = async (req, res) => {
+    try {
       const tags = await models.tag.findAll({
-        ...((isMajorTagsRequest || isMinorTagsRequest) && {
-          where: {
-            ...(isMajorTagsRequest && { categoryId: null }),
-            ...(isMinorTagsRequest && { categoryId: { [Op.ne]: null } })
-          }
-        })
+        where: { categoryId: null }
+      });
+      return res.sendSuccess(tags);
+    } catch (error) {
+      return res.sendFailure([error.message]);
+    }
+  }
+
+  /**
+   * Retrieves all minor tags
+   *
+   * @param {Object} req - Express request object
+   * @param {Object} res -  Express response object
+   *
+   * @returns {void}
+   * @memberOf Controller
+   */
+  getMinorTags = async (req, res) => {
+    try {
+      const tags = await models.tag.findAll({
+        where: { categoryId: { [Op.ne]: null } }
       });
       return res.sendSuccess(tags);
     } catch (error) {
@@ -48,7 +79,7 @@ class Controller {
       const tag = await models.tag.create(req.body);
       return res.sendSuccess(tag);
     } catch (error) {
-      return res.sendFailure([error.message]);
+      return res.sendFailure([helpers.Misc.enhanceErrorMessage(error)]);
     }
   }
 }

@@ -1,3 +1,5 @@
+import capitalize from 'capitalize';
+
 module.exports = (sequelize, DataTypes) => {
   const location = sequelize.define('location', {
     id: {
@@ -7,7 +9,11 @@ module.exports = (sequelize, DataTypes) => {
     },
     name: {
       type: DataTypes.STRING,
-      allowNull: false
+      allowNull: false,
+      get() {
+        const title = this.getDataValue('name');
+        return capitalize.words(title);
+      }
     },
   }, {});
   location.associate = (models) => {
