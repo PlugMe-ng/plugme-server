@@ -16,9 +16,9 @@ const routes = new Router();
 
 routes.get('/', controllers.tags.getTags);
 
-routes.get('/minor', controllers.tags.getTags);
+routes.get('/minor', controllers.tags.getMinorTags);
 
-routes.get('/major', controllers.tags.getTags);
+routes.get('/major', controllers.tags.getMajorTags);
 
 routes.post(
   '/major',

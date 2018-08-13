@@ -2,12 +2,14 @@ import auth from './auth';
 import contents from './contents';
 import opportunities from './opportunities';
 import tags from './tags';
+import locations from './locations';
 
 export default {
   auth,
   contents,
   opportunities,
-  tags
+  tags,
+  locations
 };
 
 export const getErrors = (validation, rules) => {
