@@ -22,6 +22,9 @@ module.exports = (sequelize, DataTypes) => {
       unique: true,
       validate: {
         notEmpty: true
+      },
+      set(value) {
+        this.setDataValue('username', value.toLowerCase());
       }
     },
     email: {
@@ -65,6 +68,10 @@ module.exports = (sequelize, DataTypes) => {
     fullName: {
       type: DataTypes.STRING,
       allowNull: false,
+    },
+    hasPendingReview: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false
     }
   });
 
@@ -93,6 +100,63 @@ module.exports = (sequelize, DataTypes) => {
         otherKey: 'UserId'
       }
     );
+
+    User.hasMany(
+      models.content,
+      {
+        as: 'contents',
+        foreignKey: 'authorId'
+      }
+    );
+
+    User.belongsToMany(models.content, {
+      through: 'contents_users_likes',
+      as: 'likedContents',
+      foreignKey: 'userId',
+      otherKey: 'contentId'
+    });
+
+    User.belongsToMany(models.content, {
+      through: 'contents_users_views',
+      as: 'viewedContents',
+      foreignKey: 'userId',
+      otherKey: 'contentId'
+    });
+
+    User.belongsToMany(models.content, {
+      through: models.flag,
+      as: 'flaggedContents',
+      foreignKey: 'userId',
+      otherKey: 'contentId'
+    });
+
+    User.hasMany(models.comment);
+    User.belongsToMany(models.tag, {
+      as: 'interests',
+      through: 'users_tags_interest',
+      foreignKey: 'userId',
+      otherKey: 'tagId'
+    });
+    User.belongsToMany(models.tag, {
+      as: 'skills',
+      through: 'users_tags_skills',
+      foreignKey: 'userId',
+      otherKey: 'tagId'
+    });
+    User.hasMany(models.opportunity, {
+      foreignKey: 'pluggerId'
+    });
+    User.belongsToMany(models.opportunity, {
+      through: 'users_opportunities_applications',
+      as: 'appliedOpportunities',
+      foreignKey: 'userId',
+      otherKey: 'opportunityId'
+    });
+    User.hasMany(models.opportunity, {
+      as: 'achievements',
+      foreignKey: 'achieverId'
+    });
+    User.hasMany(models.review);
   };
 
   return User;

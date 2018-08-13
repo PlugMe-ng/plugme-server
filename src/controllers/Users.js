@@ -11,6 +11,93 @@ import helpers from '../helpers';
 import models from '../models';
 
 const { Op } = models.Sequelize;
+
+const contentAssociations = {
+  model: models.content,
+  attributes: ['id', 'totalViews'],
+  as: 'contents',
+  include: [{
+    model: models.User,
+    as: 'likers',
+    attributes: ['id'],
+    through: {
+      attributes: []
+    }
+  }, {
+    model: models.comment,
+    attributes: ['id']
+  }]
+};
+
+const userAssociations = [{
+  model: models.User,
+  as: 'fans',
+  include: [contentAssociations],
+  attributes: {
+    exclude: ['password'],
+  },
+  through: {
+    attributes: []
+  },
+}, {
+  model: models.tag,
+  as: 'interests',
+  attributes: ['id', 'title'],
+  through: {
+    attributes: []
+  }
+}, {
+  model: models.tag,
+  as: 'skills',
+  attributes: ['id', 'title'],
+  through: {
+    attributes: []
+  }
+}, {
+  model: models.content,
+  as: 'contents',
+  include: [{
+    model: models.User,
+    as: 'likers',
+    attributes: ['id'],
+    through: {
+      attributes: []
+    }
+  }, {
+    model: models.User,
+    as: 'viewers',
+    attributes: ['id'],
+    through: {
+      attributes: []
+    }
+  }, {
+    model: models.comment,
+    attributes: ['id', 'UserId']
+  }, {
+    model: models.tag,
+    attributes: ['id', 'title'],
+    as: 'tags',
+    through: {
+      attributes: []
+    }
+  }]
+}];
+
+const getUserCummulativeData = (user) => {
+  let totalContentLikes = 0;
+  let totalContentViews = 0;
+  let totalContentComments = 0;
+  user.contents.forEach((content) => {
+    totalContentLikes += content.likers.length;
+    totalContentViews += content.totalViews;
+    totalContentComments += content.comments.length;
+  });
+  delete user.contents;
+  user.totalLikes = totalContentLikes;
+  user.totalViews = totalContentViews;
+  user.totalFeedback = totalContentComments;
+};
+
 /**
 * Users controller class
 * @class Users
@@ -42,35 +129,36 @@ export default class Users {
    */
   async getByUsername(req, res) {
     try {
-      const user = await models.User.findOne({
-        where: { username: req.params.username },
+      let user = await models.User.findOne({
+        where: { username: req.params.username.toLowerCase() },
         attributes: { exclude: ['password'] },
-        include: [{
-          model: models.User,
-          as: 'fans',
-          attributes: {
-            exclude: ['password'],
-          },
-          through: {
-            attributes: []
-          }
-        }, {
-          model: models.User,
-          as: 'fansOf',
-          attributes: {
-            exclude: ['password'],
-          },
-          through: {
-            attributes: []
-          }
-        }]
+        order: [[{ model: models.content, as: 'contents' }, 'createdAt', 'DESC']],
+        include: userAssociations
       });
       if (!user) {
         throw new Error('User not found');
       }
-      return res.sendSuccess({
-        ...user.get()
+      const userFansOf = await user.getFansOf({
+        attributes: { exclude: ['password'] },
+        include: [contentAssociations],
+        joinTableAttributes: []
       });
+      user = user.get({ plain: true });
+      user.fansOf = userFansOf.map(element =>
+        element.get({ plain: true }));
+
+      user.totalLikes = 0;
+      user.totalViews = 0;
+
+      user.contents.forEach((content) => {
+        user.totalLikes += content.likers.length;
+        user.totalViews += content.totalViews;
+      });
+
+      user.fans.forEach(getUserCummulativeData);
+      user.fansOf.forEach(getUserCummulativeData);
+
+      return res.sendSuccess(user);
     } catch (error) {
       return res.sendFailure([error.message]);
     }
