@@ -1,27 +1,56 @@
+import { Op } from 'sequelize';
+
 import models from '../models';
 
-export default {
-  getTags: async (req, res) => {
+/**
+ * @class Controller
+ */
+class Controller {
+  /**
+   * Retrieves all tags
+   *
+   * @param {Object} req - Express request object
+   * @param {Object} res -  Express response object
+   *
+   * @returns {void}
+   * @memberOf Controller
+   */
+  getTags = async (req, res) => {
     try {
-      const tags = await models.tag.findAll();
-      return res.sendSuccess(tags);
-    } catch (error) {
-      return res.sendFailure([error.message]);
-    }
-  },
+      const isMajorTagsRequest = req.originalUrl.endsWith('major');
+      const isMinorTagsRequest = req.originalUrl.endsWith('minor');
 
-  getMinorTags: async (req, res) => {
-    try {
       const tags = await models.tag.findAll({
-        where: {
-          categoryId: {
-            [models.sequelize.Op.ne]: null
-          },
-        }
+        ...((isMajorTagsRequest || isMinorTagsRequest) && {
+          where: {
+            ...(isMajorTagsRequest && { categoryId: null }),
+            ...(isMinorTagsRequest && { categoryId: { [Op.ne]: null } })
+          }
+        })
       });
       return res.sendSuccess(tags);
     } catch (error) {
       return res.sendFailure([error.message]);
     }
   }
-};
+
+  /**
+   * Handles tag creation
+   *
+   * @param {Object} req - Express request object
+   * @param {Object} res -  Express response object
+   *
+   * @returns {void}
+   * @memberOf Controller
+   */
+  createTag = async (req, res) => {
+    try {
+      const tag = await models.tag.create(req.body);
+      return res.sendSuccess(tag);
+    } catch (error) {
+      return res.sendFailure([error.message]);
+    }
+  }
+}
+
+export default new Controller();

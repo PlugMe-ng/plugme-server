@@ -24,7 +24,7 @@ export default class Check {
   async currentUserIsAdmin(req, res, next) {
     try {
       if (req.user.role !== 'admin') {
-        throw new Error('This user is not an admin.');
+        throw new Error('You do not have permissions to perform this operation.');
       }
 
       next();

@@ -7,6 +7,8 @@
  */
 
 import Validator from 'validatorjs';
+
+import { getErrors } from './';
 import models from '../../models';
 
 const opportunityUploadRules = {
@@ -41,10 +43,7 @@ class Validate {
   async createOpportunity(req, res, next) {
     const validation = new Validator(req.body, opportunityUploadRules);
     validation.fails(() => {
-      let errors = [];
-      Object.keys(opportunityUploadRules).forEach((key) => {
-        errors = [...errors, ...validation.errors.get(key)];
-      });
+      const errors = getErrors(validation, opportunityUploadRules);
       return res.sendFailure(errors);
     });
     const now = Date.now();
@@ -96,10 +95,7 @@ class Validate {
   async reviewOpportunity(req, res, next) {
     const validation = new Validator(req.body, opportunityReviewRules);
     validation.fails(() => {
-      let errors = [];
-      Object.keys(opportunityReviewRules).forEach((key) => {
-        errors = [...errors, ...validation.errors.get(key)];
-      });
+      const errors = getErrors(validation, opportunityReviewRules);
       return res.sendFailure(errors);
     });
     validation.passes(() => next());
