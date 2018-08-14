@@ -16,8 +16,11 @@ class Controller {
    * @memberOf Controller
    */
   getAllLocations = async (req, res) => {
+    const { attribute, order } = req.meta.sort;
+
     try {
       const locations = await models.country.findAll({
+        order: [[attribute, order]],
         attributes: ['id', 'name'],
         include: [{
           model: models.location,

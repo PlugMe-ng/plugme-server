@@ -9,12 +9,17 @@ import { Router } from 'express';
 import controllers from '../controllers';
 import middlewares from '../middleware';
 import validations from '../middleware/validations';
+import sort from '../middleware/sort';
 
 const { auth, check } = middlewares;
 
 const routes = new Router();
 
-routes.get('/', controllers.locations.getAllLocations);
+routes.get(
+  '/',
+  sort,
+  controllers.locations.getAllLocations
+);
 
 routes.use(auth.authenticateUser, check.currentUserIsAdmin);
 
