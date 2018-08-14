@@ -63,6 +63,40 @@ class Controller {
       return res.sendFailure([helpers.Misc.enhanceErrorMessage(error)]);
     }
   }
+
+  /**
+   * Handles deleting a location.
+   * @param {Object} req - express request object
+   * @param {Object} res - express response object
+   *
+   * @returns {void}
+   * @memberOf Controller
+   */
+  deleteLocation = async (req, res) => {
+    try {
+      await models.location.destroy({ where: { id: req.params.locationId } });
+      return res.sendSuccess({ message: 'Location deleted successfully' });
+    } catch (error) {
+      return res.sendFailure([helpers.Misc.enhanceErrorMessage(error)]);
+    }
+  }
+
+  /**
+   * Handles deleting a country.
+   * @param {Object} req - express request object
+   * @param {Object} res - express response object
+   *
+   * @returns {void}
+   * @memberOf Controller
+   */
+  deleteCountry = async (req, res) => {
+    try {
+      await models.country.destroy({ where: { id: req.params.countryId } });
+      return res.sendSuccess({ message: 'Country deleted successfully' });
+    } catch (error) {
+      return res.sendFailure([helpers.Misc.enhanceErrorMessage(error)]);
+    }
+  }
 }
 
 export default new Controller();
