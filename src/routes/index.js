@@ -14,6 +14,7 @@ import contentRoutes from './contents';
 import tagRoutes from './tags';
 import opportunitiesRoutes from './opportunities';
 import locationRoutes from './locations';
+import occupationRoutes from './occupations';
 
 const router = new Router();
 
@@ -23,6 +24,7 @@ router
   .use('/gallery', contentRoutes)
   .use('/tags', tagRoutes)
   .use('/opportunities', opportunitiesRoutes)
-  .use('/locations', locationRoutes);
+  .use('/locations', locationRoutes)
+  .use('/occupations', occupationRoutes);
 
 export default router;

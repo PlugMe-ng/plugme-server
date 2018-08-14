@@ -13,6 +13,7 @@ import contents from './contents';
 import tags from './tags';
 import opportunities from './opportunities';
 import locations from './locations';
+import occupations from './occupations';
 
 export default {
   Auth,
@@ -20,5 +21,6 @@ export default {
   contents,
   tags,
   opportunities,
-  locations
+  locations,
+  occupations
 };
