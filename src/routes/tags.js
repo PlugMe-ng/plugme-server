@@ -20,20 +20,23 @@ routes.get('/minor', controllers.tags.getMinorTags);
 
 routes.get('/major', controllers.tags.getMajorTags);
 
+routes.use(auth.authenticateUser, check.currentUserIsAdmin);
+
 routes.post(
   '/major',
-  auth.authenticateUser,
-  check.currentUserIsAdmin,
   validations.tags.createMajorTag,
   controllers.tags.createTag
 );
 
 routes.post(
   '/minor',
-  auth.authenticateUser,
-  check.currentUserIsAdmin,
   validations.tags.createMinorTag,
   controllers.tags.createTag
+);
+
+routes.delete(
+  '/:tagId',
+  controllers.tags.deleteTag
 );
 
 export default routes;
