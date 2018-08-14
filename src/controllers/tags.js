@@ -35,8 +35,11 @@ class Controller {
    * @memberOf Controller
    */
   getMajorTags = async (req, res) => {
+    const { attribute, order } = req.meta.sort;
+
     try {
       const tags = await models.tag.findAll({
+        order: [[attribute, order]],
         where: { categoryId: null }
       });
       return res.sendSuccess(tags);
@@ -55,8 +58,11 @@ class Controller {
    * @memberOf Controller
    */
   getMinorTags = async (req, res) => {
+    const { attribute, order } = req.meta.sort;
+
     try {
       const tags = await models.tag.findAll({
+        order: [[attribute, order]],
         where: { categoryId: { [Op.ne]: null } }
       });
       return res.sendSuccess(tags);
