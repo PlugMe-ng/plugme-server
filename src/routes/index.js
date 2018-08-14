@@ -6,6 +6,7 @@
  * @requires ./auth
  * @requires ./users
  */
+import { Router } from 'express';
 
 import authRoutes from './auth';
 import usersRoutes from './users';
@@ -14,16 +15,14 @@ import tagRoutes from './tags';
 import opportunitiesRoutes from './opportunities';
 import locationRoutes from './locations';
 
-export default (app) => {
-  app.use('/v1/auth', authRoutes);
+const router = new Router();
 
-  app.use('/v1/users', usersRoutes);
+router
+  .use('/auth', authRoutes)
+  .use('/users', usersRoutes)
+  .use('/gallery', contentRoutes)
+  .use('/tags', tagRoutes)
+  .use('/opportunities', opportunitiesRoutes)
+  .use('/locations', locationRoutes);
 
-  app.use('/v1/gallery', contentRoutes);
-
-  app.use('/v1/tags', tagRoutes);
-
-  app.use('/v1/opportunities', opportunitiesRoutes);
-
-  app.use('/v1/locations', locationRoutes);
-};
+export default router;
