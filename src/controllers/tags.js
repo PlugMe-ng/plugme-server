@@ -82,6 +82,24 @@ class Controller {
       return res.sendFailure([helpers.Misc.enhanceErrorMessage(error)]);
     }
   }
+
+  /**
+   * Handles tag deletion
+   *
+   * @param {Object} req - Express request object
+   * @param {Object} res -  Express response object
+   *
+   * @returns {void}
+   * @memberOf Controller
+   */
+  deleteTag = async (req, res) => {
+    try {
+      await models.tag.destroy({ where: { id: req.params.tagId } });
+      return res.sendSuccess({ message: 'Tag successfully deleted' });
+    } catch (error) {
+      res.sendFailure([error.message]);
+    }
+  }
 }
 
 export default new Controller();
