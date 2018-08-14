@@ -72,7 +72,7 @@ app.get('/', (req, res) => {
 
 app.use(trimmer);
 
-routes(app);
+app.use('/v1', routes);
 
 // 404 error handler
 app.use((req, res) =>
