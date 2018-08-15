@@ -2,7 +2,8 @@ import Validator from 'validatorjs';
 import { getErrors } from '.';
 
 const userUpdateRules = {
-  role: 'in:member,admin'
+  role: 'in:member,admin',
+  blocked: 'boolean'
 };
 
 /**
