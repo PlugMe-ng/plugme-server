@@ -13,24 +13,35 @@ import { Router } from 'express';
 import Users from '../controllers/Users';
 import middleware from '../middleware';
 import validations from '../middleware/validations';
+import sort from '../middleware/sort';
+import filter from '../middleware/filter';
 
-const usersController = new Users();
+const controller = new Users();
 const routes = new Router();
 
-routes.get('/:username', usersController.getByUsername);
+const { users: validation } = validations;
+const { check } = middleware;
+
+routes.get('/:username', controller.getByUsername);
 
 routes.use(middleware.auth.authenticateUser);
 
-routes.post('/:username/fans', usersController.addFan);
-routes.get('/', middleware.pagination, usersController.get);
+routes.post('/:username/fans', controller.addFan);
+
+routes.get(
+  '/',
+  check.currentUserIsAdmin,
+  sort,
+  filter,
+  middleware.pagination,
+  controller.get
+);
 
 routes.put(
   '/:userId',
-  middleware.check.currentUserIsAdmin,
-  validations.users.updateUser,
-  usersController.adminUserUpdate
+  check.currentUserIsAdmin,
+  validation.updateUser,
+  controller.adminUserUpdate
 );
-
-routes.delete('/:userId', usersController.deleteById);
 
 export default routes;
