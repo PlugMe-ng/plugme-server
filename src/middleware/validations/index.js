@@ -4,6 +4,7 @@ import opportunities from './opportunities';
 import tags from './tags';
 import locations from './locations';
 import occupations from './occupations';
+import users from './users';
 
 export default {
   auth,
@@ -12,6 +13,7 @@ export default {
   tags,
   locations,
   occupations,
+  users
 };
 
 export const getErrors = (validation, rules) => {
