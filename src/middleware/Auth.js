@@ -45,6 +45,9 @@ export default class Auth {
       if (!user.verified) {
         throw new Error('Account is not verified');
       }
+      if (user.blocked) {
+        throw new Error('You are not authorized to perform this operation');
+      }
 
       req.user = user.get();
       req.userObj = user;
