@@ -234,6 +234,24 @@ export default class Users {
   }
 
   /**
+   * @method adminUserUpdate
+   * @desc This method updates the user with the specified user ID
+   *
+   * @param { object } req request
+   * @param { object } res response
+   *
+   * @returns { object } response
+   */
+  adminUserUpdate = async (req, res) => {
+    try {
+      await models.User.update(req.body, { where: { id: req.params.userId } });
+      return res.sendSuccess({ message: 'User updated successfully' });
+    } catch (error) {
+      return res.sendFailure([error.message]);
+    }
+  }
+
+  /**
    * @method addFan
    * @desc This method adds a user to the fans of the specified username
    *
