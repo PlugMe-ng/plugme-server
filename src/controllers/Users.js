@@ -7,10 +7,10 @@
  * @requires ../models
  */
 
+import { Op } from 'sequelize';
+
 import helpers from '../helpers';
 import models from '../models';
-
-const { Op } = models.Sequelize;
 
 const contentAssociations = {
   model: models.content,
@@ -104,21 +104,6 @@ const getUserCummulativeData = (user) => {
 */
 export default class Users {
   /**
-   * @method deleteById
-   * @desc This method deletes the user with the specified user ID
-   *
-   * @param { object } req request
-   * @param { object } res response
-   *
-   * @returns { object } response
-   */
-  async deleteById(req, res) {
-    return res.status(200).send({
-      data: { name: 'user1' }
-    });
-  }
-
-  /**
    * @method getByUserName
    * @desc This method get the user with the specified username
    *
@@ -176,39 +161,35 @@ export default class Users {
   async get(req, res) {
     try {
       const { limit, offset } = req.meta.pagination;
-      const { query } = req.meta.search;
       const { attribute, order } = req.meta.sort;
-      let { where } = req.meta.filter;
+      const { where: filter } = req.meta.filter;
 
-      // if search query is present, overwrite the 'where' so that
-      // the 'displayName', 'email', and 'githubUsername'
-      // are checked to see if they contain
-      // that search query (case-INsensitive)
-      if (query) {
-        where = {
+      const where = {
+        ...(filter.name && {
           [Op.or]: [
-            { displayName: { [Op.iLike]: `%${query}%` } },
-            { email: { [Op.iLike]: `%${query}%` } },
-            { githubUsername: { [Op.iLike]: `%${query}%` } }
+            { username: { [Op.iLike]: `%${filter.name}%` } },
+            { fullName: { [Op.iLike]: `%${filter.name}%` } }
           ]
-        };
-      }
+        })
+      };
 
-      const dbResult = await models.User.findAndCountAll({ where });
-      const users = await models.User.findAll({
+      const users = await models.User.findAndCount({
         where,
         limit,
         offset,
-        order: [[attribute, order]]
+        order: [[attribute, order]],
+        attributes: {
+          exclude: ['password']
+        }
       });
       if (users) {
         const pagination = helpers.Misc.generatePaginationMeta(
           req,
-          dbResult,
+          users,
           limit,
           offset
         );
-        return res.sendSuccess({ users }, 200, { pagination });
+        return res.sendSuccess(users.rows, 200, { pagination });
       }
 
       throw new Error('Could not retrieve users from the database.');
