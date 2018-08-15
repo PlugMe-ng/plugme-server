@@ -9,19 +9,10 @@ import { Router } from 'express';
 import controllers from '../controllers';
 import middleware from '../middleware';
 
-const { validations: { opportunities: validation } } = middleware;
+const { validations: { opportunities: validation }, auth, check } = middleware;
 const { opportunities: controller } = controllers;
 
 const routes = new Router();
-
-routes.post(
-  '/',
-  middleware.auth.authenticateUser,
-  middleware.check.userHasPendingReview,
-  validation.createOpportunity,
-  validation.verifyTags,
-  controller.createOpportunity
-);
 
 routes.get(
   '/',
@@ -30,29 +21,40 @@ routes.get(
   middleware.filter,
   controller.get
 );
-
 routes.get('/:opportunityId', controller.getOpportunityById);
+routes.get('/:opportunityId/applications', controller.getOpportunityApplications);
+
+routes.use(auth.authenticateUser);
+
+routes.post(
+  '/',
+  check.userHasPendingReview,
+  validation.createOpportunity,
+  validation.verifyTags,
+  controller.createOpportunity
+);
+
+routes.delete(
+  '/:opportunityId',
+  check.currentUserIsAdmin,
+  controller.delete
+);
 
 routes.post(
   '/:opportunityId/applications',
-  middleware.auth.authenticateUser,
-  middleware.check.userHasPendingReview,
+  check.userHasPendingReview,
   controller.opportunityApplication
-);
-
-routes.get('/:opportunityId/applications', controller.getOpportunityApplications);
-
-routes.post(
-  '/:opportunityId/applications/:userId',
-  middleware.auth.authenticateUser,
-  controller.setOpportunityAchiever
 );
 
 routes.post(
   '/:opportunityId/reviews',
-  middleware.auth.authenticateUser,
   validation.reviewOpportunity,
   controller.reviewOpportunity,
+);
+
+routes.post(
+  '/:opportunityId/applications/:userId',
+  controller.setOpportunityAchiever
 );
 
 export default routes;
