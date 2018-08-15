@@ -488,6 +488,24 @@ class Controller {
       return res.sendFailure([error.message]);
     }
   }
+
+  /**
+   * Handles deleting an opportunity
+   * @param {Express.Request} req - Express Request Object
+   * @param {Express.Response} res - Express Response Object
+   *
+   * @returns {void}
+   * @memberOf Controller
+   */
+  delete = async (req, res) => {
+    try {
+      await models.opportunity
+        .destroy({ where: { id: req.params.opportunityId } });
+      return res.sendSuccess({ message: 'Opportuntiy deleted successfully' });
+    } catch (error) {
+      return res.sendFailure([error.message]);
+    }
+  }
 }
 
 export default new Controller();
