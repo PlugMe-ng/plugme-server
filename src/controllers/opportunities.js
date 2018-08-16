@@ -228,7 +228,7 @@ class Controller {
           }),
         }, {
           model: models.User,
-          attributes: ['id'],
+          attributes: ['id', 'username', 'fullName'],
           as: 'achiever',
           ...(filter.achiever && {
             where: { username: { [Op.iLike]: filter.achiever } }
