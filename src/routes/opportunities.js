@@ -18,6 +18,7 @@ routes.get(
   '/',
   middleware.pagination,
   middleware.sort,
+  middleware.search,
   middleware.filter,
   controller.get
 );
