@@ -172,20 +172,26 @@ class Controller {
     const { limit, offset } = req.meta.pagination;
     const { attribute, order } = req.meta.sort;
     const { where: filter } = req.meta.filter;
+    const { query } = req.meta.search;
+
+    const where = {
+      ...(filter.budget && { budget: { [Op.lte]: filter.budget } }),
+      ...(filter.status && { status: filter.status.toLowerCase() }),
+      ...(query && {
+        [Op.or]: [
+          { title: { [Op.iLike]: `%${query}%` } },
+          { responsibilities: { [Op.iLike]: `%${query}%` } }
+        ]
+      })
+    };
 
     try {
       const opportunities = await models.opportunity.findAndCount({
         distinct: true,
         limit,
         offset,
+        where,
         order: [[attribute, order]],
-        ...((filter.budget || filter.status) &&
-          {
-            where: {
-              ...(filter.budget && { budget: { [Op.lte]: filter.budget } }),
-              ...(filter.status && { status: filter.status.toLowerCase() })
-            }
-          }),
         include: [{
           model: models.location,
           attributes: ['id', 'name', 'countryId'],
