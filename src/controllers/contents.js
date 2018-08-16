@@ -3,6 +3,8 @@ import { Op } from 'sequelize';
 import models from '../models';
 import helpers from '../helpers';
 
+const { isAdmin } = helpers.Misc;
+
 const addViewEntry = async (user, content) => {
   if (!user) {
     return;
@@ -87,11 +89,20 @@ class ContentsController {
     const { attribute, order } = req.meta.sort;
     const { where: filter } = req.meta.filter;
 
+    const { userObj } = req;
+
+    const where = {
+      ...(isAdmin(userObj) &&
+      filter.flagCount && { flagCount: { [Op.gte]: filter.flagCount } })
+    };
+
     try {
       const contents = await models.content.findAndCountAll({
         distinct: true,
         limit,
         offset,
+        where,
+        attributes: { exclude: [!isAdmin(userObj) && 'flagCount'] },
         order: [[attribute, order]],
         include: [{
           model: models.comment,
@@ -117,7 +128,15 @@ class ContentsController {
           through: {
             attributes: []
           }
-        }, {
+        }, ...(isAdmin(userObj) && filter.flagCount ?
+          [{
+            model: models.User,
+            as: 'flaggers',
+            attributes: ['id', 'username', 'fullName'],
+            through: {
+              attributes: ['info']
+            }
+          }] : []), {
           model: models.tag,
           attributes: ['id', 'title'],
           as: 'tags',
@@ -256,6 +275,9 @@ class ContentsController {
   flagContent = async (req, res) => {
     const { content, userObj } = req;
     try {
+      if (!(await content.hasFlagger(userObj))) {
+        content.increment('flagCount');
+      }
       await content.addFlagger(userObj, {
         through: {
           info: req.body.info
@@ -281,14 +303,13 @@ class ContentsController {
   deleteContent = async (req, res) => {
     const { content, user } = req;
     try {
-      // TODO: allow an admin to delete a content here
-      if (content.authorId !== user.id) {
-        throw new Error('This content is owned by another user');
+      if (content.authorId === user.id || isAdmin(user)) {
+        await content.destroy();
+        return res.sendSuccess({
+          message: 'Content has been deleted succesfully'
+        });
       }
-      await content.destroy();
-      return res.sendSuccess({
-        message: 'Content has been deleted succesfully'
-      });
+      throw new Error('This content belongs to another user');
     } catch (error) {
       return res.sendFailure([error.message]);
     }
