@@ -30,6 +30,10 @@ module.exports = (sequelize, DataTypes) => {
     totalLikes: {
       type: DataTypes.INTEGER,
       defaultValue: 0
+    },
+    flagCount: {
+      type: DataTypes.INTEGER,
+      defaultValue: 0
     }
   }, {});
   content.associate = (models) => {

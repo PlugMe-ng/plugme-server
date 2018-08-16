@@ -116,10 +116,13 @@ const enhanceErrorMessage = (error) => {
   return error.message;
 };
 
+const isAdmin = user => user && user.role === 'admin';
+
 export default {
   Misc: {
     generatePaginationMeta,
     updateUserAttributes,
-    enhanceErrorMessage
+    enhanceErrorMessage,
+    isAdmin
   }
 };
