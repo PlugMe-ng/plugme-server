@@ -31,9 +31,9 @@ routes.post('/:username/fans', controller.addFan);
 routes.get(
   '/',
   check.currentUserIsAdmin,
+  middleware.pagination,
   sort,
   filter,
-  middleware.pagination,
   controller.get
 );
 
