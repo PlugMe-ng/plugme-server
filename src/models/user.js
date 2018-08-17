@@ -72,6 +72,18 @@ module.exports = (sequelize, DataTypes) => {
     hasPendingReview: {
       type: DataTypes.BOOLEAN,
       defaultValue: false
+    },
+    meta: {
+      type: DataTypes.JSONB
+    }
+  }, {
+    getterMethods: {
+      bio() {
+        return this.meta ? this.meta.bio : null;
+      },
+      experience() {
+        return this.meta ? this.meta.experience : null;
+      }
     }
   });
 
@@ -157,6 +169,8 @@ module.exports = (sequelize, DataTypes) => {
       foreignKey: 'achieverId'
     });
     User.hasMany(models.review);
+    User.belongsTo(models.occupation);
+    User.belongsTo(models.location);
   };
 
   return User;
