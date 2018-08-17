@@ -38,9 +38,15 @@ routes.get(
 );
 
 routes.put(
+  '/',
+  validation.userUpdate,
+  controller.update
+);
+
+routes.put(
   '/:userId',
   check.currentUserIsAdmin,
-  validation.updateUser,
+  validation.adminUserUpdate,
   controller.adminUserUpdate
 );
 

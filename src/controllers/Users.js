@@ -81,6 +81,16 @@ const userAssociations = [{
       attributes: []
     }
   }]
+}, {
+  model: models.location,
+  attributes: ['id', 'name'],
+  include: [{
+    model: models.country,
+    attributes: ['id', 'name']
+  }]
+}, {
+  model: models.occupation,
+  attributes: ['id', 'title']
 }];
 
 const getUserCummulativeData = (user) => {
@@ -199,19 +209,40 @@ export default class Users {
   }
 
   /**
-   * @method updateById
-   * @desc This method updates the user with the specified user ID
+   * @method update
+   * @desc updates the signedIn user profile
    *
    * @param { object } req request
    * @param { object } res response
    *
    * @returns { object } response
    */
-  async updateById(req, res) {
-    // it should be possible to also update the user's role here, right?
-    return res.status(200).send({
-      data: { name: 'user1' }
-    });
+  update = async (req, res) => {
+    const { userObj: user } = req;
+    const {
+      skills, interests, email, role, bio, experience, hasPendingReview, ...data
+    } = req.body;
+    try {
+      if (interests) {
+        await user.setInterests(interests);
+      }
+      if (skills) {
+        await user.setSkills(skills);
+      }
+      await user.update({
+        ...data,
+        meta: {
+          ...user.meta,
+          ...(bio && { bio }),
+          ...(experience && { experience }),
+          ...(req.body.occupationId &&
+            { occupationModificationCount: user.meta.occupationModificationCount + 1 })
+        }
+      });
+      return res.sendSuccess({ message: 'Profile updated successfully' }, 200, { user });
+    } catch (error) {
+      return res.sendFailure([helpers.Misc.enhanceErrorMessage(error)]);
+    }
   }
 
   /**
