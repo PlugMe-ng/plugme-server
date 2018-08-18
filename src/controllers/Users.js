@@ -256,7 +256,12 @@ export default class Users {
    */
   adminUserUpdate = async (req, res) => {
     try {
-      await models.User.update(req.body, { where: { id: req.params.userId } });
+      const user = await models.User.findById(req.params.userId);
+      if (!user) {
+        throw new Error('Specified user does not exist');
+      }
+      await user.update(req.body);
+      req.adminActionObject = user;
       return res.sendSuccess({ message: 'User updated successfully' });
     } catch (error) {
       return res.sendFailure([error.message]);

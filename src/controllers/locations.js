@@ -77,7 +77,12 @@ class Controller {
    */
   deleteLocation = async (req, res) => {
     try {
-      await models.location.destroy({ where: { id: req.params.locationId } });
+      const location = await models.location.findById(req.params.locationId);
+      if (!location) {
+        throw new Error('Specified location does not exist');
+      }
+      req.adminActionObject = location;
+      location.destroy();
       return res.sendSuccess({ message: 'Location deleted successfully' });
     } catch (error) {
       return res.sendFailure([helpers.Misc.enhanceErrorMessage(error)]);
@@ -94,7 +99,12 @@ class Controller {
    */
   deleteCountry = async (req, res) => {
     try {
-      await models.country.destroy({ where: { id: req.params.countryId } });
+      const country = await models.country.findById(req.params.countryId);
+      if (!country) {
+        throw new Error('Specified country does not exist');
+      }
+      req.adminActionObject = country;
+      country.destroy();
       return res.sendSuccess({ message: 'Country deleted successfully' });
     } catch (error) {
       return res.sendFailure([helpers.Misc.enhanceErrorMessage(error)]);
