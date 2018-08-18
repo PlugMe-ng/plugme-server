@@ -15,6 +15,7 @@ import tagRoutes from './tags';
 import opportunitiesRoutes from './opportunities';
 import locationRoutes from './locations';
 import occupationRoutes from './occupations';
+import miscRoutes from './misc';
 
 const router = new Router();
 
@@ -25,6 +26,7 @@ router
   .use('/tags', tagRoutes)
   .use('/opportunities', opportunitiesRoutes)
   .use('/locations', locationRoutes)
-  .use('/occupations', occupationRoutes);
+  .use('/occupations', occupationRoutes)
+  .use('/', miscRoutes);
 
 export default router;
