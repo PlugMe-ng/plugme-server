@@ -505,8 +505,12 @@ class Controller {
    */
   delete = async (req, res) => {
     try {
-      await models.opportunity
-        .destroy({ where: { id: req.params.opportunityId } });
+      const opportunity = await models.opportunity.findById();
+      if (!opportunity) {
+        throw new Error('Specified opportunity does not exist');
+      }
+      req.adminActionObject = opportunity;
+      opportunity.destroy();
       return res.sendSuccess({ message: 'Opportuntiy deleted successfully' });
     } catch (error) {
       return res.sendFailure([error.message]);

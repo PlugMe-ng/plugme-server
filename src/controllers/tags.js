@@ -100,7 +100,12 @@ class Controller {
    */
   deleteTag = async (req, res) => {
     try {
-      await models.tag.destroy({ where: { id: req.params.tagId } });
+      const tag = await models.tag.findById(req.params.tagId);
+      if (!tag) {
+        throw new Error('Specified tag does not exist');
+      }
+      req.adminActionObject = tag;
+      tag.destroy();
       return res.sendSuccess({ message: 'Tag successfully deleted' });
     } catch (error) {
       res.sendFailure([error.message]);

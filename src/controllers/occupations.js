@@ -56,8 +56,13 @@ class Controller {
    */
   deleteOccupation = async (req, res) => {
     try {
-      await models.occupation
-        .destroy({ where: { id: req.params.occupationId } });
+      const occupation = await models.occupation
+        .findById(req.params.occupationId);
+      if (!occupation) {
+        throw new Error('Specified occupation does not exist');
+      }
+      req.adminActionObject = occupation;
+      occupation.destroy();
       return res.sendSuccess({ message: 'Occupation deleted successfully' });
     } catch (error) {
       return res.sendFailure([helpers.Misc.enhanceErrorMessage(error)]);
