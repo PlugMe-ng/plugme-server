@@ -505,7 +505,8 @@ class Controller {
    */
   delete = async (req, res) => {
     try {
-      const opportunity = await models.opportunity.findById();
+      const opportunity = await models.opportunity
+        .findById(req.params.opportunityId);
       if (!opportunity) {
         throw new Error('Specified opportunity does not exist');
       }

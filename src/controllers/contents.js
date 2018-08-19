@@ -303,18 +303,18 @@ class ContentsController {
   deleteContent = async (req, res) => {
     const { content, user } = req;
     try {
-      if (content.authorId !== user.id || !isAdmin(user)) {
-        throw new Error('This content belongs to another user');
-      }
-      content.destroy();
-      if (isAdmin(user) && content.authorId !== user.id) {
-        return res.sendSuccessAndLog(content, {
+      if (content.authorId === user.id || isAdmin(user)) {
+        content.destroy();
+        if (isAdmin(user) && content.authorId !== user.id) {
+          return res.sendSuccessAndLog(content, {
+            message: 'Content has been deleted succesfully'
+          });
+        }
+        return res.sendSuccess({
           message: 'Content has been deleted succesfully'
         });
       }
-      return res.sendSuccess({
-        message: 'Content has been deleted succesfully'
-      });
+      throw new Error('This content belongs to another user');
     } catch (error) {
       return res.sendFailure([error.message]);
     }
