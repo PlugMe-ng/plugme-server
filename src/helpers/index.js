@@ -119,54 +119,37 @@ const enhanceErrorMessage = (error) => {
 const isAdmin = user => user && user.role === 'admin';
 
 /**
- * Logs every admin action into a database table.
- *
- * req.adminActionObject is set manually in controller methods that handle
- * admin actions (PUT/DELETE). It will contain the details of a database
- * (sequelize) object an admin performed an action on
- *
- * req.isAdminAction is set in **check** middleware and in rare cases,
- * controller methods
- *
- * actionEntity could be something else, but the meta is there to provide
- * more details
- *
- * This function is hooked into the res.sendSuccess api middleware
+ * Logs admin actions.
  *
  * @param {any} req - Enhanced express request object
+ * @param {Object} actionObject - Sequelize model instance on which action
+ * is performed
+ *
  * @returns {void}
  */
-const logAdminAction = (req) => {
-  if (!req.isAdminAction || req.method === 'GET') {
-    return;
-  }
-  let actionObject;
-  if (req.adminActionObject) {
-    actionObject = req.adminActionObject.get();
-    delete actionObject.password;
-  }
-  const meta = {
-    url: req.baseUrl,
-    fullUrl: req.originalUrl,
-    method: req.method,
-    details: {
-      ...req.body,
-      ...(actionObject && actionObject)
-    }
-  };
+const logAdminAction = (req, actionObject) => {
   try {
-    let actionEntity = req.baseUrl.substring(req.baseUrl.lastIndexOf('/') + 1);
-    actionEntity = actionEntity.substring(0, actionEntity.length - 1);
+    const actionEntityName = actionObject.constructor.name;
+    actionObject = actionObject.get();
+    delete actionObject.password;
+
+    const meta = {
+      url: req.baseUrl,
+      fullUrl: req.originalUrl,
+      method: req.method,
+      details: actionObject
+    };
+
     let action;
     switch (req.method) {
       case 'POST':
-        action = `created a ${actionEntity}`;
+        action = `created a ${actionEntityName}`;
         break;
       case 'DELETE':
-        action = `deleted a ${actionEntity}`;
+        action = `deleted a ${actionEntityName}`;
         break;
       case 'PUT':
-        action = `modified a ${actionEntity}`;
+        action = `modified a ${actionEntityName}`;
         break;
       default:
         break;
