@@ -180,7 +180,8 @@ export default class Users {
             { username: { [Op.iLike]: `%${filter.name}%` } },
             { fullName: { [Op.iLike]: `%${filter.name}%` } }
           ]
-        })
+        }),
+        ...(filter.role && { role: filter.role.toLowerCase() })
       };
 
       const users = await models.User.findAndCount({
