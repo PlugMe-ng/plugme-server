@@ -509,9 +509,8 @@ class Controller {
       if (!opportunity) {
         throw new Error('Specified opportunity does not exist');
       }
-      req.adminActionObject = opportunity;
       opportunity.destroy();
-      return res.sendSuccess({ message: 'Opportuntiy deleted successfully' });
+      return res.sendSuccessAndLog(opportunity, { message: 'Opportuntiy deleted successfully' });
     } catch (error) {
       return res.sendFailure([error.message]);
     }

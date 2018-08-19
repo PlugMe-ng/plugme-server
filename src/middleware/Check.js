@@ -26,7 +26,6 @@ export default class Check {
       if (req.user.role !== 'admin') {
         throw new Error('You do not have permissions to perform this operation.');
       }
-      req.isAdminAction = true;
       next();
     } catch (error) {
       return res.sendFailure([error.message]);

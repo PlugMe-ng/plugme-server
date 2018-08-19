@@ -261,8 +261,7 @@ export default class Users {
         throw new Error('Specified user does not exist');
       }
       await user.update(req.body);
-      req.adminActionObject = user;
-      return res.sendSuccess({ message: 'User updated successfully' });
+      return res.sendSuccessAndLog(user, { message: 'User updated successfully' });
     } catch (error) {
       return res.sendFailure([error.message]);
     }

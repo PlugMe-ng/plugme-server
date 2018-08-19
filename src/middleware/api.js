@@ -20,13 +20,15 @@ export default (req, res, next) => {
   req.fullUrl = `${req.protocol}://${req.get('host')}${req.originalUrl}`;
   req.fullUrlWithoutSearch = `${req.protocol}://${req.get('host')}${req.path}`;
 
-  res.sendSuccess = (data, status = 200, meta) => {
-    // hooking into logging admin actions here temporarily
-    helpers.Misc.logAdminAction(req);
-    return res.status(status).json({
+  res.sendSuccess = (data, status = 200, meta) =>
+    res.status(status).json({
       data,
       meta
     });
+
+  res.sendSuccessAndLog = (actionObject, data = actionObject, status = 200, meta) => {
+    helpers.Misc.logAdminAction(req, actionObject);
+    return res.sendSuccess(data, status, meta);
   };
 
   res.sendFailure = (errors, status = 200, meta) =>

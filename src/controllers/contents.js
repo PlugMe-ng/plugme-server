@@ -306,11 +306,12 @@ class ContentsController {
       if (content.authorId !== user.id || !isAdmin(user)) {
         throw new Error('This content belongs to another user');
       }
-      if (content.authorId !== user.id && isAdmin(user)) {
-        req.isAdminAction = true;
-        req.adminActionObject = content;
-      }
       content.destroy();
+      if (isAdmin(user) && content.authorId !== user.id) {
+        return res.sendSuccessAndLog(content, {
+          message: 'Content has been deleted succesfully'
+        });
+      }
       return res.sendSuccess({
         message: 'Content has been deleted succesfully'
       });

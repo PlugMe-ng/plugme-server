@@ -44,7 +44,7 @@ class Controller {
   addLocation = async (req, res) => {
     try {
       const location = await models.location.create(req.body);
-      return res.sendSuccess(location);
+      return res.sendSuccessAndLog(location);
     } catch (error) {
       return res.sendFailure([error.message]);
     }
@@ -61,7 +61,7 @@ class Controller {
   addCountry = async (req, res) => {
     try {
       const country = await models.country.create(req.body);
-      return res.sendSuccess(country);
+      return res.sendSuccessAndLog(country);
     } catch (error) {
       return res.sendFailure([helpers.Misc.enhanceErrorMessage(error)]);
     }
@@ -81,9 +81,8 @@ class Controller {
       if (!location) {
         throw new Error('Specified location does not exist');
       }
-      req.adminActionObject = location;
       location.destroy();
-      return res.sendSuccess({ message: 'Location deleted successfully' });
+      return res.sendSuccessAndLog(location, { message: 'Location deleted successfully' });
     } catch (error) {
       return res.sendFailure([helpers.Misc.enhanceErrorMessage(error)]);
     }
@@ -103,9 +102,8 @@ class Controller {
       if (!country) {
         throw new Error('Specified country does not exist');
       }
-      req.adminActionObject = country;
       country.destroy();
-      return res.sendSuccess({ message: 'Country deleted successfully' });
+      return res.sendSuccessAndLog(country, { message: 'Country deleted successfully' });
     } catch (error) {
       return res.sendFailure([helpers.Misc.enhanceErrorMessage(error)]);
     }

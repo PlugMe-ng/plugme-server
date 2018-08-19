@@ -39,7 +39,7 @@ class Controller {
   addOccupation = async (req, res) => {
     try {
       const occupation = await models.occupation.create(req.body);
-      return res.sendSuccess(occupation);
+      return res.sendSuccessAndLog(occupation);
     } catch (error) {
       return res.sendFailure([helpers.Misc.enhanceErrorMessage(error)]);
     }
@@ -61,9 +61,8 @@ class Controller {
       if (!occupation) {
         throw new Error('Specified occupation does not exist');
       }
-      req.adminActionObject = occupation;
       occupation.destroy();
-      return res.sendSuccess({ message: 'Occupation deleted successfully' });
+      return res.sendSuccessAndLog(occupation, { message: 'Occupation deleted successfully' });
     } catch (error) {
       return res.sendFailure([helpers.Misc.enhanceErrorMessage(error)]);
     }

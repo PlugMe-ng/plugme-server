@@ -83,7 +83,7 @@ class Controller {
   createTag = async (req, res) => {
     try {
       const tag = await models.tag.create(req.body);
-      return res.sendSuccess(tag);
+      return res.sendSuccessAndLog(tag);
     } catch (error) {
       return res.sendFailure([helpers.Misc.enhanceErrorMessage(error)]);
     }
@@ -104,9 +104,8 @@ class Controller {
       if (!tag) {
         throw new Error('Specified tag does not exist');
       }
-      req.adminActionObject = tag;
       tag.destroy();
-      return res.sendSuccess({ message: 'Tag successfully deleted' });
+      return res.sendSuccessAndLog(tag, { message: 'Tag successfully deleted' });
     } catch (error) {
       res.sendFailure([error.message]);
     }
