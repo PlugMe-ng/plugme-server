@@ -10,6 +10,7 @@
 
 import querystring from 'querystring';
 import url from 'url';
+import indefinite from 'indefinite';
 
 import models from '../models';
 
@@ -129,7 +130,7 @@ const isAdmin = user => user && user.role === 'admin';
  */
 const logAdminAction = (req, actionObject) => {
   try {
-    const actionEntityName = actionObject.constructor.name;
+    const actionEntityName = indefinite(actionObject.constructor.name);
     actionObject = actionObject.get();
     delete actionObject.password;
 
@@ -143,13 +144,13 @@ const logAdminAction = (req, actionObject) => {
     let action;
     switch (req.method) {
       case 'POST':
-        action = `created a ${actionEntityName}`;
+        action = `created ${actionEntityName}`;
         break;
       case 'DELETE':
-        action = `deleted a ${actionEntityName}`;
+        action = `deleted ${actionEntityName}`;
         break;
       case 'PUT':
-        action = `modified a ${actionEntityName}`;
+        action = `modified ${actionEntityName}`;
         break;
       default:
         break;
