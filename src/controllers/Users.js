@@ -220,7 +220,7 @@ export default class Users {
   update = async (req, res) => {
     const { userObj: user } = req;
     const {
-      skills, interests, email, role, bio, experience, hasPendingReview, ...data
+      role, email, hasPendingReview, skills, interests, bio, experience, ...data
     } = req.body;
     try {
       if (interests) {

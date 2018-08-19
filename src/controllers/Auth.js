@@ -67,7 +67,9 @@ export default class Auth {
   */
   signup = async (req, res) => {
     try {
-      const { role, verified, ...data } = req.body;
+      const {
+        role, verified, meta, ...data
+      } = req.body;
       const user = await models.User.create({
         ...data,
         password: await bcrypt.hash(

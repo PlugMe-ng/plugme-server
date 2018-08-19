@@ -15,7 +15,8 @@ const userUpdateRules = {
   skills: 'array|min:1',
   interests: 'array|min:1',
   bio: 'string|max:160',
-  experience: 'string|max:160|min:2'
+  experience: 'string|max:160',
+  photo: 'url'
 };
 
 /**
