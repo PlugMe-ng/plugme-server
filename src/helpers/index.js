@@ -130,7 +130,7 @@ const isAdmin = user => user && user.role === 'admin';
  */
 const logAdminAction = (req, actionObject) => {
   try {
-    const actionEntityName = indefinite(actionObject.constructor.name);
+    const actionEntityName = actionObject.constructor.name.toLowerCase();
     actionObject = actionObject.get();
     delete actionObject.password;
 
