@@ -185,7 +185,7 @@ class ContentsController {
           {
             model: models.User,
             as: 'author',
-            attributes: ['id', 'username', 'fullName'],
+            attributes: ['id', 'username', 'fullName', 'photo'],
             include: [{
               model: models.User,
               as: 'fans',
@@ -193,6 +193,16 @@ class ContentsController {
               through: {
                 attributes: []
               }
+            }, {
+              model: models.location,
+              attributes: ['id', 'name'],
+              include: [{
+                model: models.country,
+                attributes: ['id', 'name']
+              }]
+            }, {
+              model: models.occupation,
+              attributes: ['id', 'title']
             }]
           }, {
             model: models.User,
