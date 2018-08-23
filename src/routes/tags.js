@@ -8,25 +8,32 @@
 import { Router } from 'express';
 import controllers from '../controllers';
 import middlewares from '../middleware';
-import validations from '../middleware/validations';
-import sort from '../middleware/sort';
 
-const { auth, check } = middlewares;
+const {
+  auth, check, filter, sort, validations
+} = middlewares;
 
 const routes = new Router();
 
-routes.get('/', controllers.tags.getTags);
+routes.get(
+  '/',
+  sort,
+  filter,
+  controllers.tags.getTags
+);
 
 routes.get(
   '/minor',
   sort,
-  controllers.tags.getMinorTags,
+  filter,
+  controllers.tags.getTags,
 );
 
 routes.get(
   '/major',
   sort,
-  controllers.tags.getMajorTags
+  filter,
+  controllers.tags.getTags
 );
 
 routes.use(auth.authenticateUser, check.currentUserIsAdmin);

@@ -17,54 +17,49 @@ class Controller {
    * @memberOf Controller
    */
   getTags = async (req, res) => {
-    try {
-      const tags = await models.tag.findAll();
-      return res.sendSuccess(tags);
-    } catch (error) {
-      return res.sendFailure([error.message]);
-    }
-  }
+    const type = req.path.replace('/', '');
 
-  /**
-   * Retrieves all major tags
-   *
-   * @param {Object} req - Express request object
-   * @param {Object} res -  Express response object
-   *
-   * @returns {void}
-   * @memberOf Controller
-   */
-  getMajorTags = async (req, res) => {
+    const { where: filter } = req.meta.filter;
     const { attribute, order } = req.meta.sort;
 
     try {
-      const tags = await models.tag.findAll({
+      let tags = await models.tag.findAll({
         order: [[attribute, order]],
-        where: { categoryId: null }
+        where: {
+          ...(type === 'major' && { categoryId: null }),
+          ...(type === 'minor' && { categoryId: { [Op.ne]: null } })
+        },
+        ...(filter.include_stats && {
+          include: [{
+            model: models.content,
+            as: 'contents',
+            attributes: ['totalLikes', 'totalViews'],
+            include: [{
+              model: models.comment,
+              attributes: ['id']
+            }],
+            through: {
+              attributes: []
+            }
+          }]
+        })
       });
-      return res.sendSuccess(tags);
-    } catch (error) {
-      return res.sendFailure([error.message]);
-    }
-  }
+      if (filter.include_stats) {
+        tags = tags.map((tag) => {
+          tag = tag.get({ plain: true });
+          tag.totalComments = 0;
+          tag.totalLikes = 0;
+          tag.totalViews = 0;
 
-  /**
-   * Retrieves all minor tags
-   *
-   * @param {Object} req - Express request object
-   * @param {Object} res -  Express response object
-   *
-   * @returns {void}
-   * @memberOf Controller
-   */
-  getMinorTags = async (req, res) => {
-    const { attribute, order } = req.meta.sort;
-
-    try {
-      const tags = await models.tag.findAll({
-        order: [[attribute, order]],
-        where: { categoryId: { [Op.ne]: null } }
-      });
+          tag.contents.forEach((content) => {
+            tag.totalComments = content.comments.length;
+            tag.totalLikes = content.totalLikes;
+            tag.totalViews = content.totalViews;
+          });
+          delete tag.contents;
+          return tag;
+        });
+      }
       return res.sendSuccess(tags);
     } catch (error) {
       return res.sendFailure([error.message]);
