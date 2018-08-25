@@ -16,16 +16,9 @@ import controllers from '../controllers';
 
 const { contents: validations } = Validations;
 
-const routes = new Router();
+const router = new Router();
 
-routes.post(
-  '/',
-  middleware.auth.authenticateUser,
-  validations.createContent,
-  controllers.contents.createContent
-);
-
-routes.get(
+router.get(
   '/',
   middleware.auth.optionalUserAuthentication,
   middleware.pagination,
@@ -34,46 +27,54 @@ routes.get(
   controllers.contents.get
 );
 
-routes.get(
+router.get('/tags', controllers.tags.galleryTags);
+
+router.get('/trending', controllers.tags.trendingTags);
+
+router.get(
   '/:contentId',
   middleware.auth.optionalUserAuthentication,
   controllers.contents.getContent
 );
 
-routes.post(
-  '/:contentId/like',
-  middleware.auth.authenticateUser,
-  validations.contentExists,
-  controllers.contents.likeContent
+/**               ############################################                */
+router.use(middleware.auth.authenticateUser);
+
+router.post(
+  '/',
+  validations.createContent,
+  controllers.contents.createContent
 );
 
-routes.post(
-  '/:contentId/flags',
-  middleware.auth.authenticateUser,
-  validations.flagContent,
-  validations.contentExists,
-  controllers.contents.flagContent
-);
-
-routes.delete(
+router.delete(
   '/:contentId',
-  middleware.auth.authenticateUser,
   validations.contentExists,
   controllers.contents.deleteContent
 );
 
-routes.post(
+router.post(
   '/:contentId/comments',
-  middleware.auth.authenticateUser,
   validations.addComment,
   validations.contentExists,
   controllers.contents.addComment
 );
 
-routes.delete(
+router.post(
+  '/:contentId/flags',
+  validations.flagContent,
+  validations.contentExists,
+  controllers.contents.flagContent
+);
+
+router.post(
+  '/:contentId/like',
+  validations.contentExists,
+  controllers.contents.likeContent
+);
+
+router.delete(
   '/:contentId/comments/:commentId',
-  middleware.auth.authenticateUser,
   controllers.contents.deleteComment
 );
 
-export default routes;
+export default router;
