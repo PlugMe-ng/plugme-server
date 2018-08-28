@@ -4,6 +4,7 @@ import models from '../models';
 import helpers from '../helpers';
 
 const sortFn = (a, b) => b.totalLikes - a.totalLikes;
+const getTimeLast24Hrs = () => Date.now() - (3600000 * 24);
 
 const getCummulativeStats = tags => tags.map((tag) => {
   tag = tag.get({ plain: true });
@@ -20,81 +21,64 @@ const getCummulativeStats = tags => tags.map((tag) => {
 
   delete tag.contents;
 
-  let { minorTags } = tag;
+  const { minorTags } = tag;
 
-  minorTags = minorTags.map((minorTag) => {
-    minorTag.totalComments = 0;
-    minorTag.totalLikes = 0;
-    minorTag.totalViews = 0;
-
+  minorTags.forEach((minorTag) => {
     minorTag.contents.forEach((content) => {
-      minorTag.totalComments += content.comments.length;
-      minorTag.totalLikes += content.totalLikes;
-      minorTag.totalViews += content.totalViews;
+      tag.totalComments += content.comments.length;
+      tag.totalLikes += content.totalLikes;
+      tag.totalViews += content.totalViews;
     });
-
-    minorTag.contents = minorTag.contents.slice(0, 1);
-
-    tag.totalComments += minorTag.totalComments;
-    tag.totalLikes += minorTag.totalLikes;
-    tag.totalViews += minorTag.totalViews;
-
-    return minorTag;
   });
 
-  tag.tags = minorTags;
   delete tag.minorTags;
   return tag;
 });
 
+const computeCumulativeLikes = tags =>
+  tags.map((tag) => {
+    tag = tag.get({ plain: true });
+    tag.totalLikes = 0;
+    tag.contents.forEach((content) => {
+      tag.totalLikes += content.totalLikes;
+    });
+    tag.minorTags.forEach((minorTag) => {
+      minorTag.contents.forEach((content) => {
+        tag.totalLikes += content.totalLikes;
+      });
+    });
+    return tag;
+  });
+
 const getTagsRankedByRecentLikes = async () => {
-  const T24HRS = Date.now() - (3600000 * 24);
+  const contentAssociation = {
+    model: models.content,
+    as: 'contents',
+    attributes: ['totalLikes'],
+    through: { attributes: [] },
+    include: [{
+      model: models.User,
+      as: 'likers',
+      attributes: [],
+      required: true,
+      through: {
+        attributes: [],
+        where: { createdAt: { [Op.gt]: getTimeLast24Hrs() } },
+      }
+    }],
+  };
 
   const tags = await models.tag.findAll({
     where: { categoryId: null },
-    include: [{
+    attributes: ['id'],
+    include: [contentAssociation, {
       model: models.tag,
       as: 'minorTags',
-      include: [{
-        model: models.content,
-        as: 'contents',
-        attributes: ['mediaUrls', 'mediaType', 'totalLikes', 'totalViews'],
-        through: { attributes: [] },
-        include: [{
-          model: models.comment,
-          attributes: ['id']
-        }, {
-          model: models.User,
-          as: 'likers',
-          attributes: [],
-          required: true,
-          through: {
-            attributes: [],
-            where: { createdAt: { [Op.gt]: T24HRS } },
-          }
-        }],
-      }]
-    }, {
-      model: models.content,
-      as: 'contents',
-      attributes: ['mediaUrls', 'mediaType', 'totalLikes', 'totalViews'],
-      through: { attributes: [] },
-      include: [{
-        model: models.comment,
-        attributes: ['id']
-      }, {
-        model: models.User,
-        as: 'likers',
-        attributes: [],
-        required: true,
-        through: {
-          attributes: [],
-          where: { createdAt: { [Op.gt]: T24HRS } },
-        }
-      }],
+      attributes: ['id'],
+      include: [contentAssociation]
     }]
   });
-  return getCummulativeStats(tags).sort(sortFn);
+  return computeCumulativeLikes(tags).sort(sortFn).map(tag => tag.id);
 };
 
 /**
@@ -182,35 +166,29 @@ class Controller {
     try {
       let tags = await models.tag.findAll({
         where: { categoryId: null },
-        order: [['minorTags', 'contents', 'totalLikes', 'DESC']],
+        attributes: ['id', 'title'],
         include: [{
+          model: models.content,
+          as: 'contents',
+          attributes: ['totalLikes', 'totalViews'],
+          through: { attributes: [] },
+          include: [{ model: models.comment, attributes: ['id'] }]
+        }, {
           model: models.tag,
           as: 'minorTags',
+          attributes: ['id'],
           include: [{
             model: models.content,
             as: 'contents',
-            attributes: ['id', 'mediaUrls', 'mediaType', 'totalLikes', 'totalViews'],
-            include: [{
-              model: models.comment,
-              attributes: ['id']
-            }],
-            through: { attributes: [] }
+            attributes: ['totalLikes', 'totalViews'],
+            through: { attributes: [] },
+            include: [{ model: models.comment, attributes: ['id'] }]
           }]
-        }, {
-          model: models.content,
-          as: 'contents',
-          attributes: ['mediaUrls', 'mediaType', 'totalLikes', 'totalViews'],
-          include: [{
-            model: models.comment,
-            attributes: ['id']
-          }],
-          through: { attributes: [] }
         }]
       });
 
       tags = getCummulativeStats(tags);
-      const tagsRankedByRecentLikes = (await getTagsRankedByRecentLikes())
-        .map(t => t.id);
+      const tagsRankedByRecentLikes = (await getTagsRankedByRecentLikes());
 
       const tagsSortedByRecentLikes = [];
 
@@ -219,6 +197,51 @@ class Controller {
         tagsSortedByRecentLikes[index] = tag;
       });
       return res.sendSuccess(tagsSortedByRecentLikes);
+    } catch (error) {
+      return res.sendFailure([error.message]);
+    }
+  }
+
+  /**
+   * Handles retrieving all tags including the accumlated stats from contents
+   * that belong to them.
+   *
+   * @param {Object} req - Express Request object
+   * @param {Object} res -  Express Response object
+   *
+   * @returns {void}
+   * @memberOf Controller
+   */
+  galleryTagsMinor = async (req, res) => {
+    try {
+      let tags = await models.tag.findAll({
+        where: { categoryId: req.params.categoryId ? req.params.categoryId : { [Op.ne]: null } },
+        order: [['contents', 'totalLikes', 'DESC']],
+        include: [{
+          model: models.content,
+          as: 'contents',
+          attributes: ['id', 'mediaUrls', 'mediaType', 'totalLikes', 'totalViews'],
+          through: { attributes: [] },
+          include: [{
+            model: models.comment,
+            attributes: ['id']
+          }]
+        }]
+      });
+      tags = tags.map((tag) => {
+        tag = tag.get({ plain: true });
+        tag.totalLikes = 0;
+        tag.totalViews = 0;
+        tag.totalComments = 0;
+        tag.contents.forEach((content) => {
+          tag.totalLikes += content.totalLikes;
+          tag.totalViews += content.totalViews;
+          tag.totalComments += content.comments.length;
+        });
+        tag.contents = tag.contents.slice(0, 1);
+        return tag;
+      });
+      return res.sendSuccess(tags);
     } catch (error) {
       return res.sendFailure([error.message]);
     }
@@ -234,7 +257,6 @@ class Controller {
    * @memberOf Controller
    */
   trendingTags = async (req, res) => {
-    const T24HRS = Date.now() - (3600000 * 24);
     try {
       const tags = await models.tag.findAll({
         where: { categoryId: { [Op.ne]: null } },
@@ -254,7 +276,7 @@ class Controller {
             required: true,
             through: {
               attributes: [],
-              where: { createdAt: { [Op.gt]: T24HRS } },
+              where: { createdAt: { [Op.gt]: getTimeLast24Hrs() } },
             }
           }],
         }]
@@ -266,11 +288,10 @@ class Controller {
         tag.contents.forEach((content) => {
           tag.totalLikes += content.totalLikes;
         });
+        tag.contents = tag.contents.slice(0, 1);
         return tag;
       }).sort(sortFn)
-        .slice(0, 25)
-        .map(tag => tag.contents[0])
-        .filter(content => !!content);
+        .slice(0, 25);
 
       return res.sendSuccess(contents);
     } catch (error) {
