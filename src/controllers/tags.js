@@ -3,6 +3,8 @@ import { Op } from 'sequelize';
 import models from '../models';
 import helpers from '../helpers';
 
+const sortFn = (a, b) => b.totalLikes - a.totalLikes;
+
 const getCummulativeStats = tags => tags.map((tag) => {
   tag = tag.get({ plain: true });
 
@@ -21,13 +23,9 @@ const getCummulativeStats = tags => tags.map((tag) => {
   let { minorTags } = tag;
 
   minorTags = minorTags.map((minorTag) => {
-    const minorTagContent = minorTag.contents[0];
-
     minorTag.totalComments = 0;
     minorTag.totalLikes = 0;
     minorTag.totalViews = 0;
-    minorTag.mediaUrl = minorTagContent ? minorTagContent.mediaUrls[0] : null;
-    minorTag.mediaType = minorTagContent ? minorTagContent.mediaType : null;
 
     minorTag.contents.forEach((content) => {
       minorTag.totalComments += content.comments.length;
@@ -35,11 +33,11 @@ const getCummulativeStats = tags => tags.map((tag) => {
       minorTag.totalViews += content.totalViews;
     });
 
+    minorTag.contents = minorTag.contents.slice(0, 1);
+
     tag.totalComments += minorTag.totalComments;
     tag.totalLikes += minorTag.totalLikes;
     tag.totalViews += minorTag.totalViews;
-
-    delete minorTag.contents;
 
     return minorTag;
   });
@@ -50,7 +48,7 @@ const getCummulativeStats = tags => tags.map((tag) => {
 });
 
 const getTagsRankedByRecentLikes = async () => {
-  const HRS24 = Date.now() - (3600000 * 24);
+  const T24HRS = Date.now() - (3600000 * 24);
 
   const tags = await models.tag.findAll({
     where: { categoryId: null },
@@ -72,7 +70,7 @@ const getTagsRankedByRecentLikes = async () => {
           required: true,
           through: {
             attributes: [],
-            where: { createdAt: { [Op.gt]: HRS24 } },
+            where: { createdAt: { [Op.gt]: T24HRS } },
           }
         }],
       }]
@@ -91,12 +89,12 @@ const getTagsRankedByRecentLikes = async () => {
         required: true,
         through: {
           attributes: [],
-          where: { createdAt: { [Op.gt]: HRS24 } },
+          where: { createdAt: { [Op.gt]: T24HRS } },
         }
       }],
     }]
   });
-  return getCummulativeStats(tags).sort((a, b) => b.totalLikes > a.totalLikes);
+  return getCummulativeStats(tags).sort(sortFn);
 };
 
 /**
@@ -191,7 +189,7 @@ class Controller {
           include: [{
             model: models.content,
             as: 'contents',
-            attributes: ['mediaUrls', 'mediaType', 'totalLikes', 'totalViews'],
+            attributes: ['id', 'mediaUrls', 'mediaType', 'totalLikes', 'totalViews'],
             include: [{
               model: models.comment,
               attributes: ['id']
@@ -236,16 +234,45 @@ class Controller {
    * @memberOf Controller
    */
   trendingTags = async (req, res) => {
+    const T24HRS = Date.now() - (3600000 * 24);
     try {
-      let tags = [];
-      (await getTagsRankedByRecentLikes())
-        .forEach((tag) => { tags = [...tags, ...tag.tags]; });
+      const tags = await models.tag.findAll({
+        where: { categoryId: { [Op.ne]: null } },
+        order: [['contents', 'totalLikes', 'DESC']],
+        include: [{
+          model: models.content,
+          as: 'contents',
+          attributes: ['id', 'mediaUrls', 'mediaType', 'totalLikes', 'totalViews'],
+          through: { attributes: [] },
+          include: [{
+            model: models.comment,
+            attributes: ['id'],
+          }, {
+            model: models.User,
+            as: 'likers',
+            attributes: [],
+            required: true,
+            through: {
+              attributes: [],
+              where: { createdAt: { [Op.gt]: T24HRS } },
+            }
+          }],
+        }]
+      });
 
-      tags = tags
-        .sort((a, b) => b.totalLikes > a.totalLikes);
-      // .splice(0, 25);
+      const contents = tags.map((tag) => {
+        tag = tag.get({ plain: true });
+        tag.totalLikes = 0;
+        tag.contents.forEach((content) => {
+          tag.totalLikes += content.totalLikes;
+        });
+        return tag;
+      }).sort(sortFn)
+        .slice(0, 25)
+        .map(tag => tag.contents[0])
+        .filter(content => !!content);
 
-      return res.sendSuccess(tags);
+      return res.sendSuccess(contents);
     } catch (error) {
       return res.sendFailure([error.message]);
     }
