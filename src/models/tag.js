@@ -16,7 +16,7 @@ module.exports = (sequelize, DataTypes) => {
       },
       get() {
         const title = this.getDataValue('title');
-        return capitalize.words(title);
+        return title && capitalize.words(title);
       },
     },
   }, {

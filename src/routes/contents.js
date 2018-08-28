@@ -29,6 +29,10 @@ router.get(
 
 router.get('/tags', controllers.tags.galleryTags);
 
+router.get('/tags/minor', controllers.tags.galleryTagsMinor);
+
+router.get('/tags/:categoryId', controllers.tags.galleryTagsMinor);
+
 router.get('/trending', controllers.tags.trendingTags);
 
 router.get(
