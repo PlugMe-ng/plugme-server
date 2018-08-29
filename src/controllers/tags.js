@@ -265,6 +265,7 @@ class Controller {
           model: models.content,
           as: 'contents',
           attributes: ['id', 'mediaUrls', 'mediaType', 'totalLikes', 'totalViews'],
+          required: true,
           through: { attributes: [] },
           include: [{
             model: models.comment,
