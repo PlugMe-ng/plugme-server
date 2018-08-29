@@ -161,6 +161,7 @@ export default class Users {
           'id',
           'username',
           'fullName',
+          'photo',
           [models.sequelize.fn('sum', models.sequelize.col('contents.totalLikes')), 'totalLikes'],
           [models.sequelize.fn('sum', models.sequelize.col('contents.totalViews')), 'totalViews'],
           [models.sequelize.fn('count', models.sequelize.col('contents.id')), 'totalComments']
@@ -215,6 +216,7 @@ export default class Users {
           'id',
           'username',
           'fullName',
+          'photo',
           [models.sequelize.fn('sum', models.sequelize.col('contents.totalLikes')), 'totalLikes'],
           [models.sequelize.fn('sum', models.sequelize.col('contents.totalViews')), 'totalViews'],
           [models.sequelize.fn('count', models.sequelize.col('contents.id')), 'totalComments']
