@@ -13,22 +13,24 @@ import { Router } from 'express';
 import Users from '../controllers/Users';
 import middleware from '../middleware';
 import validations from '../middleware/validations';
-import sort from '../middleware/sort';
-import filter from '../middleware/filter';
 
 const controller = new Users();
-const routes = new Router();
+const router = new Router();
 
 const { users: validation } = validations;
-const { check } = middleware;
+const {
+  check, pagination, sort, filter
+} = middleware;
 
-routes.get('/:username', controller.getByUsername);
+router.get('/:username', controller.getByUsername);
+router.get('/:username/fans', pagination, controller.getUserFans);
+router.get('/:username/fanOf', pagination, controller.getUserFansOf);
 
-routes.use(middleware.auth.authenticateUser);
+router.use(middleware.auth.authenticateUser);
 
-routes.post('/:username/fans', controller.addFan);
+router.post('/:username/fans', controller.addFan);
 
-routes.get(
+router.get(
   '/',
   check.currentUserIsAdmin,
   middleware.pagination,
@@ -37,17 +39,17 @@ routes.get(
   controller.get
 );
 
-routes.put(
+router.put(
   '/',
   validation.userUpdate,
   controller.update
 );
 
-routes.put(
+router.put(
   '/:userId',
   check.currentUserIsAdmin,
   validation.adminUserUpdate,
   controller.adminUserUpdate
 );
 
-export default routes;
+export default router;

@@ -12,102 +12,6 @@ import { Op } from 'sequelize';
 import helpers from '../helpers';
 import models from '../models';
 
-const contentAssociations = {
-  model: models.content,
-  attributes: ['id', 'totalViews'],
-  as: 'contents',
-  include: [{
-    model: models.User,
-    as: 'likers',
-    attributes: ['id'],
-    through: {
-      attributes: []
-    }
-  }, {
-    model: models.comment,
-    attributes: ['id']
-  }]
-};
-
-const userAssociations = [{
-  model: models.User,
-  as: 'fans',
-  include: [contentAssociations],
-  attributes: {
-    exclude: ['password'],
-  },
-  through: {
-    attributes: []
-  },
-}, {
-  model: models.tag,
-  as: 'interests',
-  attributes: ['id', 'title'],
-  through: {
-    attributes: []
-  }
-}, {
-  model: models.tag,
-  as: 'skills',
-  attributes: ['id', 'title'],
-  through: {
-    attributes: []
-  }
-}, {
-  model: models.content,
-  as: 'contents',
-  include: [{
-    model: models.User,
-    as: 'likers',
-    attributes: ['id'],
-    through: {
-      attributes: []
-    }
-  }, {
-    model: models.User,
-    as: 'viewers',
-    attributes: ['id'],
-    through: {
-      attributes: []
-    }
-  }, {
-    model: models.comment,
-    attributes: ['id', 'UserId']
-  }, {
-    model: models.tag,
-    attributes: ['id', 'title'],
-    as: 'tags',
-    through: {
-      attributes: []
-    }
-  }]
-}, {
-  model: models.location,
-  attributes: ['id', 'name'],
-  include: [{
-    model: models.country,
-    attributes: ['id', 'name']
-  }]
-}, {
-  model: models.occupation,
-  attributes: ['id', 'title']
-}];
-
-const getUserCummulativeData = (user) => {
-  let totalContentLikes = 0;
-  let totalContentViews = 0;
-  let totalContentComments = 0;
-  user.contents.forEach((content) => {
-    totalContentLikes += content.likers.length;
-    totalContentViews += content.totalViews;
-    totalContentComments += content.comments.length;
-  });
-  delete user.contents;
-  user.totalLikes = totalContentLikes;
-  user.totalViews = totalContentViews;
-  user.totalFeedback = totalContentComments;
-};
-
 /**
 * Users controller class
 * @class Users
@@ -125,33 +29,53 @@ export default class Users {
   async getByUsername(req, res) {
     try {
       let user = await models.User.findOne({
-        where: { username: req.params.username.toLowerCase() },
-        attributes: { exclude: ['password'] },
-        order: [[{ model: models.content, as: 'contents' }, 'createdAt', 'DESC']],
-        include: userAssociations
+        where: { username: req.params.username },
+        attributes: { exclude: ['password', 'occupationId', 'locationId'] },
+        include: [{
+          model: models.content,
+          as: 'contents',
+          attributes: ['totalLikes', 'totalViews'],
+        }, {
+          model: models.tag,
+          as: 'interests',
+          attributes: ['id', 'title'],
+          through: { attributes: [] }
+        }, {
+          model: models.tag,
+          as: 'skills',
+          attributes: ['id', 'title'],
+          through: { attributes: [] }
+        }, {
+          model: models.location,
+          attributes: ['id', 'name'],
+          include: [{
+            model: models.country,
+            attributes: ['id', 'name']
+          }]
+        }, {
+          model: models.occupation,
+          attributes: ['id', 'title']
+        }]
       });
       if (!user) {
         throw new Error('User not found');
       }
-      const userFansOf = await user.getFansOf({
-        attributes: { exclude: ['password'] },
-        include: [contentAssociations],
-        joinTableAttributes: []
-      });
+
+      const totalFansOf = await user.countFansOf();
+      const totalFans = await user.countFans();
+
       user = user.get({ plain: true });
-      user.fansOf = userFansOf.map(element =>
-        element.get({ plain: true }));
+      user.totalFans = totalFans;
+      user.totalFansOf = totalFansOf;
 
       user.totalLikes = 0;
       user.totalViews = 0;
 
       user.contents.forEach((content) => {
-        user.totalLikes += content.likers.length;
+        user.totalLikes += content.totalLikes;
         user.totalViews += content.totalViews;
       });
-
-      user.fans.forEach(getUserCummulativeData);
-      user.fansOf.forEach(getUserCummulativeData);
+      delete user.contents;
 
       return res.sendSuccess(user);
     } catch (error) {
@@ -204,6 +128,117 @@ export default class Users {
       }
 
       throw new Error('Could not retrieve users from the database.');
+    } catch (error) {
+      return res.sendFailure([error.message]);
+    }
+  }
+
+  /**
+   * @desc Retrieves all the fans of the specified user
+   *
+   * @param { object } req request
+   * @param { object } res response
+   *
+   * @returns { object } response
+   */
+  getUserFans = async (req, res) => {
+    const { limit, offset } = req.meta.pagination;
+    try {
+      const user = await models.User
+        .findOne({ where: { username: req.params.username }, attributes: ['id'] });
+      if (!user) {
+        throw new Error('Specified user does not exist');
+      }
+      const count = await user.countFans();
+      const fans = await user.getFans({
+        limit,
+        offset,
+        where: {
+          ...(req.query.id && { id: req.query.id })
+        },
+        group: ['User.id', 'contents.id'],
+        attributes: [
+          'id',
+          'username',
+          'fullName',
+          [models.sequelize.fn('sum', models.sequelize.col('contents.totalLikes')), 'totalLikes'],
+          [models.sequelize.fn('sum', models.sequelize.col('contents.totalViews')), 'totalViews'],
+          [models.sequelize.fn('count', models.sequelize.col('contents.id')), 'totalComments']
+        ],
+        joinTableAttributes: [],
+        include: [{
+          duplicating: false,
+          model: models.content,
+          as: 'contents',
+          attributes: [],
+          include: [{
+            model: models.comment,
+            attributes: [],
+            duplicating: false,
+          }]
+        }]
+      });
+      const pagination = helpers.Misc.generatePaginationMeta(
+        req,
+        { count },
+        limit,
+        offset
+      );
+      return res.sendSuccess(fans, 200, { pagination });
+    } catch (error) {
+      return res.sendFailure([error.message]);
+    }
+  }
+
+  /**
+   * @desc Retrieves all users the specified user is following
+   *
+   * @param { object } req request
+   * @param { object } res response
+   *
+   * @returns { object } response
+   */
+  getUserFansOf = async (req, res) => {
+    const { limit, offset } = req.meta.pagination;
+    try {
+      const user = await models.User
+        .findOne({ where: { username: req.params.username }, attributes: ['id'] });
+      if (!user) {
+        throw new Error('Specified user does not exist');
+      }
+      const count = await user.countFansOf();
+      const fans = await user.getFansOf({
+        limit,
+        offset,
+        group: ['User.id', 'contents.id'],
+        attributes: [
+          'id',
+          'username',
+          'fullName',
+          [models.sequelize.fn('sum', models.sequelize.col('contents.totalLikes')), 'totalLikes'],
+          [models.sequelize.fn('sum', models.sequelize.col('contents.totalViews')), 'totalViews'],
+          [models.sequelize.fn('count', models.sequelize.col('contents.id')), 'totalComments']
+        ],
+        joinTableAttributes: [],
+        include: [{
+          duplicating: false,
+          model: models.content,
+          as: 'contents',
+          attributes: [],
+          include: [{
+            model: models.comment,
+            attributes: [],
+            duplicating: false,
+          }]
+        }]
+      });
+      const pagination = helpers.Misc.generatePaginationMeta(
+        req,
+        { count },
+        limit,
+        offset
+      );
+      return res.sendSuccess(fans, 200, { pagination });
     } catch (error) {
       return res.sendFailure([error.message]);
     }
