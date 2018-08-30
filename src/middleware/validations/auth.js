@@ -13,11 +13,11 @@ const signinUserRules = {
   password: 'required|string',
 };
 const signupUserRules = {
-  username: 'required|between:4,16|alpha_dash',
+  username: 'required|between:5,20|alpha_dash',
   email: 'required|email',
   password: 'required|string|between:7,25',
   photo: 'string',
-  fullName: 'required|string|between:2,30'
+  fullName: 'required|string|between:5,25'
 };
 const tokenSignInRules = {
   token: 'required|string',
