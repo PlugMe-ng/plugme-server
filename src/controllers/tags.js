@@ -264,16 +264,27 @@ class Controller {
         include: [{
           model: models.content,
           as: 'contents',
-          attributes: ['id', 'mediaUrls', 'mediaType', 'totalLikes', 'totalViews'],
+          attributes: { exclude: ['flagCount'] },
           required: true,
           through: { attributes: [] },
           include: [{
             model: models.comment,
+            attributes: ['id', 'UserId'],
+          }, {
+            model: models.User,
+            as: 'author',
+            attributes: ['fullName', 'username', 'id'],
+          }, {
+            model: models.User,
+            as: 'viewers',
             attributes: ['id'],
+            through: {
+              attributes: []
+            }
           }, {
             model: models.User,
             as: 'likers',
-            attributes: [],
+            attributes: ['id'],
             required: true,
             through: {
               attributes: [],
@@ -292,7 +303,14 @@ class Controller {
         tag.contents = tag.contents.slice(0, 1);
         return tag;
       }).sort(sortFn)
-        .slice(0, 25);
+        .slice(0, 25)
+        .map((tag) => {
+          const content = tag.contents[0];
+          delete tag.contents;
+          delete tag.totalLikes;
+          content.tags = [tag];
+          return content;
+        });
 
       return res.sendSuccess(contents);
     } catch (error) {
