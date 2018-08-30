@@ -11,11 +11,12 @@ const adminUserUpdateRules = {
 const userUpdateRules = {
   occupationId: 'string',
   locationId: 'string',
-  username: 'string|min:5|max:20',
+  username: 'alpha_dash|min:5|max:20',
+  fullName: 'string|between:5,25',
   skills: 'array|min:1',
   interests: 'array|min:1',
-  bio: 'string|max:160',
-  experience: 'string|max:160',
+  bio: 'string|max:270',
+  experience: 'string|max:270',
   photo: 'url'
 };
 
