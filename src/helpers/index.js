@@ -10,7 +10,6 @@
 
 import querystring from 'querystring';
 import url from 'url';
-import indefinite from 'indefinite';
 
 import models from '../models';
 
@@ -119,6 +118,8 @@ const enhanceErrorMessage = (error) => {
 
 const isAdmin = user => user && user.role === 'admin';
 
+const getTimeFromNow = days => Date.now() - (3600000 * 24 * days);
+
 /**
  * Logs admin actions.
  *
@@ -171,6 +172,7 @@ export default {
     updateUserAttributes,
     enhanceErrorMessage,
     isAdmin,
-    logAdminAction
+    logAdminAction,
+    getTimeFromNow
   }
 };
