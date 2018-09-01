@@ -118,8 +118,16 @@ class ContentsController {
           model: models.User,
           as: 'likers',
           attributes: ['id'],
+          ...(filter.like_days && { required: true }),
           through: {
-            attributes: []
+            attributes: [],
+            where: {
+              ...(filter.like_days && {
+                createdAt: {
+                  [Op.gt]: helpers.Misc.getTimeFromNow(filter.like_days)
+                }
+              })
+            }
           }
         }, {
           model: models.User,

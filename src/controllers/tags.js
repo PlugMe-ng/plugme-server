@@ -4,7 +4,6 @@ import models from '../models';
 import helpers from '../helpers';
 
 const sortFn = (a, b) => b.totalLikes - a.totalLikes;
-const getTimeLast24Hrs = () => Date.now() - (3600000 * 24);
 
 const getCummulativeStats = tags => tags.map((tag) => {
   tag = tag.get({ plain: true });
@@ -63,7 +62,7 @@ const getTagsRankedByRecentLikes = async () => {
       required: true,
       through: {
         attributes: [],
-        where: { createdAt: { [Op.gt]: getTimeLast24Hrs() } },
+        where: { createdAt: { [Op.gt]: helpers.Misc.getTimeFromNow(1) } },
       }
     }],
   };
@@ -288,7 +287,7 @@ class Controller {
             required: true,
             through: {
               attributes: [],
-              where: { createdAt: { [Op.gt]: getTimeLast24Hrs() } },
+              where: { createdAt: { [Op.gt]: helpers.Misc.getTimeFromNow(1) } },
             }
           }],
         }]
@@ -300,7 +299,6 @@ class Controller {
         tag.contents.forEach((content) => {
           tag.totalLikes += content.totalLikes;
         });
-        tag.contents = tag.contents.slice(0, 1);
         return tag;
       }).sort(sortFn)
         .slice(0, 25)
