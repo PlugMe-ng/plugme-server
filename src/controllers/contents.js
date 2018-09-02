@@ -364,6 +364,43 @@ class ContentsController {
   }
 
   /**
+   * Handles retrieving a content's comments
+   *
+   * @param {Object} req
+   * @param {Object} res
+   *
+   * @returns {void}
+   * @memberOf ContentsController
+   */
+  getComments = async (req, res) => {
+    const { content } = req;
+    const { limit, offset } = req.meta.pagination;
+    const { attribute, order } = req.meta.sort;
+    try {
+      const comments = await models.comment.findAndCountAll({
+        distinct: true,
+        limit,
+        offset,
+        order: [[attribute, order]],
+        where: { contentId: content.id },
+        include: [{
+          model: models.User,
+          attributes: ['photo', 'fullName', 'username', 'id'],
+          include: [{
+            model: models.occupation,
+            attributes: ['title']
+          }]
+        }]
+      });
+      const paginationMeta =
+        helpers.Misc.generatePaginationMeta(req, comments, limit, offset);
+      return res.sendSuccess(comments.rows, 200, paginationMeta);
+    } catch (error) {
+      return res.sendFailure([error.message]);
+    }
+  }
+
+  /**
    * Handles comment deletion
    *
    * @param {Object} req
