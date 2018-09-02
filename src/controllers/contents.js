@@ -234,7 +234,7 @@ class ContentsController {
               include: [{
                 model: models.occupation,
                 attributes: ['title']
-            }]
+              }]
             }]
           }, {
             model: models.tag,
