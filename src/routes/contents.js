@@ -41,6 +41,14 @@ router.get(
   controllers.contents.getContent
 );
 
+router.get(
+  '/:contentId/comments',
+  validations.contentExists,
+  middleware.pagination,
+  middleware.sort,
+  controllers.contents.getComments
+);
+
 /**               ############################################                */
 router.use(middleware.auth.authenticateUser);
 
