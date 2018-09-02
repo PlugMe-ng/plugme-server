@@ -4,6 +4,10 @@ import Sequelize from 'sequelize';
 
 import configuration from '../config/config';
 
+const pg = require('pg');
+
+pg.defaults.parseInt8 = true;
+
 const basename = path.basename(module.filename);
 const env = process.env.NODE_ENV || 'development';
 const config = configuration[env];
