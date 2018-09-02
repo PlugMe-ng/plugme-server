@@ -230,7 +230,11 @@ class ContentsController {
             model: models.comment,
             include: [{
               model: models.User,
-              attributes: ['id', 'username', 'fullName']
+              attributes: ['id', 'photo', 'username', 'fullName'],
+              include: [{
+                model: models.occupation,
+                attributes: ['title']
+            }]
             }]
           }, {
             model: models.tag,
