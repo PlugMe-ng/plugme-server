@@ -12,8 +12,8 @@ const addViewEntry = async (user, content) => {
   const viewer = (await content.getViewers({ where: { id: user.id } }))[0];
 
   if (!viewer) {
-    await content.addViewer(user);
-    await content.increment('totalViews');
+    content.addViewer(user);
+    content.increment('totalViews');
     return;
   }
   const view = viewer.contents_users_views;
@@ -24,8 +24,8 @@ const addViewEntry = async (user, content) => {
     return;
   }
   await view.destroy();
-  await content.addViewer(user);
-  await content.increment('totalViews');
+  content.addViewer(user);
+  content.increment('totalViews');
 };
 
 /**
@@ -188,68 +188,28 @@ class ContentsController {
     const { userObj } = req;
     try {
       const content = await models.content.findById(contentId, {
-        order: [[models.comment, 'createdAt', 'ASC']],
-        include: [
-          {
-            model: models.User,
-            as: 'author',
-            attributes: ['id', 'username', 'fullName', 'photo'],
-            include: [{
-              model: models.User,
-              as: 'fans',
-              attributes: ['id', 'username', 'fullName'],
-              through: {
-                attributes: []
-              }
-            }, {
-              model: models.location,
-              attributes: ['id', 'name'],
-              include: [{
-                model: models.country,
-                attributes: ['id', 'name']
-              }]
-            }, {
-              model: models.occupation,
-              attributes: ['id', 'title']
-            }]
-          }, {
-            model: models.User,
-            as: 'likers',
-            attributes: ['id'],
-            through: {
-              attributes: []
-            }
-          }, {
-            model: models.User,
-            as: 'viewers',
-            attributes: ['id'],
-            through: {
-              attributes: []
-            }
-          }, {
-            model: models.comment,
-            include: [{
-              model: models.User,
-              attributes: ['id', 'photo', 'username', 'fullName'],
-              include: [{
-                model: models.occupation,
-                attributes: ['title']
-              }]
-            }]
-          }, {
-            model: models.tag,
-            as: 'tags',
-            attributes: ['id', 'title'],
-            through: {
-              attributes: []
-            }
+        include: [{
+          model: models.User,
+          as: 'author',
+          attributes: ['id', 'username', 'fullName', 'photo']
+        }, {
+          model: models.tag,
+          as: 'tags',
+          attributes: ['id', 'title'],
+          through: { attributes: [] }
+        }, {
+          model: models.User,
+          as: 'likers',
+          attributes: ['id'],
+          through: {
+            attributes: []
           }
-        ]
+        }]
       });
       if (!content) {
         throw new Error('Specified content does not exist');
       }
-      await addViewEntry(userObj, content);
+      addViewEntry(userObj, content);
       return res.sendSuccess(content);
     } catch (error) {
       return res.sendFailure([error.message]);
