@@ -26,24 +26,13 @@ router.get('/:username', controller.getByUsername);
 router.get('/:username/fans', pagination, controller.getUserFans);
 router.get('/:username/fanOf', pagination, controller.getUserFansOf);
 
+router.get('/', pagination, sort, filter, controller.get);
+
 router.use(middleware.auth.authenticateUser);
 
 router.post('/:username/fans', controller.addFan);
 
-router.get(
-  '/',
-  check.currentUserIsAdmin,
-  middleware.pagination,
-  sort,
-  filter,
-  controller.get
-);
-
-router.put(
-  '/',
-  validation.userUpdate,
-  controller.update
-);
+router.put('/', validation.userUpdate, controller.update);
 
 router.put(
   '/:userId',
