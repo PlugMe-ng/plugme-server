@@ -18,14 +18,14 @@ import bodyParser from 'body-parser';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import express from 'express';
-import logger from 'morgan';
-import path from 'path';
-import swaggerUI from 'swagger-ui-express';
 import trimmer from 'express-trimmer';
+import logger from 'morgan';
+import swaggerUI from 'swagger-ui-express';
 
 import middleware from './middleware';
 import routes from './routes';
 import apiDocs from './api-docs.json';
+import Socket from './socket';
 
 dotenv.config();
 
@@ -52,7 +52,6 @@ app.use((req, res, next) => {
 */
 app.use(cors());
 
-// Parse incoming requests data
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 
@@ -60,7 +59,6 @@ app.use('/api-docs', swaggerUI.serve, swaggerUI.setup(apiDocs));
 
 app.use(middleware.api);
 
-// set content type
 app.use((req, res, next) => {
   res.header('Content-Type', 'application/json');
   next();
@@ -74,13 +72,11 @@ app.use(trimmer);
 
 app.use('/v1', routes);
 
-// 404 error handler
 app.use((req, res) =>
   res.sendFailure([`The endpoint '${req.path}' could not be found.`], 404));
 
-app.listen(port, () => {
-  // TODO: remove this in production
-  console.log(`Server started successfully on port ${port}`);
-});
+const server = app.listen(port);
+const socket = new Socket(server);
 
-export default app;
+export { socket as notifications };
+export default server;
