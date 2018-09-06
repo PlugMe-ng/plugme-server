@@ -16,6 +16,7 @@ import opportunitiesRoutes from './opportunities';
 import locationRoutes from './locations';
 import occupationRoutes from './occupations';
 import miscRoutes from './misc';
+import notificationRoutes from './notifications';
 
 const router = new Router();
 
@@ -27,6 +28,7 @@ router
   .use('/opportunities', opportunitiesRoutes)
   .use('/locations', locationRoutes)
   .use('/occupations', occupationRoutes)
+  .use('/notifications', notificationRoutes)
   .use('/', miscRoutes);
 
 export default router;

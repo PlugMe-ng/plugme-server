@@ -78,5 +78,5 @@ app.use((req, res) =>
 const server = app.listen(port);
 const socket = new Socket(server);
 
-export { socket as notifications };
+export { socket as notifsIO };
 export default server;

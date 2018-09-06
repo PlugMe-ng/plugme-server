@@ -63,8 +63,6 @@ export default class {
    */
   send = (event, recipient, payload) => {
     const recipientSocket = connectedClients[recipient];
-    if (recipientSocket) {
-      this.io.to(recipientSocket).emit(event, payload);
-    }
+    if (recipientSocket) this.io.to(recipientSocket).emit(event, payload);
   }
 }

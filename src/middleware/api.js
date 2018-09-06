@@ -1,4 +1,5 @@
 import helpers from '../helpers';
+import notifications from '../controllers/notifications';
 
 /**
  * @fileOverview API middleware
@@ -28,6 +29,22 @@ export default (req, res, next) => {
 
   res.sendSuccessAndLog = (actionObject, data = actionObject, status = 200, meta) => {
     helpers.Misc.logAdminAction(req, actionObject);
+    return res.sendSuccess(data, status, meta);
+  };
+
+  /**
+   * @param {Object} payload
+   * @param {string} payload.event - type of event triggered
+   * @param {Array.<string>} payload.recipients - an array of recipientIds of
+   * the event
+   * @param {Object} payload.entity - action object
+   * @param {any} data
+   * @param {number} [status=200]
+   * @param {any} meta
+   * @returns {void}
+   */
+  res.sendSuccessAndNotify = (payload, data, status = 200, meta) => {
+    notifications.create(req.user, payload);
     return res.sendSuccess(data, status, meta);
   };
 

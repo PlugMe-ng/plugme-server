@@ -2,6 +2,7 @@ import { Op } from 'sequelize';
 
 import models from '../models';
 import helpers from '../helpers';
+import { events } from './notifications';
 
 const { isAdmin } = helpers.Misc;
 
@@ -237,7 +238,11 @@ class ContentsController {
       }
       await content.addLiker(userObj);
       await content.increment('totalLikes');
-      return res.sendSuccess({
+      return res.sendSuccessAndNotify({
+        event: events.LIKE,
+        recipients: [content.authorId],
+        entity: content
+      }, {
         message: 'You have successfully liked this content'
       });
     } catch (error) {
@@ -317,7 +322,11 @@ class ContentsController {
       const comment = await models.comment.create(req.body);
       await comment.setUser(userObj);
       await comment.setContent(content);
-      return res.sendSuccess(comment.get());
+      return res.sendSuccessAndNotify({
+        event: events.COMMENT,
+        recipients: [content.authorId],
+        entity: content
+      }, comment.get());
     } catch (error) {
       return res.sendFailure([error.message]);
     }
