@@ -5,18 +5,25 @@ import helpers from '../helpers';
 export const events = {
   LIKE: 'like',
   COMMENT: 'comment',
+  OPPORTUNITY_APPLICATION: 'opportunity_application',
+  OPPORTUNITY_ACHIEVER_SET: 'opportunity_achiever_set',
+  OPPORTUNITY_REVIEW: 'opportunity_review'
 };
 
-const eventFunctions = {
-  like: user => `${user} liked your content`,
-  comment: user => `${user} commented on your content`,
+const eventDescriptions = {
+  like: 'liked your content',
+  comment: 'commented on your content',
+  opportunity_application: 'has plugged to an opportunity you uploaded',
+  opportunity_achiever_set: 'has selected opportunity achiever',
+  opportunity_review: 'has reviewed your opportuntiy'
+
 };
 
-const generateMeta = (author, event, entity) => {
+const generateMeta = (event, entity) => {
   const meta = {};
   meta[entity.constructor.name.toLowerCase()] = entity.id;
   meta.event = event;
-  meta.text = eventFunctions[event](author ? author.username : null);
+  meta.text = eventDescriptions[event];
   return meta;
 };
 
@@ -32,15 +39,19 @@ export default new class {
    * @returns {void}
    */
   create = (author, { event, recipients, entity }) => {
-    const meta = generateMeta(author, event, entity);
-    recipients.forEach((recipientId) => {
-      models.notification.create({
-        authorId: author ? author.id : null,
-        userId: recipientId,
-        meta
+    try {
+      const meta = generateMeta(event, entity);
+      recipients.forEach((recipientId) => {
+        models.notification.create({
+          authorId: author ? author.id : null,
+          userId: recipientId,
+          meta
+        });
+        notifsIO.send('notification', recipientId);
       });
-      notifsIO.send('notification', recipientId);
-    });
+    } catch (error) {
+      // TODO: fail silently for now
+    }
   }
 
   get = async (req, res) => {

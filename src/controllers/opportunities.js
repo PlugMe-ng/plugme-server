@@ -2,6 +2,7 @@ import { Op } from 'sequelize';
 
 import models from '../models';
 import helpers from '../helpers';
+import { events } from './notifications';
 
 /**
  * @description Checks that the opportunity being created is not a
@@ -342,7 +343,11 @@ class Controller {
         });
       }
       const { plugEntries, ...data } = opportunity.get({ plain: true });
-      return res.sendSuccess({
+      return res.sendSuccessAndNotify({
+        event: events.OPPORTUNITY_APPLICATION,
+        recipients: [opportunity.pluggerId],
+        entity: opportunity
+      }, {
         message: 'Opportunity plugged successfully'
       }, 200, { ...data });
     } catch (error) {
@@ -487,9 +492,15 @@ class Controller {
       } else {
         await opportunity.update({ status: 'done' });
       }
-      return res.sendSuccess({
-        message: 'Review submitted successfully'
-      });
+      return userObj.id === opportunity.pluggerId ?
+        res.sendSuccessAndNotify({
+          event: events.OPPORTUNITY_REVIEW,
+          entity: opportunity,
+          recipients: [opportunity.achieverId]
+        }, {
+          message: 'Review submitted successfully'
+        }) :
+        res.sendSuccess({ message: 'Review submitted successfully' });
     } catch (error) {
       return res.sendFailure([error.message]);
     }
