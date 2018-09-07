@@ -15,7 +15,7 @@ const eventDescriptions = {
   comment: 'commented on your content',
   opportunity_application: 'has plugged to an opportunity you uploaded',
   opportunity_achiever_set: 'has selected opportunity achiever',
-  opportunity_review: 'has reviewed your opportuntiy'
+  opportunity_review: 'has reviewed your opportunity'
 
 };
 
