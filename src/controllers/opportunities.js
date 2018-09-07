@@ -2,7 +2,7 @@ import { Op } from 'sequelize';
 
 import models from '../models';
 import helpers from '../helpers';
-import { events } from './notifications';
+import notifications, { events } from './notifications';
 
 /**
  * @description Checks that the opportunity being created is not a
@@ -102,6 +102,19 @@ const opportunityApplicationChecks = async (opportunity, user) => {
   if (!userCanApply) {
     throw new Error('You can only get plugged to opportunities that fit your indicated skill set');
   }
+};
+
+const notifyUnselectedAchievers = async (opportunity, author) => {
+  const unselectedAchieversIds = (await opportunity.getPlugEntries({
+    attributes: ['id']
+  })).map(entry => entry.id).filter(id => id !== opportunity.achieverId);
+
+  notifications.create(author, {
+    event: events.OPPORTUNITY_ACHIEVER_SET_OTHERS,
+    recipients: unselectedAchieversIds,
+    entity: opportunity,
+    includeEmail: true
+  });
 };
 
 /**
@@ -437,7 +450,13 @@ class Controller {
         status: 'pending',
         achieverId: userId
       });
-      return res.sendSuccess({
+      notifyUnselectedAchievers(opportunity, plugger);
+      return res.sendSuccessAndNotify({
+        event: events.OPPORTUNITY_ACHIEVER_SET,
+        recipients: [userId],
+        entity: opportunity,
+        includeEmail: true
+      }, {
         message: 'Achiever plugged successfully'
       });
     } catch (error) {

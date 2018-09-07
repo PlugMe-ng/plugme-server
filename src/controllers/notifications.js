@@ -1,12 +1,15 @@
 import models from '../models';
 import { notifsIO } from '../server';
 import helpers from '../helpers';
+import { sendMail } from '../helpers/auth';
+import config from '../config';
 
 export const events = {
   LIKE: 'like',
   COMMENT: 'comment',
   OPPORTUNITY_APPLICATION: 'opportunity_application',
   OPPORTUNITY_ACHIEVER_SET: 'opportunity_achiever_set',
+  OPPORTUNITY_ACHIEVER_SET_OTHERS: 'opportunity_achiever_set_others',
   OPPORTUNITY_REVIEW: 'opportunity_review'
 };
 
@@ -14,9 +17,35 @@ const eventDescriptions = {
   like: 'liked your content',
   comment: 'commented on your content',
   opportunity_application: 'has plugged to an opportunity you uploaded',
-  opportunity_achiever_set: 'has selected opportunity achiever',
+  opportunity_achiever_set: 'has plugged you to an opportunity',
+  opportunity_achiever_set_others: 'You were not plugged to this opportunity',
   opportunity_review: 'has reviewed your opportunity'
+};
 
+const generateEventMailPayload = {
+  opportunity_achiever_set: (author, recipient, entity) => ({
+    subject: 'You have been plugged to an opportunity',
+    content:
+      `
+      <p>Hi ${recipient.fullName},</p>
+
+      <p>You have been PLUGGED to this <a href="${config.FE_URL}/opportunity/${author.username}/${entity.id}">opportunity</a> and will be duly contacted by the Plugger for further information</p>
+      `,
+    address: recipient.email
+  }),
+
+  opportunity_achiever_set_others: (author, recipient, entity) => ({
+    subject: 'You were not plugged to an opportunity',
+    content:
+      `
+      <p>Hi ${recipient.fullName}</p>
+
+      <p>Unfortunately, you were not plugged to this <a href="${config.FE_URL}/${author.username}/opportunity/${entity.id}">opportunity</a></p>
+
+      <p>There are more opportunities waiting for you on <a href="${config.FE_URL}">PlugMe</a> however</p>
+      `,
+    address: recipient.email
+  })
 };
 
 const generateMeta = (event, entity) => {
@@ -35,11 +64,21 @@ export default new class {
    * @param {Array.<string>} payload.recipients - an array of recipientIds of
    * the event
    * @param {Object} payload.entity - action object
+   * @param {boolean} [payload.includeEmail] - include email notification
    *
    * @returns {void}
    */
-  create = (author, { event, recipients, entity }) => {
+  create = (author, {
+    event, recipients, entity, includeEmail = false
+  }) => {
     try {
+      if (includeEmail) {
+        recipients.forEach((recipientId) => {
+          models.User.findById(recipientId, { attributes: ['email', 'fullName'] })
+            .then(recipient =>
+              sendMail(generateEventMailPayload[event](author, recipient, entity)));
+        });
+      }
       const meta = generateMeta(event, entity);
       recipients.forEach((recipientId) => {
         models.notification.create({

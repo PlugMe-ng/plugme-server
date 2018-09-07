@@ -25,4 +25,5 @@ module.exports = {
     operatorsAliases: false,
   },
   SECRET: process.env.SECRET,
+  FE_URL: 'https://plugme-client-staging.herokuapp.com'
 };
