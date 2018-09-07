@@ -65,7 +65,7 @@ export default new class {
         limit,
         offset,
         where: { userId },
-        order: [['read', 'asc'], [attribute, order]],
+        order: [[attribute, order]],
         include: [{
           model: models.User,
           as: 'author',
