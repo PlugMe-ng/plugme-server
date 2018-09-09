@@ -10,7 +10,8 @@ export const events = {
   OPPORTUNITY_APPLICATION: 'opportunity_application',
   OPPORTUNITY_ACHIEVER_SET: 'opportunity_achiever_set',
   OPPORTUNITY_ACHIEVER_SET_OTHERS: 'opportunity_achiever_set_others',
-  OPPORTUNITY_REVIEW: 'opportunity_review'
+  OPPORTUNITY_REVIEW: 'opportunity_review',
+  NEW_MESSAGE: 'new_message'
 };
 
 const eventDescriptions = {
@@ -19,7 +20,8 @@ const eventDescriptions = {
   opportunity_application: 'has plugged to an opportunity you uploaded',
   opportunity_achiever_set: 'has plugged you to an opportunity',
   opportunity_achiever_set_others: 'You were not plugged to this opportunity',
-  opportunity_review: 'has reviewed your opportunity'
+  opportunity_review: 'has reviewed your opportunity',
+  new_message: 'messaged you'
 };
 
 const generateEventMailPayload = {
@@ -69,7 +71,10 @@ export default new class {
    * @returns {void}
    */
   create = (author, {
-    event, recipients, entity, includeEmail = false
+    event,
+    recipients,
+    entity,
+    includeEmail = false
   }) => {
     try {
       if (includeEmail) {
@@ -81,6 +86,7 @@ export default new class {
       }
       const meta = generateMeta(event, entity);
       recipients.forEach((recipientId) => {
+        if (author && recipientId === author.id) return;
         models.notification.create({
           authorId: author ? author.id : null,
           userId: recipientId,

@@ -171,6 +171,12 @@ module.exports = (sequelize, DataTypes) => {
     User.hasMany(models.review);
     User.belongsTo(models.occupation);
     User.belongsTo(models.location);
+    User.belongsToMany(models.conversation, {
+      through: 'users_conversations',
+      as: 'conversations',
+      foreignKey: 'participantId',
+      otherKey: 'conversationId'
+    });
   };
 
   return User;

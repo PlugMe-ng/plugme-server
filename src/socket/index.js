@@ -3,6 +3,7 @@ import jwtSocketAuth from 'socketio-jwt-auth';
 
 import config from '../config';
 import models from '../models';
+import messaging from '../controllers/messaging';
 
 const jwtAuth = jwtSocketAuth.authenticate({
   secret: config.SECRET,
@@ -38,15 +39,14 @@ export default class {
     this.io = io(app).use(jwtAuth).on('connection', (socket) => {
       const { user } = socket.request;
       if (user.logged_in) {
-        // TODO: use redis
-        connectedClients[user.id] = socket.id;
+        connectedClients[user.id] = socket.id; // TODO: use redis
+        messaging.create(socket);
+        socket.on('disconnect', () => {
+          delete connectedClients[user.id];
+          socket.emit('connected_clients', connectedClients);
+        });
       }
       socket.emit('connected_clients', connectedClients);
-      socket.on('disconnect', () => {
-        if (user.logged_in) {
-          delete connectedClients[user.id];
-        }
-      });
     });
   }
 
