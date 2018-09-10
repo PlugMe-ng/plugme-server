@@ -1,23 +1,9 @@
 import crypto from 'crypto';
-import sendGrid from '@sendgrid/mail';
 import jwt from 'jsonwebtoken';
 
 import config from '../config';
 import models from '../models';
-
-sendGrid.setApiKey(process.env.SENDGRID_API_KEY);
-
-// TODO: move this to an helper or utility class
-export const sendMail = ({ address, subject, content }) => {
-  const mailData = {
-    to: address,
-    from: 'info@plugme.com.ng',
-    subject,
-    text: content,
-    html: content
-  };
-  sendGrid.send(mailData);
-};
+import sendMail from './mailing';
 
 const createToken = async (user, type) => {
   const seed = crypto.randomBytes(20);

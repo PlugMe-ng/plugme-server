@@ -1,7 +1,7 @@
 import models from '../models';
 import { notifsIO } from '../server';
 import helpers from '../helpers';
-import { sendMail } from '../helpers/auth';
+import sendMail from '../helpers/mailing';
 import config from '../config';
 
 export const events = {

@@ -18,7 +18,7 @@
         "consistent-return": 0,
         "curly": ["error", "multi-line"],
         "import/no-unresolved": [2, { "commonjs": true }],
-        "max-len": [1, 80, 2, { "ignoreUrls": true, "ignoreStrings": true, "ignoreTemplateLiterals": true }],
+        "max-len": [1, 100, 2, { "ignoreUrls": true, "ignoreStrings": true, "ignoreTemplateLiterals": true }],
         "new-cap": 0,
         "no-param-reassign": 0,
         "no-tabs": 0,

@@ -25,5 +25,6 @@ module.exports = {
     operatorsAliases: false,
   },
   SECRET: process.env.SECRET,
-  FE_URL: 'https://plugme-client-staging.herokuapp.com'
+  FE_URL: 'https://plugme-client-staging.herokuapp.com',
+  dev_support_notif: process.env.DEV_SUPPORT_NOTIFICATION
 };

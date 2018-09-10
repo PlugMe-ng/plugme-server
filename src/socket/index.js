@@ -3,7 +3,7 @@ import jwtSocketAuth from 'socketio-jwt-auth';
 
 import config from '../config';
 import models from '../models';
-import messaging from '../controllers/messaging';
+import messaging from './messaging';
 
 const jwtAuth = jwtSocketAuth.authenticate({
   secret: config.SECRET,
