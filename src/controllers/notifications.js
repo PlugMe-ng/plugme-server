@@ -97,8 +97,21 @@ export default new class {
         });
       }
       const meta = generateMeta(event, entity);
-      recipients.forEach((recipientId) => {
+      recipients.forEach(async (recipientId) => {
         if (author && recipientId === author.id) return;
+        if (event === events.NEW_MESSAGE) {
+          const unreadMessageNotif = await models.notification.findOne({
+            order: [['createdAt', 'DESC']],
+            where: {
+              userId: recipientId,
+              read: false,
+              authorId: author.id
+            }
+          });
+          if (unreadMessageNotif) {
+            return;
+          }
+        }
         models.notification.create({
           authorId: author ? author.id : null,
           userId: recipientId,
