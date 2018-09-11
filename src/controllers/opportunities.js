@@ -540,6 +540,11 @@ class Controller {
       if (!opportunity) {
         throw new Error('Specified opportunity does not exist');
       }
+      notifications.create(req.userObj, {
+        event: events.OPPORTUNITY_DELETE,
+        recipients: [opportunity.pluggerId],
+        entity: `Opportunity deleted by admin - ${opportunity.title}`
+      });
       opportunity.destroy();
       return res.sendSuccessAndLog(opportunity, { message: 'Opportuntiy deleted successfully' });
     } catch (error) {

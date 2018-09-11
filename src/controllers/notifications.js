@@ -13,7 +13,9 @@ export const events = {
   OPPORTUNITY_REVIEW: 'opportunity_review',
   NEW_MESSAGE: 'new_message',
   NEW_FAN: 'new_fan',
-  NEW_CONTENT: 'new_content'
+  NEW_CONTENT: 'new_content',
+  CONTENT_DELETE: 'content_delete',
+  OPPORTUNITY_DELETE: 'opportunity_delete'
 };
 
 const eventDescriptions = {
@@ -25,7 +27,9 @@ const eventDescriptions = {
   opportunity_review: 'has reviewed your opportunity',
   new_message: 'messaged you',
   new_fan: 'is now a fan of yours',
-  new_content: 'has published a new content'
+  new_content: 'has published a new content',
+  content_delete: '',
+  opportunity_delete: ''
 };
 
 const generateEventMailPayload = {
@@ -56,9 +60,13 @@ const generateEventMailPayload = {
 
 const generateMeta = (event, entity) => {
   const meta = {};
-  meta[entity.constructor.name.toLowerCase()] = entity.id;
   meta.event = event;
-  meta.text = eventDescriptions[event];
+  if (entity.id) {
+    meta[entity.constructor.name.toLowerCase()] = entity.id;
+    meta.text = eventDescriptions[event];
+  } else {
+    meta.text = entity;
+  }
   return meta;
 };
 
