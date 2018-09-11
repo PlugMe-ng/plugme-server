@@ -79,7 +79,7 @@ export default new class {
     socket.on('new_message', async (message) => {
       try {
         message = await models.message.create({ ...message, senderId: user.id });
-        this.notifyRecipients(user, message);
+        await this.notifyRecipients(user, message);
       } catch (error) {
         socket.emit('error_messaging', [error.message]);
       }
