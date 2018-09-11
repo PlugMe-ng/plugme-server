@@ -2,7 +2,7 @@ import { Op } from 'sequelize';
 
 import models from '../models';
 import helpers from '../helpers';
-import { events } from './notifications';
+import notifications, { events } from './notifications';
 
 const { isAdmin } = helpers.Misc;
 
@@ -27,6 +27,11 @@ const addViewEntry = async (user, content) => {
   await view.destroy();
   content.addViewer(user);
   content.increment('totalViews');
+};
+
+const notifyFans = async (user, content) => {
+  const fans = (await user.getFans({ attributes: ['id'] })).map(fan => fan.id);
+  notifications.create(user, { event: events.NEW_CONTENT, recipients: fans, entity: content });
 };
 
 /**
@@ -65,9 +70,8 @@ class ContentsController {
           }
         }]
       });
-      return res.sendSuccess({
-        ...content.get()
-      });
+      notifyFans(userObj, content);
+      return res.sendSuccess({ ...content.get() });
     } catch (error) {
       if (content) {
         content.destroy();

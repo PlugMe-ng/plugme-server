@@ -11,7 +11,9 @@ export const events = {
   OPPORTUNITY_ACHIEVER_SET: 'opportunity_achiever_set',
   OPPORTUNITY_ACHIEVER_SET_OTHERS: 'opportunity_achiever_set_others',
   OPPORTUNITY_REVIEW: 'opportunity_review',
-  NEW_MESSAGE: 'new_message'
+  NEW_MESSAGE: 'new_message',
+  NEW_FAN: 'new_fan',
+  NEW_CONTENT: 'new_content'
 };
 
 const eventDescriptions = {
@@ -21,7 +23,9 @@ const eventDescriptions = {
   opportunity_achiever_set: 'has plugged you to an opportunity',
   opportunity_achiever_set_others: 'You were not plugged to this opportunity',
   opportunity_review: 'has reviewed your opportunity',
-  new_message: 'messaged you'
+  new_message: 'messaged you',
+  new_fan: 'is now a fan of yours',
+  new_content: 'has published a new content'
 };
 
 const generateEventMailPayload = {

@@ -11,6 +11,7 @@ import { Op } from 'sequelize';
 
 import helpers from '../helpers';
 import models from '../models';
+import { events } from './notifications';
 
 /**
 * Users controller class
@@ -335,7 +336,11 @@ export default class Users {
         return;
       }
       await user.addFan(req.userObj);
-      res.sendSuccess({
+      return res.sendSuccessAndNotify({
+        event: events.NEW_FAN,
+        recipients: [user.id],
+        entity: user
+      }, {
         message: 'You are now a fan of the user'
       });
     } catch (error) {
