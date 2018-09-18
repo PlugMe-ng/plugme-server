@@ -166,6 +166,33 @@ const logAdminAction = (req, actionObject) => {
   }
 };
 
+const subscriptionPlans = {
+  1500: {
+    type: 'basic',
+    validity: [3, 'months']
+  },
+  4500: {
+    type: 'basic',
+    validity: [1, 'year']
+  },
+  2500: {
+    type: 'pro',
+    validity: [3, 'months']
+  },
+  7500: {
+    type: 'pro',
+    validity: [1, 'year']
+  },
+  3500: {
+    type: 'premium',
+    validity: [3, 'months']
+  },
+  10000: {
+    type: 'premium',
+    validity: [1, 'year']
+  }
+};
+
 export default {
   Misc: {
     generatePaginationMeta,
@@ -173,6 +200,7 @@ export default {
     enhanceErrorMessage,
     isAdmin,
     logAdminAction,
-    getTimeFromNow
+    getTimeFromNow,
+    subscriptionPlans
   }
 };

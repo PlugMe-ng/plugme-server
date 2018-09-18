@@ -68,7 +68,7 @@ export default class Auth {
   signup = async (req, res) => {
     try {
       const {
-        role, verified, meta, ...data
+        role, verified, meta, plan, ...data
       } = req.body;
       const user = await models.User.create({
         ...data,

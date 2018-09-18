@@ -75,6 +75,13 @@ module.exports = (sequelize, DataTypes) => {
     },
     meta: {
       type: DataTypes.JSONB
+    },
+    plan: {
+      type: DataTypes.JSONB,
+      defaultValue: {
+        type: 'basic',
+        expiresAt: null
+      }
     }
   }, {
     getterMethods: {

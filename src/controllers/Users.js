@@ -6,12 +6,14 @@
  * @requires ../helpers
  * @requires ../models
  */
-
+import axios from 'axios';
+import moment from 'moment';
 import { Op } from 'sequelize';
 
 import helpers from '../helpers';
 import models from '../models';
 import { events } from './notifications';
+import config from '../config';
 
 /**
 * Users controller class
@@ -259,7 +261,7 @@ export default class Users {
   update = async (req, res) => {
     const { userObj: user } = req;
     const {
-      role, email, hasPendingReview, skills, interests, bio, experience, ...data
+      role, email, hasPendingReview, skills, plan, interests, bio, experience, ...data
     } = req.body;
     try {
       if (interests) {
@@ -345,6 +347,41 @@ export default class Users {
       });
     } catch (error) {
       res.sendFailure([error.message]);
+    }
+  }
+
+  /**
+   * @desc Handles user plan subscription
+   *
+   * @param { object } req request
+   * @param { object } res response
+   *
+   * @returns { object } response
+   */
+  subscription = async (req, res) => {
+    const { reference: trxRef } = req.body;
+    if (!trxRef) {
+      throw new Error('transaction reference token is required');
+    }
+    try {
+      const response = await axios.get(`${config.PAYMENT_VERIFICATION_URL}/${trxRef}`, {
+        headers: { Authorization: `Bearer ${config.PAYSTACK_SECRET_KEY}` }
+      });
+      const { status, amount, customer: { email } } = response.data.data;
+      if (status !== 'success') {
+        throw new Error('Could not verify payment');
+      }
+      const { type, validity } = helpers.Misc.subscriptionPlans[Number(amount / 100)];
+
+      await models.User.update({
+        plan: {
+          type,
+          expiresAt: moment().add(...validity).valueOf()
+        },
+      }, { where: { email } });
+      return res.sendSuccess({ message: 'User plan updated successfully' });
+    } catch (error) {
+      return res.sendFailure([error.message]);
     }
   }
 }

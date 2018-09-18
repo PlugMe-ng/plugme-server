@@ -8,27 +8,27 @@
  */
 import { Router } from 'express';
 
-import authRoutes from './auth';
-import usersRoutes from './users';
-import contentRoutes from './contents';
-import tagRoutes from './tags';
-import opportunitiesRoutes from './opportunities';
-import locationRoutes from './locations';
-import occupationRoutes from './occupations';
-import miscRoutes from './misc';
-import notificationRoutes from './notifications';
+import auth from './auth';
+import users from './users';
+import contents from './contents';
+import tags from './tags';
+import opportunities from './opportunities';
+import locations from './locations';
+import occupations from './occupations';
+import misc from './misc';
+import notifications from './notifications';
 
 const router = new Router();
 
 router
-  .use('/auth', authRoutes)
-  .use('/users', usersRoutes)
-  .use('/gallery', contentRoutes)
-  .use('/tags', tagRoutes)
-  .use('/opportunities', opportunitiesRoutes)
-  .use('/locations', locationRoutes)
-  .use('/occupations', occupationRoutes)
-  .use('/notifications', notificationRoutes)
-  .use('/', miscRoutes);
+  .use('/auth', auth)
+  .use('/users', users)
+  .use('/gallery', contents)
+  .use('/tags', tags)
+  .use('/opportunities', opportunities)
+  .use('/locations', locations)
+  .use('/occupations', occupations)
+  .use('/notifications', notifications)
+  .use('/', misc);
 
 export default router;
