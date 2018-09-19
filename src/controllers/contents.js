@@ -1,3 +1,4 @@
+import moment from 'moment';
 import { Op } from 'sequelize';
 
 import models from '../models';
@@ -32,6 +33,19 @@ const addViewEntry = async (user, content) => {
 const notifyFans = async (user, content) => {
   const fans = (await user.getFans({ attributes: ['id'] })).map(fan => fan.id);
   notifications.create(user, { event: events.NEW_CONTENT, recipients: fans, entity: content });
+};
+
+/**
+ * Starts the free basic plan expiration countdown of a user after the first content upload
+ *
+ * @param {object} user
+ *
+ * @returns {void}
+ */
+const updateUserPlan = (user) => {
+  if (!user.plan.expiresAt) {
+    user.update({ 'plan.expiresAt': moment().add(3, 'months').valueOf() });
+  }
 };
 
 /**
@@ -71,6 +85,7 @@ class ContentsController {
         }]
       });
       notifyFans(userObj, content);
+      updateUserPlan(userObj);
       return res.sendSuccess({ ...content.get() });
     } catch (error) {
       if (content) {
