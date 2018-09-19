@@ -54,7 +54,10 @@ router.use(middleware.auth.authenticateUser);
 
 router.post(
   '/',
+  middleware.check.userHasActiveSubscription,
   validations.createContent,
+  validations.checkMinorTagInclusion,
+  validations.userPlanLimit,
   controllers.contents.createContent
 );
 

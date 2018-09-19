@@ -12,9 +12,9 @@ import middleware from '../middleware';
 const { validations: { opportunities: validation }, auth, check } = middleware;
 const { opportunities: controller } = controllers;
 
-const routes = new Router();
+const router = new Router();
 
-routes.get(
+router.get(
   '/',
   middleware.pagination,
   middleware.sort,
@@ -22,40 +22,42 @@ routes.get(
   middleware.filter,
   controller.get
 );
-routes.get('/:opportunityId', controller.getOpportunityById);
-routes.get('/:opportunityId/applications', controller.getOpportunityApplications);
+router.get('/:opportunityId', controller.getOpportunityById);
+router.get('/:opportunityId/applications', controller.getOpportunityApplications);
 
-routes.use(auth.authenticateUser);
+router.use(auth.authenticateUser);
 
-routes.post(
+router.post(
   '/',
+  check.userHasActiveSubscription,
   check.userHasPendingReview,
   validation.createOpportunity,
   validation.verifyTags,
   controller.createOpportunity
 );
 
-routes.delete(
+router.delete(
   '/:opportunityId',
   check.currentUserIsAdmin,
   controller.delete
 );
 
-routes.post(
+router.post(
   '/:opportunityId/applications',
+  check.userHasActiveSubscription,
   check.userHasPendingReview,
   controller.opportunityApplication
 );
 
-routes.post(
+router.post(
   '/:opportunityId/reviews',
   validation.reviewOpportunity,
   controller.reviewOpportunity,
 );
 
-routes.post(
+router.post(
   '/:opportunityId/applications/:userId',
   controller.setOpportunityAchiever
 );
 
-export default routes;
+export default router;

@@ -1,3 +1,5 @@
+import moment from 'moment';
+
 import models from '../models';
 import notifications, { events } from '../controllers/notifications';
 import { notifsIO } from '../server';
@@ -14,7 +16,7 @@ const createConversation = async (users) => {
 };
 
 /**
- * Finds or creates the common conversationIds of the specified participants
+ * Finds the common conversationId(s) of the specified participants
  *
  * NOTE: same participants may have multiple conversationIds in rare cases
  *
@@ -38,12 +40,34 @@ const getUsersConversations = async (users) => {
   return conversations;
 };
 
+/**
+ * Finds or creates the common conversationId(s) of the specified participants
+ *
+ * NOTE: same participants may have multiple conversationIds in rare cases
+ *
+ * @param {Array.<string>} users - ids of conversation participants
+ * @returns {string} - conversationId
+ */
 const findOrCreateConversation = async (users) => {
   const participants = Array.from(new Set(users)).sort();
   if (participants.length < 2) throw new Error('Not enough participants');
 
   const conversations = await getUsersConversations(participants);
   return conversations.length ? conversations : createConversation(participants);
+};
+
+/**
+ * Handles user permissions
+ * @param {any} user
+ *
+ * @returns {void}
+ */
+const checkPermissions = (user) => {
+  const userPlanHasExpired = user.plan.expiresAt &&
+        moment(user.plan.expiresAt).isBefore(moment.now());
+  if (userPlanHasExpired) {
+    throw new Error('Please renew your current subscription to perform this action');
+  }
 };
 
 export default new class {
@@ -54,6 +78,7 @@ export default new class {
       recipients, conversationId, limit = 20, offset = 0
     }) => {
       try {
+        checkPermissions(user);
         const conversations = conversationId ? [conversationId]
           : await findOrCreateConversation([user.id, ...recipients]);
         const messages = await models.message.findAndCount({
@@ -78,6 +103,7 @@ export default new class {
 
     socket.on('new_message', async (message) => {
       try {
+        checkPermissions(user);
         message = await models.message.create({ ...message, senderId: user.id });
         await this.notifyRecipients(user, message);
       } catch (error) {
