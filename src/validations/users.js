@@ -13,7 +13,7 @@ const userUpdateRules = {
   locationId: 'string',
   username: 'alpha_dash|min:5|max:20',
   fullName: 'string|between:5,25',
-  skills: 'array|min:1',
+  skills: 'array|min:1|max:3',
   interests: 'array|min:1',
   bio: 'string|max:270',
   experience: 'string|max:270',
