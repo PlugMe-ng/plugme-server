@@ -66,7 +66,7 @@ const checkPermissions = (user) => {
   const userPlanHasExpired = user.plan.expiresAt &&
         moment(user.plan.expiresAt).isBefore(moment.now());
   if (userPlanHasExpired) {
-    throw new Error('Please renew your current subscription to perform this action');
+    throw new Error('Please renew your subscription to perform this action');
   }
 };
 
