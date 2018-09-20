@@ -159,7 +159,7 @@ export default class Users {
         where: {
           ...(req.query.id && { id: req.query.id })
         },
-        group: ['User.id', 'contents.id'],
+        group: ['User.id'],
         attributes: [
           'id',
           'username',
@@ -214,7 +214,7 @@ export default class Users {
       const fans = await user.getFansOf({
         limit,
         offset,
-        group: ['User.id', 'contents.id'],
+        group: ['User.id'],
         attributes: [
           'id',
           'username',
