@@ -20,6 +20,14 @@ const userUpdateRules = {
   photo: 'url'
 };
 
+const minorTagsOnly = async (tags) => {
+  for (let i = 0; i < tags.length; i += 1) {
+    const tag = await models.tag.findById(tags[i]); // eslint-disable-line
+    if (!tag || !tag.categoryId) return false;
+  }
+  return true;
+};
+
 /**
  * @class Validations
  */
@@ -55,28 +63,36 @@ class Validations {
     const validation = new Validator(req.body, userUpdateRules);
     validation.fails(() => res
       .sendFailure(getErrors(validation, userUpdateRules)));
-    if (req.body.skills) {
-      for (let i = 0; i < req.body.skills.length; i += 1) {
-        try {
-          const tagId = req.body.skills[i];
-          /* eslint-disable no-await-in-loop */
-          const tag = await models.tag.findById(tagId);
-          if (!tag) {
-            throw new Error('One of the specified minor tags does not exist');
-          }
-          if (!tag.categoryId) {
-            throw new Error('Skills tag can only contain minor tags');
-          }
-        } catch (error) {
-          return res.sendFailure([error.message]);
+    validation.passes(() => next());
+  }
+
+  /**
+   * Inlcudes required checks for user profile update
+   * @param {Express.Request} req - Express Request Object
+   * @param {Express.Response} res - Express Response Objetc
+   * @param {Function} next - Express Next Function
+   *
+   * @returns {void}
+   * @memberOf Validations
+   */
+  checks = async (req, res, next) => {
+    try {
+      if (req.body.skills && !(await minorTagsOnly(req.body.skills))) {
+        throw new Error('Skills can only contain minor tags');
+      }
+      if (req.body.interests && req.userObj.plan.type === 'basic') {
+        if (req.body.interests.length > 5 || !(await minorTagsOnly(req.body.interests))) {
+          throw new Error('Maximum of 5 interest minor tags allowed for basic plan users');
         }
       }
+      if (req.body.occupationId && req.user.meta.occupationModificationCount > 2) {
+        const { occupationId, ...data } = req.body;
+        req.body = data;
+      }
+      return next();
+    } catch (error) {
+      return res.sendFailure([error.message]);
     }
-    if (req.body.occupationId && req.user.meta.occupationModificationCount > 2) {
-      const { occupationId, ...data } = req.body;
-      req.body = data;
-    }
-    validation.passes(() => next());
   }
 }
 
