@@ -12,12 +12,11 @@ import { Router } from 'express';
 
 import Users from '../controllers/Users';
 import middleware from '../middleware';
-import validations from '../middleware/validations';
+import { users as validations } from '../validations';
 
 const controller = new Users();
 const router = new Router();
 
-const { users: validation } = validations;
 const {
   check, pagination, sort, filter
 } = middleware;
@@ -31,11 +30,11 @@ router.get('/', pagination, sort, filter, controller.get);
 router.use(middleware.auth.authenticateUser);
 
 router.post('/:username/fans', controller.addFan);
-router.put('/', validation.userUpdate, controller.update);
+router.put('/', validations.userUpdate, controller.update);
 router.put(
   '/:userId',
   check.currentUserIsAdmin,
-  validation.adminUserUpdate,
+  validations.adminUserUpdate,
   controller.adminUserUpdate
 );
 

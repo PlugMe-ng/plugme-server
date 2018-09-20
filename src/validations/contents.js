@@ -7,7 +7,7 @@
  */
 
 import Validator from 'validatorjs';
-import models from '../../models';
+import models from '../models';
 
 const contentCreationRules = {
   title: 'required|string',

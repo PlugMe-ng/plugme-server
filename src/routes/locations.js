@@ -8,8 +8,8 @@
 import { Router } from 'express';
 import controllers from '../controllers';
 import middlewares from '../middleware';
-import validations from '../middleware/validations';
 import sort from '../middleware/sort';
+import { locations as validations } from '../validations';
 
 const { auth, check } = middlewares;
 
@@ -25,13 +25,13 @@ routes.use(auth.authenticateUser, check.currentUserIsAdmin);
 
 routes.post(
   '/',
-  validations.locations.addLocation,
+  validations.addLocation,
   controllers.locations.addLocation
 );
 
 routes.post(
   '/countries',
-  validations.locations.addCountry,
+  validations.addCountry,
   controllers.locations.addCountry
 );
 

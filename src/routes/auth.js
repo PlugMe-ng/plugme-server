@@ -11,9 +11,7 @@
 import { Router } from 'express';
 
 import Auth from '../controllers/Auth';
-import validate from '../middleware/validations';
-
-const { auth: validations } = validate;
+import { auth as validations } from '../validations';
 
 const authController = new Auth();
 const routes = new Router();

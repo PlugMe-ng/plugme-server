@@ -11,10 +11,8 @@
 import { Router } from 'express';
 
 import middleware from '../middleware';
-import Validations from '../middleware/validations';
 import controllers from '../controllers';
-
-const { contents: validations } = Validations;
+import { contents as validations } from '../validations';
 
 const router = new Router();
 
@@ -28,19 +26,14 @@ router.get(
 );
 
 router.get('/tags', controllers.tags.galleryTags);
-
 router.get('/tags/minor', controllers.tags.galleryTagsMinor);
-
 router.get('/tags/:categoryId', controllers.tags.galleryTagsMinor);
-
 router.get('/trending', controllers.tags.trendingTags);
-
 router.get(
   '/:contentId',
   middleware.auth.optionalUserAuthentication,
   controllers.contents.getContent
 );
-
 router.get(
   '/:contentId/comments',
   validations.contentExists,

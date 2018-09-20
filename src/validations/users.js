@@ -1,7 +1,7 @@
 import Validator from 'validatorjs';
 import { getErrors } from '.';
 
-import models from '../../models';
+import models from '../models';
 
 const adminUserUpdateRules = {
   role: 'in:member,admin',

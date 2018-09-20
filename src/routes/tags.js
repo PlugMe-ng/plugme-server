@@ -8,9 +8,10 @@
 import { Router } from 'express';
 import controllers from '../controllers';
 import middlewares from '../middleware';
+import { tags as validations } from '../validations';
 
 const {
-  auth, check, filter, sort, validations
+  auth, check, filter, sort
 } = middlewares;
 
 const routes = new Router();
@@ -40,13 +41,13 @@ routes.use(auth.authenticateUser, check.currentUserIsAdmin);
 
 routes.post(
   '/major',
-  validations.tags.createMajorTag,
+  validations.createMajorTag,
   controllers.tags.createTag
 );
 
 routes.post(
   '/minor',
-  validations.tags.createMinorTag,
+  validations.createMinorTag,
   controllers.tags.createTag
 );
 

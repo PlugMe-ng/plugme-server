@@ -8,8 +8,9 @@
 import { Router } from 'express';
 import controllers from '../controllers';
 import middleware from '../middleware';
+import { opportunities as validations } from '../validations';
 
-const { validations: { opportunities: validation }, auth, check } = middleware;
+const { auth, check } = middleware;
 const { opportunities: controller } = controllers;
 
 const router = new Router();
@@ -31,8 +32,8 @@ router.post(
   '/',
   check.userHasActiveSubscription,
   check.userHasPendingReview,
-  validation.createOpportunity,
-  validation.verifyTags,
+  validations.createOpportunity,
+  validations.verifyTags,
   controller.createOpportunity
 );
 
@@ -51,7 +52,7 @@ router.post(
 
 router.post(
   '/:opportunityId/reviews',
-  validation.reviewOpportunity,
+  validations.reviewOpportunity,
   controller.reviewOpportunity,
 );
 
