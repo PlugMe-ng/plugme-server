@@ -1,4 +1,5 @@
 import { Op } from 'sequelize';
+import moment from 'moment';
 
 import models from '../models';
 import helpers from '../helpers';
@@ -15,27 +16,19 @@ import notifications, { events } from './notifications';
  *
  * @memberOf Controller
  */
-const networkLagCheck = async (userObj, req) => {
-  const TIME_CHECK_MIN = 10;
-  const MILLISECONDS_TO_MIN = 60000;
-
+const duplicateOpportunityUploadCheck = async (userObj, req) => {
   const lastUploadedOpportunity = (await models.opportunity.findAll({
     attributes: ['createdAt', 'title'],
     limit: 1,
     order: [['createdAt', 'DESC']],
     where: {
-      pluggerId: userObj.id
+      pluggerId: userObj.id,
+      title: req.body.title
     }
   }))[0];
-  if (!lastUploadedOpportunity) {
-    return;
-  }
-  const diffTimeLastOpportunity = (
-    new Date().getTime()
-    - new Date(lastUploadedOpportunity.createdAt).getTime()) / MILLISECONDS_TO_MIN;
+  if (!lastUploadedOpportunity) return;
 
-  if (diffTimeLastOpportunity < TIME_CHECK_MIN &&
-    req.body.title === lastUploadedOpportunity.title) {
+  if (moment().isBetween(moment(lastUploadedOpportunity.createdAt), moment().add(10, 'minutes'))) {
     throw new Error('Duplicate opportunity');
   }
 };
@@ -118,6 +111,37 @@ const notifyUnselectedAchievers = async (opportunity, author) => {
 };
 
 /**
+ * Notifies premium and pro plan users of the new opportunity if
+ * it matches their skills tags and location
+ *
+ * @param {any} opportunity
+ *
+ * @returns {void}
+ */
+const notifyUsers = async (opportunity) => {
+  const recipients = (await models.User.findAll({
+    attributes: ['id'],
+    where: { 'plan.type': { [Op.ne]: 'basic' } },
+    include: [{
+      model: models.location,
+      attributes: [],
+      where: { id: opportunity.locationId }
+    }, {
+      model: models.tag,
+      as: 'skills',
+      attributes: [],
+      where: { id: opportunity.tags.map(tag => tag.id) }
+    }]
+  })).map(user => user.id);
+  notifications.create(opportunity.plugger, {
+    event: events.NEW_OPPORTUNITY,
+    recipients,
+    entity: opportunity,
+    includeEmail: true
+  });
+};
+
+/**
  * @class Controller
  */
 class Controller {
@@ -136,7 +160,7 @@ class Controller {
       const { tags, locationId } = req.body;
       const { userObj } = req;
 
-      await networkLagCheck(userObj, req);
+      await duplicateOpportunityUploadCheck(userObj, req);
 
       opportunity = await models.opportunity.create({ ...req.body, status: 'available' });
       await opportunity.setTags(tags);
@@ -164,7 +188,8 @@ class Controller {
           }
         }]
       });
-      await res.sendSuccess(opportunity);
+      notifyUsers(opportunity);
+      return res.sendSuccess(opportunity);
     } catch (error) {
       if (opportunity) {
         await opportunity.destroy();

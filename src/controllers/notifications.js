@@ -15,7 +15,8 @@ export const events = {
   NEW_FAN: 'new_fan',
   NEW_CONTENT: 'new_content',
   CONTENT_DELETE: 'content_delete',
-  OPPORTUNITY_DELETE: 'opportunity_delete'
+  OPPORTUNITY_DELETE: 'opportunity_delete',
+  NEW_OPPORTUNITY: 'new_opportunity'
 };
 
 const eventDescriptions = {
@@ -28,6 +29,7 @@ const eventDescriptions = {
   new_message: 'messaged you',
   new_fan: 'is now a fan of yours',
   new_content: 'has published a new content',
+  new_opportunity: 'has uploaded a new opportuntity',
   content_delete: '',
   opportunity_delete: ''
 };
@@ -54,6 +56,19 @@ const generateEventMailPayload = {
 
       <p>There are more opportunities waiting for you on <a href="${config.FE_URL}">PlugMe</a> however</p>
       `,
+    address: recipient.email
+  }),
+
+  new_opportunity: (author, recipient, entity) => ({
+    subject: 'New opportunity is available',
+    content:
+    `
+    <p>Hi ${recipient.fullName}</p>
+
+    <p>A new <a href="${config.FE_URL}/${author.username}/opportunity/${entity.id}">opportunity</a> that match your skills tag has been uploaded.</p>
+
+    <p>Hurry now to apply for this opportuntiy before it passes.</p>
+    `,
     address: recipient.email
   })
 };
@@ -108,9 +123,7 @@ export default new class {
               authorId: author.id
             }
           });
-          if (unreadMessageNotif) {
-            return;
-          }
+          if (unreadMessageNotif) return;
         }
         models.notification.create({
           authorId: author ? author.id : null,
