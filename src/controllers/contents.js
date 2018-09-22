@@ -1,5 +1,6 @@
 import moment from 'moment';
 import { Op } from 'sequelize';
+import _ from 'underscore';
 
 import models from '../models';
 import helpers from '../helpers';
@@ -48,6 +49,42 @@ const updateUserPlan = (user) => {
   }
 };
 
+const populateUsersGalleries = async (content) => {
+  let interestedUsers = (await content.getTags({
+    attributes: [],
+    joinTableAttributes: [],
+    include: [{
+      model: models.User,
+      as: 'interestedUsers',
+      attributes: ['id'],
+      through: { attributes: [] }
+    }]
+  })).map(tag => tag.interestedUsers.map(user => user.id))
+    .reduce((a, b) => [...a, ...b], []);
+  interestedUsers = _.shuffle(interestedUsers);
+
+  switch (content.author.plan.type) {
+    case 'basic': {
+      const reach = Math.ceil(interestedUsers.length / 2);
+      const users = interestedUsers.slice(0, reach);
+      content.setUsers(users);
+      break;
+    }
+    case 'pro': {
+      const reach = Math.ceil(interestedUsers.length * (3 / 4));
+      const users = interestedUsers.slice(0, reach);
+      content.setUsers(users);
+      break;
+    }
+    case 'premium': {
+      content.setUsers(interestedUsers);
+      break;
+    }
+    default:
+      break;
+  }
+};
+
 /**
  * @class ContentsController
  */
@@ -74,7 +111,7 @@ class ContentsController {
         include: [{
           model: models.User,
           as: 'author',
-          attributes: ['fullName', 'username']
+          attributes: ['fullName', 'username', 'plan']
         }, {
           model: models.tag,
           as: 'tags',
@@ -85,6 +122,7 @@ class ContentsController {
         }]
       });
       notifyFans(userObj, content);
+      populateUsersGalleries(content);
       updateUserPlan(userObj);
       return res.sendSuccess({ ...content.get() });
     } catch (error) {
