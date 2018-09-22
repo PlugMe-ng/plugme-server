@@ -8,18 +8,17 @@
 import { Router } from 'express';
 
 import middlewares from '../middleware';
-import sort from '../middleware/sort';
 import { occupations as validations } from '../validations';
 import { occupations as controller } from '../controllers';
 
 const { auth, check } = middlewares;
-const routes = new Router();
+const router = new Router();
 
-routes.get('/', sort, controller.get);
+router.get('/', controller.get);
 
-routes.use(auth.authenticateUser, check.currentUserIsAdmin);
+router.use(auth.authenticateUser, check.currentUserIsAdmin);
 
-routes.post('/', validations.addOccupation, controller.addOccupation);
-routes.delete('/:occupationId', controller.deleteOccupation);
+router.post('/', validations.addOccupation, controller.addOccupation);
+router.delete('/:occupationId', controller.deleteOccupation);
 
-export default routes;
+export default router;

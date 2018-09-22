@@ -15,14 +15,7 @@ const { auth, check } = middleware;
 
 const router = new Router();
 
-router.get(
-  '/',
-  middleware.pagination,
-  middleware.sort,
-  middleware.search,
-  middleware.filter,
-  controller.get
-);
+router.get('/', controller.get);
 router.get('/:opportunityId', controller.getOpportunityById);
 router.get('/:opportunityId/applications', controller.getOpportunityApplications);
 

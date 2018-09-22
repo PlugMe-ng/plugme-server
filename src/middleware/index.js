@@ -13,10 +13,7 @@
 import api from './api';
 import Auth from './Auth';
 import Check from './Check';
-import filter from './filter';
-import pagination from './pagination';
-import search from './search';
-import sort from './sort';
+import meta from './meta';
 
 const auth = new Auth();
 const check = new Check();
@@ -25,8 +22,5 @@ export default {
   api,
   auth,
   check,
-  filter,
-  pagination,
-  search,
-  sort,
+  meta
 };

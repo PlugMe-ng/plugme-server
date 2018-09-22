@@ -57,7 +57,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 
 app.use('/api-docs', swaggerUI.serve, swaggerUI.setup(apiDocs));
 
-app.use(middleware.api);
+app.use(middleware.api, middleware.meta);
 
 app.use((req, res, next) => {
   res.header('Content-Type', 'application/json');

@@ -4,15 +4,13 @@ import middlewares from '../middleware';
 import { tags as validations } from '../validations';
 import { tags as controller } from '../controllers';
 
-const {
-  auth, check, filter, sort
-} = middlewares;
+const { auth, check } = middlewares;
 
 const routes = new Router();
 
-routes.get('/', sort, filter, controller.getTags);
-routes.get('/minor', sort, filter, controller.getTags);
-routes.get('/major', sort, filter, controller.getTags);
+routes.get('/', controller.getTags);
+routes.get('/minor', controller.getTags);
+routes.get('/major', controller.getTags);
 
 routes.use(auth.authenticateUser, check.currentUserIsAdmin);
 

@@ -16,15 +16,13 @@ import { users as controller } from '../controllers';
 
 const router = new Router();
 
-const {
-  check, pagination, sort, filter
-} = middleware;
+const { check } = middleware;
 
 router.post('/subscriptions', controller.subscription);
 router.get('/:username', controller.getByUsername);
-router.get('/:username/fans', pagination, controller.getUserFans);
-router.get('/:username/fanOf', pagination, controller.getUserFansOf);
-router.get('/', pagination, sort, filter, controller.get);
+router.get('/:username/fans', controller.getUserFans);
+router.get('/:username/fanOf', controller.getUserFansOf);
+router.get('/', controller.get);
 
 router.use(middleware.auth.authenticateUser);
 

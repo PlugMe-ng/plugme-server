@@ -9,9 +9,6 @@ const router = new Router();
 router.get(
   '/',
   middleware.auth.optionalUserAuthentication,
-  middleware.pagination,
-  middleware.sort,
-  middleware.filter,
   controller.get
 );
 
@@ -24,8 +21,6 @@ router.get(
 router.get(
   '/:contentId/comments',
   validations.contentExists,
-  middleware.pagination,
-  middleware.sort,
   controller.getComments
 );
 

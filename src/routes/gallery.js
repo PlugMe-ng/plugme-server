@@ -14,9 +14,9 @@ import middleware from '../middleware';
 import { gallery as controller } from '../controllers';
 
 const router = new Router();
-const { pagination, sort, auth: { authenticateUser } } = middleware;
+const { auth: { authenticateUser } } = middleware;
 
-router.get('/', authenticateUser, pagination, sort, controller.getUserGallery);
+router.get('/', authenticateUser, controller.getUserGallery);
 router.get('/tags', controller.galleryTags);
 router.get('/tags/minor', controller.galleryTagsMinor);
 router.get('/tags/:categoryId', controller.galleryTagsMinor);

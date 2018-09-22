@@ -3,9 +3,7 @@ import middleware from '../middleware';
 
 import { misc as controller } from '../controllers';
 
-const {
-  auth, check, filter, sort, search, pagination
-} = middleware;
+const { auth, check } = middleware;
 
 const router = new Router();
 
@@ -13,10 +11,6 @@ router.get(
   '/admin/logs',
   auth.authenticateUser,
   check.currentUserIsAdmin,
-  pagination,
-  sort,
-  search,
-  filter,
   controller.getAdminLogs
 );
 
