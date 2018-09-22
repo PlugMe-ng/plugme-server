@@ -1,5 +1,3 @@
-
-
 module.exports = (sequelize, DataTypes) => {
   const content = sequelize.define('content', {
     id: {
@@ -63,6 +61,11 @@ module.exports = (sequelize, DataTypes) => {
       otherKey: 'userId'
     });
     content.hasMany(models.comment);
+    content.belongsToMany(models.User, {
+      through: 'gallery',
+      foreignKey: 'contentId',
+      otherKey: 'userId'
+    });
   };
   return content;
 };

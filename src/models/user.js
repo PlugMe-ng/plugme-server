@@ -184,6 +184,12 @@ module.exports = (sequelize, DataTypes) => {
       foreignKey: 'participantId',
       otherKey: 'conversationId'
     });
+    User.belongsToMany(models.content, {
+      through: 'gallery',
+      foreignKey: 'userId',
+      otherKey: 'contentId',
+      as: 'galleryContents'
+    });
   };
 
   return User;

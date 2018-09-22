@@ -22,6 +22,13 @@ const {
 } = middleware;
 
 router.post('/subscriptions', controller.subscription);
+router.get(
+  '/gallery',
+  pagination,
+  sort,
+  middleware.auth.authenticateUser,
+  controller.getUserGallery
+);
 router.get('/:username', controller.getByUsername);
 router.get('/:username/fans', pagination, controller.getUserFans);
 router.get('/:username/fanOf', pagination, controller.getUserFansOf);
