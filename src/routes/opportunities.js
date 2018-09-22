@@ -6,12 +6,12 @@
  * @requires NPM:express
  */
 import { Router } from 'express';
-import controllers from '../controllers';
+
 import middleware from '../middleware';
 import { opportunities as validations } from '../validations';
+import { opportunities as controller } from '../controllers';
 
 const { auth, check } = middleware;
-const { opportunities: controller } = controllers;
 
 const router = new Router();
 

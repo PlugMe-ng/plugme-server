@@ -144,7 +144,7 @@ const notifyUsers = async (opportunity) => {
 /**
  * @class Controller
  */
-class Controller {
+export default new class {
   /**
    * Handles creating a new opportunity
    *
@@ -576,6 +576,4 @@ class Controller {
       return res.sendFailure([error.message]);
     }
   }
-}
-
-export default new Controller();
+}();

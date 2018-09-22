@@ -23,7 +23,7 @@ import helpers from '../helpers';
 * Controls endpoints for authentication and authorization
 * @class Auth
 */
-export default class Auth {
+export default new class {
   /**
    * Sign in a user
    * @param {object} req express request object
@@ -354,4 +354,4 @@ export default class Auth {
       res.sendFailure([error.message]);
     }
   }
-}
+}();

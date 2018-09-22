@@ -6,7 +6,7 @@ import helpers from '../helpers';
 /**
  * @class Controller
  */
-class Controller {
+export default new class {
   /**
    * Retrieves admin actions logs
    *
@@ -52,6 +52,4 @@ class Controller {
       return res.sendFailure([error.message]);
     }
   }
-}
-
-export default new Controller();
+}();

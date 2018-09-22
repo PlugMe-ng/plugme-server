@@ -6,7 +6,7 @@ import helpers from '../helpers';
  *
  * @class Controller
  */
-class Controller {
+export default new class {
   /**
    * Gets all locations.
    * @param {Object} req - express request object
@@ -108,6 +108,4 @@ class Controller {
       return res.sendFailure([helpers.Misc.enhanceErrorMessage(error)]);
     }
   }
-}
-
-export default new Controller();
+}();

@@ -10,11 +10,10 @@
 
 import { Router } from 'express';
 
-import Users from '../controllers/Users';
 import middleware from '../middleware';
 import { users as validations } from '../validations';
+import { users as controller } from '../controllers';
 
-const controller = new Users();
 const router = new Router();
 
 const {

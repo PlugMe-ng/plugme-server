@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import middleware from '../middleware';
-import misc from '../controllers/misc';
+
+import { misc as controller } from '../controllers';
 
 const {
   auth, check, filter, sort, search, pagination
@@ -16,7 +17,7 @@ router.get(
   sort,
   search,
   filter,
-  misc.getAdminLogs
+  controller.getAdminLogs
 );
 
 export default router;

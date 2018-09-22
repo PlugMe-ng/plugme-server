@@ -4,7 +4,7 @@ import helpers from '../helpers';
 /**
  * @class Controller
  */
-class Controller {
+export default new class {
   /**
    * Retrieves all occupations
    *
@@ -67,6 +67,4 @@ class Controller {
       return res.sendFailure([helpers.Misc.enhanceErrorMessage(error)]);
     }
   }
-}
-
-export default new Controller();
+}();

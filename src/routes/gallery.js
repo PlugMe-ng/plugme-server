@@ -11,11 +11,10 @@
 import { Router } from 'express';
 
 import middleware from '../middleware';
-import controllers from '../controllers';
+import { gallery as controller } from '../controllers';
 
 const router = new Router();
 const { pagination, sort, auth: { authenticateUser } } = middleware;
-const { gallery: controller } = controllers;
 
 router.get('/', authenticateUser, pagination, sort, controller.getUserGallery);
 router.get('/tags', controller.galleryTags);

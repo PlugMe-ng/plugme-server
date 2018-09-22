@@ -1,14 +1,8 @@
-/**
- * @fileOverview users routes
- *
- * @author Idris Adetunmbi
- *
- * @requires NPM:express
- */
 import { Router } from 'express';
-import controllers from '../controllers';
+
 import middlewares from '../middleware';
 import { tags as validations } from '../validations';
+import { tags as controller } from '../controllers';
 
 const {
   auth, check, filter, sort
@@ -16,44 +10,14 @@ const {
 
 const routes = new Router();
 
-routes.get(
-  '/',
-  sort,
-  filter,
-  controllers.tags.getTags
-);
-
-routes.get(
-  '/minor',
-  sort,
-  filter,
-  controllers.tags.getTags,
-);
-
-routes.get(
-  '/major',
-  sort,
-  filter,
-  controllers.tags.getTags
-);
+routes.get('/', sort, filter, controller.getTags);
+routes.get('/minor', sort, filter, controller.getTags);
+routes.get('/major', sort, filter, controller.getTags);
 
 routes.use(auth.authenticateUser, check.currentUserIsAdmin);
 
-routes.post(
-  '/major',
-  validations.createMajorTag,
-  controllers.tags.createTag
-);
-
-routes.post(
-  '/minor',
-  validations.createMinorTag,
-  controllers.tags.createTag
-);
-
-routes.delete(
-  '/:tagId',
-  controllers.tags.deleteTag
-);
+routes.post('/major', validations.createMajorTag, controller.createTag);
+routes.post('/minor', validations.createMinorTag, controller.createTag);
+routes.delete('/:tagId', controller.deleteTag);
 
 export default routes;

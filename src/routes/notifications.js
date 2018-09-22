@@ -1,6 +1,7 @@
 import { Router } from 'express';
+
 import middleware from '../middleware';
-import notifications from '../controllers/notifications';
+import { notifications as controller } from '../controllers';
 
 const router = new Router();
 
@@ -11,9 +12,9 @@ router.get(
   pagination,
   sort,
   auth.authenticateUser,
-  notifications.get
+  controller.get
 );
 
-router.put('/:notificationId', notifications.update);
+router.put('/:notificationId', controller.update);
 
 export default router;

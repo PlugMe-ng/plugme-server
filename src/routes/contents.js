@@ -1,18 +1,8 @@
-/**
- * @fileOverview users routes
- *
- * @author Franklin Chieze
- *
- * @requires NPM:express
- * @requires ../controllers/Users
- * @requires ../middleware
- */
-
 import { Router } from 'express';
 
 import middleware from '../middleware';
-import controllers from '../controllers';
 import { contents as validations } from '../validations';
+import { contents as controller } from '../controllers';
 
 const router = new Router();
 
@@ -22,13 +12,13 @@ router.get(
   middleware.pagination,
   middleware.sort,
   middleware.filter,
-  controllers.contents.get
+  controller.get
 );
 
 router.get(
   '/:contentId',
   middleware.auth.optionalUserAuthentication,
-  controllers.contents.getContent
+  controller.getContent
 );
 
 router.get(
@@ -36,7 +26,7 @@ router.get(
   validations.contentExists,
   middleware.pagination,
   middleware.sort,
-  controllers.contents.getComments
+  controller.getComments
 );
 
 /**               ############################################                */
@@ -48,38 +38,38 @@ router.post(
   validations.createContent,
   validations.checkMinorTagInclusion,
   validations.userPlanLimit,
-  controllers.contents.createContent
+  controller.createContent
 );
 
 router.delete(
   '/:contentId',
   validations.contentExists,
-  controllers.contents.deleteContent
+  controller.deleteContent
 );
 
 router.post(
   '/:contentId/comments',
   validations.addComment,
   validations.contentExists,
-  controllers.contents.addComment
+  controller.addComment
 );
 
 router.post(
   '/:contentId/flags',
   validations.flagContent,
   validations.contentExists,
-  controllers.contents.flagContent
+  controller.flagContent
 );
 
 router.post(
   '/:contentId/like',
   validations.contentExists,
-  controllers.contents.likeContent
+  controller.likeContent
 );
 
 router.delete(
   '/:contentId/comments/:commentId',
-  controllers.contents.deleteComment
+  controller.deleteComment
 );
 
 export default router;

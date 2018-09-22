@@ -1,48 +1,21 @@
-/**
- * @fileOverview users routes
- *
- * @author Idris Adetunmbi
- *
- * @requires NPM:express
- */
 import { Router } from 'express';
-import controllers from '../controllers';
 import middlewares from '../middleware';
 import sort from '../middleware/sort';
+
 import { locations as validations } from '../validations';
+import { locations as controller } from '../controllers';
 
 const { auth, check } = middlewares;
 
-const routes = new Router();
+const router = new Router();
 
-routes.get(
-  '/',
-  sort,
-  controllers.locations.getAllLocations
-);
+router.get('/', sort, controller.getAllLocations);
 
-routes.use(auth.authenticateUser, check.currentUserIsAdmin);
+router.use(auth.authenticateUser, check.currentUserIsAdmin);
 
-routes.post(
-  '/',
-  validations.addLocation,
-  controllers.locations.addLocation
-);
+router.post('/', validations.addLocation, controller.addLocation);
+router.post('/countries', validations.addCountry, controller.addCountry);
+router.delete('/:locationId', controller.deleteLocation);
+router.delete('/countries/:countryId', controller.deleteCountry);
 
-routes.post(
-  '/countries',
-  validations.addCountry,
-  controllers.locations.addCountry
-);
-
-routes.delete(
-  '/:locationId',
-  controllers.locations.deleteLocation
-);
-
-routes.delete(
-  '/countries/:countryId',
-  controllers.locations.deleteCountry
-);
-
-export default routes;
+export default router;

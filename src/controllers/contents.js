@@ -88,7 +88,7 @@ const populateUsersGalleries = async (content) => {
 /**
  * @class ContentsController
  */
-class ContentsController {
+export default new class {
   /**
    * Creates a new content
    *
@@ -460,6 +460,4 @@ class ContentsController {
       return res.sendFailure([error.message]);
     }
   }
-}
-
-export default new ContentsController();
+}();

@@ -1,11 +1,3 @@
-/**
- * @fileOverview Users controller
- *
- * @author Franklin Chieze
- *
- * @requires ../helpers
- * @requires ../models
- */
 import axios from 'axios';
 import moment from 'moment';
 import { Op } from 'sequelize';
@@ -19,7 +11,7 @@ import config from '../config';
 * Users controller class
 * @class Users
 */
-export default class Users {
+export default new class {
   /**
    * @method getByUserName
    * @desc This method get the user with the specified username
@@ -443,4 +435,4 @@ export default class Users {
       return res.sendFailure([error.message]);
     }
   }
-}
+}();

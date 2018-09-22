@@ -1,28 +1,10 @@
-/**
- * @fileOverview index file for controllers
- *
- * @author Franklin Chieze
- *
- * @requires ./Auth
- * @requires ./Users
- */
-
-import Auth from './Auth';
-import Users from './Users';
-import contents from './contents';
-import tags from './tags';
-import opportunities from './opportunities';
-import locations from './locations';
-import occupations from './occupations';
-import gallery from './gallery';
-
-export default {
-  Auth,
-  Users,
-  contents,
-  tags,
-  opportunities,
-  locations,
-  occupations,
-  gallery
-};
+export { default as auth } from './auth';
+export { default as contents } from './contents';
+export { default as gallery } from './gallery';
+export { default as locations } from './locations';
+export { default as misc } from './misc';
+export { default as notifications } from './notifications';
+export { default as occupations } from './occupations';
+export { default as opportunities } from './opportunities';
+export { default as tags } from './tags';
+export { default as users } from './users';
