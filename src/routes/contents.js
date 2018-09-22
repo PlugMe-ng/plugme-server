@@ -25,15 +25,12 @@ router.get(
   controllers.contents.get
 );
 
-router.get('/tags', controllers.tags.galleryTags);
-router.get('/tags/minor', controllers.tags.galleryTagsMinor);
-router.get('/tags/:categoryId', controllers.tags.galleryTagsMinor);
-router.get('/trending', controllers.tags.trendingTags);
 router.get(
   '/:contentId',
   middleware.auth.optionalUserAuthentication,
   controllers.contents.getContent
 );
+
 router.get(
   '/:contentId/comments',
   validations.contentExists,

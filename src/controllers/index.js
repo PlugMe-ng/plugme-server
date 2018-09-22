@@ -14,6 +14,7 @@ import tags from './tags';
 import opportunities from './opportunities';
 import locations from './locations';
 import occupations from './occupations';
+import gallery from './gallery';
 
 export default {
   Auth,
@@ -22,5 +23,6 @@ export default {
   tags,
   opportunities,
   locations,
-  occupations
+  occupations,
+  gallery
 };
