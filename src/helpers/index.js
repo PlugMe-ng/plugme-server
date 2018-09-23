@@ -10,8 +10,11 @@
 
 import querystring from 'querystring';
 import url from 'url';
+import schedule from 'node-schedule';
+import moment from 'moment';
 
 import models from '../models';
+import notifications, { events } from '../controllers/notifications';
 
 /**
  * @method generatePaginationMeta
@@ -192,6 +195,31 @@ const subscriptionPlans = {
     validity: [1, 'year']
   }
 };
+
+export const sendPlanExpirationNotif = async () => {
+  const now = moment();
+  const days5 = moment().add(5, 'days');
+  const { gte, lte } = models.sequelize.Op;
+
+  const users = (await models.User.findAll({
+    attributes: ['id'],
+    where: {
+      'plan.expiresAt': {
+        [gte]: now.valueOf(),
+        [lte]: days5.valueOf(),
+      }
+    }
+  })).map(user => user.id);
+  notifications.create(null, {
+    event: events.SUBSCRIPTION_END,
+    recipients: users,
+    includeEmail: true
+  });
+};
+
+schedule.scheduleJob({ hour: 0, minute: 0, dayOfWeek: new schedule.Range(0, 6) }, () => {
+  sendPlanExpirationNotif();
+});
 
 export default {
   Misc: {

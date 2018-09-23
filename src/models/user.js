@@ -190,6 +190,7 @@ module.exports = (sequelize, DataTypes) => {
       otherKey: 'contentId',
       as: 'galleryContents'
     });
+    User.hasMany(models.notification, { foreignKey: 'userId' });
   };
 
   return User;

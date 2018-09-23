@@ -1,3 +1,5 @@
+import moment from 'moment';
+
 import models from '../models';
 import { notifsIO } from '../server';
 import helpers from '../helpers';
@@ -16,7 +18,8 @@ export const events = {
   NEW_CONTENT: 'new_content',
   CONTENT_DELETE: 'content_delete',
   OPPORTUNITY_DELETE: 'opportunity_delete',
-  NEW_OPPORTUNITY: 'new_opportunity'
+  NEW_OPPORTUNITY: 'new_opportunity',
+  SUBSCRIPTION_END: 'subscription_end'
 };
 
 const eventDescriptions = {
@@ -30,8 +33,9 @@ const eventDescriptions = {
   new_fan: 'is now a fan of yours',
   new_content: 'has published a new content',
   new_opportunity: 'has uploaded a new opportuntity',
-  content_delete: '',
-  opportunity_delete: ''
+  content_delete: 'Content deleted by admin',
+  opportunity_delete: 'Opportunity deleted by admin',
+  subscription_end: 'Your subscription will expire in 5 days, please renew your subscription'
 };
 
 const generateEventMailPayload = {
@@ -70,19 +74,73 @@ const generateEventMailPayload = {
     <p>Hurry now to apply for this opportuntiy before it passes.</p>
     `,
     address: recipient.email
+  }),
+
+  subscription_end: (author, recipient, entity) => ({
+    subject: 'Your current subscription will expire in 5 days',
+    content:
+    `
+    <p>Hi ${recipient.fullName}</p>
+
+    <p>Your current subscription plan will expire in 5 days, after which you will no longer be able to upload contents or get plugged to new opportunities</p>
+
+    <p>Please renew or upgrade your plan as soon as possible</p>
+    `,
+    address: recipient.email
   })
 };
 
 const generateMeta = (event, entity) => {
   const meta = {};
+  const entityName = entity.constructor.name.toLowerCase();
+
   meta.event = event;
-  if (entity.id) {
-    meta[entity.constructor.name.toLowerCase()] = entity.id;
-    meta.text = eventDescriptions[event];
-  } else {
-    meta.text = entity;
-  }
+  meta[entityName] = entity.id;
+  meta.text = eventDescriptions[event];
+
   return meta;
+};
+
+const sendEmailNotification = ({
+  recipientId, event, author, entity
+}) => {
+  models.User.findById(recipientId, { attributes: ['email', 'fullName'] })
+    .then(user => sendMail(generateEventMailPayload[event](author, user, entity)));
+};
+
+const isDuplicateNotif = async ({ event, recipientId, author }) => {
+  switch (event) {
+    case events.NEW_MESSAGE: {
+      const unreadMessageNotif = await models.notification.findOne({
+        attributes: [],
+        order: [['createdAt', 'DESC']],
+        where: {
+          userId: recipientId,
+          read: false,
+          authorId: author.id,
+          'meta.event': event
+        }
+      });
+      return !!unreadMessageNotif;
+    }
+    case events.SUBSCRIPTION_END: {
+      const subcriptionEndNotifExists = await models.notification.findOne({
+        attributes: [],
+        order: [['createdAt', 'DESC']],
+        where: {
+          userId: recipientId,
+          'meta.event': event,
+          createdAt: {
+            [models.sequelize.Op.lte]: moment().toDate(),
+            [models.sequelize.Op.gte]: moment().subtract(5, 'days').toDate()
+          }
+        }
+      });
+      return !!subcriptionEndNotifExists;
+    }
+    default:
+      return false;
+  }
 };
 
 export default new class {
@@ -104,27 +162,12 @@ export default new class {
     includeEmail = false
   }) => {
     try {
-      if (includeEmail) {
-        recipients.forEach((recipientId) => {
-          models.User.findById(recipientId, { attributes: ['email', 'fullName'] })
-            .then(recipient =>
-              sendMail(generateEventMailPayload[event](author, recipient, entity)));
-        });
-      }
-      const meta = generateMeta(event, entity);
       recipients.forEach(async (recipientId) => {
         if (author && recipientId === author.id) return;
-        if (event === events.NEW_MESSAGE) {
-          const unreadMessageNotif = await models.notification.findOne({
-            order: [['createdAt', 'DESC']],
-            where: {
-              userId: recipientId,
-              read: false,
-              authorId: author.id
-            }
-          });
-          if (unreadMessageNotif) return;
-        }
+        if (await isDuplicateNotif({ event, recipientId, author })) return;
+        if (includeEmail) sendEmailNotification({ recipientId, event, author, entity }); // eslint-disable-line
+
+        const meta = generateMeta(event, entity);
         models.notification.create({
           authorId: author ? author.id : null,
           userId: recipientId,

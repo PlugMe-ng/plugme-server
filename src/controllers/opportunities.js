@@ -560,17 +560,16 @@ export default new class {
    */
   delete = async (req, res) => {
     try {
-      const opportunity = await models.opportunity
-        .findById(req.params.opportunityId);
-      if (!opportunity) {
-        throw new Error('Specified opportunity does not exist');
-      }
+      const opportunity = await models.opportunity.findById(req.params.opportunityId);
+      if (!opportunity) throw new Error('Specified opportunity does not exist');
+
+      opportunity.destroy();
+
       notifications.create(req.userObj, {
         event: events.OPPORTUNITY_DELETE,
         recipients: [opportunity.pluggerId],
-        entity: `Opportunity deleted by admin - ${opportunity.title}`
+        entity: opportunity
       });
-      opportunity.destroy();
       return res.sendSuccessAndLog(opportunity, { message: 'Opportuntiy deleted successfully' });
     } catch (error) {
       return res.sendFailure([error.message]);

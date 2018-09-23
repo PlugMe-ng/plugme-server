@@ -348,19 +348,19 @@ export default new class {
     const { content, user } = req;
     try {
       if (content.authorId === user.id || isAdmin(user)) {
+        content.destroy();
         if (isAdmin(user) && content.authorId !== user.id) {
-          const flaggers = (await content.getFlaggers({ attributes: ['id'] })).map(flagger => flagger.id);
+          const flaggers = (await content.getFlaggers({ attributes: ['id'] }))
+            .map(flagger => flagger.id);
           notifications.create(req.userObj, {
+            entity: content,
             event: events.CONTENT_DELETE,
             recipients: [...flaggers, content.authorId],
-            entity: `Content deleted by admin - ${content.title}`
           });
-          content.destroy();
           return res.sendSuccessAndLog(content, {
             message: 'Content has been deleted succesfully'
           });
         }
-        content.destroy();
         return res.sendSuccess({
           message: 'Content has been deleted succesfully'
         });
