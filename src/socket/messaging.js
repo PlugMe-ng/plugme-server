@@ -1,9 +1,10 @@
 import moment from 'moment';
 
 import models from '../models';
-import notifications, { events } from '../controllers/notifications';
+import { notifications } from '../controllers';
 import { notifsIO } from '../server';
 import config from '../config';
+import { events } from '../helpers';
 
 const {
   where, fn, col, Op

@@ -2,8 +2,8 @@ import { Op } from 'sequelize';
 import moment from 'moment';
 
 import models from '../models';
-import helpers from '../helpers';
-import notifications, { events } from './notifications';
+import helpers, { events } from '../helpers';
+import notifications from './notifications';
 
 /**
  * @description Checks that the opportunity being created is not a

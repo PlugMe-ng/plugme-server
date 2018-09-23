@@ -14,7 +14,8 @@ import schedule from 'node-schedule';
 import moment from 'moment';
 
 import models from '../models';
-import notifications, { events } from '../controllers/notifications';
+import notifications from '../controllers/notifications';
+import { events } from './notifications';
 
 /**
  * @method generatePaginationMeta
@@ -220,6 +221,8 @@ export const sendPlanExpirationNotif = async () => {
 schedule.scheduleJob({ hour: 0, minute: 0, dayOfWeek: new schedule.Range(0, 6) }, () => {
   sendPlanExpirationNotif();
 });
+
+export { eventDescriptions, events, generateEventMailPayload } from './notifications';
 
 export default {
   Misc: {

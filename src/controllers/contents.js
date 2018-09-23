@@ -3,8 +3,8 @@ import { Op } from 'sequelize';
 import _ from 'underscore';
 
 import models from '../models';
-import helpers from '../helpers';
-import notifications, { events } from './notifications';
+import helpers, { events } from '../helpers';
+import notifications from './notifications';
 
 const { isAdmin } = helpers.Misc;
 

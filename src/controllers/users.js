@@ -2,9 +2,8 @@ import axios from 'axios';
 import moment from 'moment';
 import { Op } from 'sequelize';
 
-import helpers from '../helpers';
+import helpers, { events } from '../helpers';
 import models from '../models';
-import { events } from './notifications';
 import config from '../config';
 
 /**
