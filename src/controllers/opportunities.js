@@ -102,7 +102,8 @@ const notifyUnselectedAchievers = async (opportunity, author) => {
     attributes: ['id']
   })).map(entry => entry.id).filter(id => id !== opportunity.achieverId);
 
-  notifications.create(author, {
+  notifications.create({
+    author,
     event: events.OPPORTUNITY_ACHIEVER_SET_OTHERS,
     recipients: unselectedAchieversIds,
     entity: opportunity,
@@ -133,7 +134,8 @@ const notifyUsers = async (opportunity) => {
       where: { id: opportunity.tags.map(tag => tag.id) }
     }]
   })).map(user => user.id);
-  notifications.create(opportunity.plugger, {
+  notifications.create({
+    author: opportunity.plugger,
     event: events.NEW_OPPORTUNITY,
     recipients,
     entity: opportunity,
@@ -565,7 +567,8 @@ export default new class {
 
       opportunity.destroy();
 
-      notifications.create(req.userObj, {
+      notifications.create({
+        author: req.userObj,
         event: events.OPPORTUNITY_DELETE,
         recipients: [opportunity.pluggerId],
         entity: opportunity

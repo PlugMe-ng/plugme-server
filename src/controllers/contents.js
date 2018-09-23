@@ -33,7 +33,9 @@ const addViewEntry = async (user, content) => {
 
 const notifyFans = async (user, content) => {
   const fans = (await user.getFans({ attributes: ['id'] })).map(fan => fan.id);
-  notifications.create(user, { event: events.NEW_CONTENT, recipients: fans, entity: content });
+  notifications.create({
+    author: user, event: events.NEW_CONTENT, recipients: fans, entity: content
+  });
 };
 
 /**
@@ -352,7 +354,8 @@ export default new class {
         if (isAdmin(user) && content.authorId !== user.id) {
           const flaggers = (await content.getFlaggers({ attributes: ['id'] }))
             .map(flagger => flagger.id);
-          notifications.create(req.userObj, {
+          notifications.create({
+            author: req.userObj,
             entity: content,
             event: events.CONTENT_DELETE,
             recipients: [...flaggers, content.authorId],

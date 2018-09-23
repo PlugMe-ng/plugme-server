@@ -126,8 +126,8 @@ export default new class {
       notifsIO.send('new_message', participant.id, message);
       return participant.id;
     });
-    notifications.create(user, {
-      event: events.NEW_MESSAGE, recipients, entity: message
+    notifications.create({
+      author: user, event: events.NEW_MESSAGE, recipients, entity: message
     });
   }
 }();

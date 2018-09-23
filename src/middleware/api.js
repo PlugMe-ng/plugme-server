@@ -44,7 +44,7 @@ export default (req, res, next) => {
    * @returns {void}
    */
   res.sendSuccessAndNotify = (payload, data, status = 200, meta) => {
-    notifications.create(req.user, payload);
+    notifications.create({ author: req.userObj, ...payload });
     return res.sendSuccess(data, status, meta);
   };
 

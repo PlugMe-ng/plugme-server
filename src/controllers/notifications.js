@@ -2,15 +2,13 @@ import moment from 'moment';
 
 import models from '../models';
 import { notifsIO } from '../server';
-import helpers, { events, eventDescriptions, generateEventMailPayload } from '../helpers';
 import sendMail from '../helpers/mailing';
+import helpers, { events, eventDescriptions, generateEventMailPayload } from '../helpers';
 
 const generateMeta = (event, entity) => {
   const meta = {};
-  const entityName = entity.constructor.name.toLowerCase();
-
+  if (entity) meta[entity.constructor.name.toLowerCase()] = entity.id;
   meta.event = event;
-  meta[entityName] = entity.id;
   meta.text = eventDescriptions[event];
 
   return meta;
@@ -60,8 +58,8 @@ const isDuplicateNotif = async ({ event, recipientId, author }) => {
 
 export default new class {
   /**
-   * @param {Object} author - triggerer of the event
    * @param {Object} payload
+   * @param {Object} payload.author - triggerer of the event
    * @param {string} payload.event - type of event triggered
    * @param {Array.<string>} payload.recipients - an array of recipientIds of
    * the event
@@ -70,29 +68,25 @@ export default new class {
    *
    * @returns {void}
    */
-  create = (author, {
+  create = ({
+    author,
     event,
     recipients,
     entity,
     includeEmail = false
   }) => {
-    try {
-      recipients.forEach(async (recipientId) => {
-        if (author && recipientId === author.id) return;
-        if (await isDuplicateNotif({ event, recipientId, author })) return;
-        if (includeEmail) sendEmailNotification({ recipientId, event, author, entity }); // eslint-disable-line
+    recipients.forEach(async (recipientId) => {
+      if (author && recipientId === author.id) return;
+      if (await isDuplicateNotif({ event, recipientId, author })) return;
+      if (includeEmail) sendEmailNotification({ recipientId, event, author, entity }); // eslint-disable-line
 
-        const meta = generateMeta(event, entity);
-        models.notification.create({
-          authorId: author ? author.id : null,
-          userId: recipientId,
-          meta
-        });
-        notifsIO.send('notification', recipientId);
+      models.notification.create({
+        authorId: author ? author.id : null,
+        userId: recipientId,
+        meta: generateMeta(event, entity)
       });
-    } catch (error) {
-      // TODO: fail silently for now
-    }
+      notifsIO.send('notification', recipientId);
+    });
   }
 
   get = async (req, res) => {

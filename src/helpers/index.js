@@ -197,7 +197,7 @@ const subscriptionPlans = {
   }
 };
 
-export const sendPlanExpirationNotif = async () => {
+const sendPlanExpirationNotif = async () => {
   const now = moment();
   const days5 = moment().add(5, 'days');
   const { gte, lte } = models.sequelize.Op;
@@ -211,7 +211,7 @@ export const sendPlanExpirationNotif = async () => {
       }
     }
   })).map(user => user.id);
-  notifications.create(null, {
+  notifications.create({
     event: events.SUBSCRIPTION_END,
     recipients: users,
     includeEmail: true
