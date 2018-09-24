@@ -27,6 +27,8 @@ import routes from './routes';
 import apiDocs from './api-docs.json';
 import Socket from './socket';
 
+require('@sentry/node').init({});
+
 dotenv.config();
 
 const env = process.env.NODE_ENV || 'development';
