@@ -36,23 +36,16 @@ export default new class {
       const user = await models.User.findOne({
         where: { email: req.body.email },
       });
-      if (user && user.password) {
-        const isCorrectPassword =
-          await bcrypt.compare(req.body.password, user.password);
-        if (isCorrectPassword) {
-          return user.verified ?
-            res.sendSuccess({
-              user: helpers.Misc.updateUserAttributes(user),
-              userToken: createJwtToken(user)
-            }) : res.sendSuccess({
-              user: helpers.Misc.updateUserAttributes(user)
-            });
-        }
-
-        throw new Error('No user was found with the supplied credentials.');
+      if (!user || !(await bcrypt.compare(req.body.password, user.password || ''))) {
+        throw new Error('Invalid sign-in credentials');
       }
-
-      throw new Error('No user was found with the supplied credentials.');
+      return user.verified ?
+        res.sendSuccess({
+          user: helpers.Misc.updateUserAttributes(user),
+          userToken: createJwtToken(user)
+        }) : res.sendSuccess({
+          user: helpers.Misc.updateUserAttributes(user)
+        });
     } catch (error) {
       return res.sendFailure([error.message]);
     }

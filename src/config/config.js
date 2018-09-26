@@ -28,5 +28,6 @@ module.exports = {
   FE_URL: 'https://plugme-client-staging.herokuapp.com',
   dev_support_notif: process.env.DEV_SUPPORT_NOTIFICATION,
   PAYSTACK_SECRET_KEY: process.env.PAYSTACK_SECRET_KEY,
-  PAYMENT_VERIFICATION_URL: 'https://api.paystack.co/transaction/verify'
+  PAYMENT_VERIFICATION_URL: 'https://api.paystack.co/transaction/verify',
+  SUPER_ADMINS: process.env.SUPER_ADMINS ? process.env.SUPER_ADMINS.split(',') : []
 };

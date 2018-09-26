@@ -348,8 +348,9 @@ export default new class {
   adminUserUpdate = async (req, res) => {
     try {
       const user = await models.User.findById(req.params.userId);
-      if (!user) {
-        throw new Error('Specified user does not exist');
+      if (!user) throw new Error('Specified user does not exist');
+      if (config.SUPER_ADMINS.includes(user.email)) {
+        throw new Error('You are not permitted to perform this operation');
       }
       await user.update(req.body);
       return res.sendSuccessAndLog(user, { message: 'User updated successfully' });
