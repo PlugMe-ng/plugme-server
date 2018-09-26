@@ -11,13 +11,13 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       allowNull: false,
       unique: true,
-      set(value) {
-        this.setDataValue('title', value.toLowerCase());
-      },
-      get() {
-        const title = this.getDataValue('title');
-        return title && capitalize.words(title);
-      },
+      // set(value) {
+      //   this.setDataValue('title', value.toLowerCase());
+      // },
+      // get() {
+      //   const title = this.getDataValue('title');
+      //   return title && capitalize.words(title);
+      // },
     },
   }, {
     tableName: 'tags'

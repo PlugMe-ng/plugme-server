@@ -6,16 +6,17 @@ import { tags as controller } from '../controllers';
 
 const { auth, check } = middlewares;
 
-const routes = new Router();
+const router = new Router();
 
-routes.get('/', controller.getTags);
-routes.get('/minor', controller.getTags);
-routes.get('/major', controller.getTags);
+router.get('/', controller.getTags);
+router.get('/minor', controller.getTags);
+router.get('/major', controller.getTags);
 
-routes.use(auth.authenticateUser, check.currentUserIsAdmin);
+router.use(auth.authenticateUser, check.currentUserIsAdmin);
 
-routes.post('/major', validations.createMajorTag, controller.createTag);
-routes.post('/minor', validations.createMinorTag, controller.createTag);
-routes.delete('/:tagId', controller.deleteTag);
+router.post('/major', validations.createMajorTag, controller.createTag);
+router.post('/minor', validations.createMinorTag, controller.createTag);
+router.delete('/:tagId', controller.deleteTag);
+router.put('/:tagId', controller.updateTag);
 
-export default routes;
+export default router;
