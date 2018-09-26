@@ -23,7 +23,8 @@ export default new class {
     const { query } = req.meta.search;
 
     const where = {
-      ...(query && { action: { [Op.iLike]: `%${query}%` } })
+      ...(query && { action: { [Op.iLike]: `%${query}%` } }),
+      ...(filter.createdAt && { createdAt: { [Op.between]: filter.createdAt.split(',') } })
     };
 
     try {
