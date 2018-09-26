@@ -223,7 +223,8 @@ export default new class {
           { title: { [Op.iLike]: `%${query}%` } },
           { responsibilities: { [Op.iLike]: `%${query}%` } }
         ]
-      })
+      }),
+      ...(filter.createdAt && { createdAt: { [Op.between]: filter.createdAt.split(',') } })
     };
 
     try {

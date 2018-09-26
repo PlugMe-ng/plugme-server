@@ -153,7 +153,8 @@ export default new class {
 
     const where = {
       ...(isAdmin(userObj) &&
-      filter.flagCount && { flagCount: { [Op.gte]: filter.flagCount } })
+      filter.flagCount && { flagCount: { [Op.gte]: filter.flagCount } }),
+      ...(filter.createdAt && { createdAt: { [Op.between]: filter.createdAt.split(',') } })
     };
 
     try {
