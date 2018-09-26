@@ -39,15 +39,11 @@ export default class Auth {
         where: { email: userData.email }
       });
 
-      if (!user) {
-        throw new Error('User is not authenticated.');
-      }
-      if (!user.verified) {
-        throw new Error('Account is not verified');
-      }
-      if (user.blocked) {
-        throw new Error('You are not authorized to perform this operation, please contact the admin');
-      }
+      if (!user) throw new Error('User is not authenticated.');
+      if (!user.verified) throw new Error('Account is not verified');
+      if (user.blocked) throw new Error('Your account has been suspended, please contact the admin');
+
+      user.update({ lastSeen: new Date() });
 
       req.user = user.get();
       req.userObj = user;

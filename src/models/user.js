@@ -82,6 +82,10 @@ module.exports = (sequelize, DataTypes) => {
         type: 'basic',
         expiresAt: null
       }
+    },
+    lastSeen: {
+      type: DataTypes.DATE,
+      defaultValue: new Date()
     }
   }, {
     getterMethods: {

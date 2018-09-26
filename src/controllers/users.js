@@ -158,29 +158,54 @@ export default new class {
             { fullName: { [Op.iLike]: `%${filter.name}%` } }
           ]
         }),
-        ...(filter.role && { role: filter.role.toLowerCase() })
+        ...(filter.role && { role: filter.role.toLowerCase() }),
+        ...(filter.lastSeen && { lastSeen: { [Op.between]: filter.lastSeen.split(',') } })
       };
 
       const users = await models.User.findAndCount({
+        distinct: true,
         where,
         limit,
         offset,
         order: [[attribute, order]],
         attributes: {
           exclude: ['password']
-        }
+        },
+        include: [{
+          model: models.tag,
+          as: 'skills',
+          attributes: [],
+          through: { attributes: [] },
+          where: {
+            ...(filter.skills && {
+              where: {
+                title: {
+                  [Op.iLike]: {
+                    [Op.any]: filter.skills.split(',').map(tag => tag.trim())
+                  }
+                }
+              }
+            }),
+          }
+        }, {
+          model: models.occupation,
+          attributes: [],
+          where: {
+            ...(filter.occupations && {
+              where: {
+                title: {
+                  [Op.iLike]: {
+                    [Op.any]: filter.occupations.split(',').map(tag => tag.trim())
+                  }
+                }
+              }
+            }),
+          }
+        }]
       });
-      if (users) {
-        const pagination = helpers.Misc.generatePaginationMeta(
-          req,
-          users,
-          limit,
-          offset
-        );
-        return res.sendSuccess(users.rows, 200, { pagination });
-      }
 
-      throw new Error('Could not retrieve users from the database.');
+      const pagination = helpers.Misc.generatePaginationMeta(req, users, limit, offset);
+      return res.sendSuccess(users.rows, 200, { pagination });
     } catch (error) {
       return res.sendFailure([error.message]);
     }
