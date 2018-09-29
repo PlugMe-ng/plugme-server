@@ -21,7 +21,6 @@ import express from 'express';
 import trimmer from 'express-trimmer';
 import logger from 'morgan';
 import swaggerUI from 'swagger-ui-express';
-import Sentry from '@sentry/node';
 
 import middleware from './middleware';
 import routes from './routes';
@@ -32,10 +31,6 @@ dotenv.config();
 
 const env = process.env.NODE_ENV || 'development';
 const port = parseInt(process.env.PORT, 10) || 3000;
-
-if (env === 'production') {
-  Sentry.init({});
-}
 
 const app = express();
 
