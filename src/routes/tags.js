@@ -17,6 +17,6 @@ router.use(auth.authenticateUser, check.currentUserIsAdmin);
 router.post('/major', validations.createMajorTag, controller.createTag);
 router.post('/minor', validations.createMinorTag, controller.createTag);
 router.delete('/:tagId', controller.deleteTag);
-router.put('/:tagId', controller.updateTag);
+router.put('/:tagId', validations.createMajorTag, controller.updateTag);
 
 export default router;

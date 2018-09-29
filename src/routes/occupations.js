@@ -19,6 +19,7 @@ router.get('/', controller.get);
 router.use(auth.authenticateUser, check.currentUserIsAdmin);
 
 router.post('/', validations.addOccupation, controller.addOccupation);
+router.put('/:occupationId', validations.addOccupation, controller.update);
 router.delete('/:occupationId', controller.deleteOccupation);
 
 export default router;

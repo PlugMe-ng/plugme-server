@@ -67,4 +67,25 @@ export default new class {
       return res.sendFailure([helpers.Misc.enhanceErrorMessage(error)]);
     }
   }
+
+  /**
+   * Handles editing an occupation
+   *
+   * @param {Object} req - Express request object
+   * @param {Object} res -  Express response object
+   *
+   * @returns {void}
+   * @memberOf Controller
+   */
+  update = async (req, res) => {
+    try {
+      const occupation = await models.occupation
+        .findById(req.params.occupationId);
+      if (!occupation) throw new Error('Specified occupation does not exist');
+      await occupation.update({ title: req.body.title });
+      return res.sendSuccessAndLog(occupation, { message: 'Occupation modified successfully' });
+    } catch (error) {
+      return res.sendFailure([helpers.Misc.enhanceErrorMessage(error)]);
+    }
+  }
 }();

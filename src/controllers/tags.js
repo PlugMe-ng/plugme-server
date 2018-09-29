@@ -91,7 +91,7 @@ export default new class {
       if (!tag) {
         throw new Error('Specified tag does not exist');
       }
-      tag.update({ title: req.body.title });
+      await tag.update({ title: req.body.title });
       return res.sendSuccessAndLog(tag, { message: 'Tag successfully updated' });
     } catch (error) {
       res.sendFailure([error.message]);
