@@ -10,10 +10,10 @@ module.exports = (sequelize, DataTypes) => {
     name: {
       type: DataTypes.STRING,
       allowNull: false,
-      get() {
-        const title = this.getDataValue('name');
-        return capitalize.words(title);
-      }
+      // get() {
+      //   const title = this.getDataValue('name');
+      //   return capitalize.words(title);
+      // }
     },
   }, {});
   location.associate = (models) => {

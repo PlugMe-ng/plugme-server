@@ -12,13 +12,13 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       allowNull: false,
       unique: true,
-      set(value) {
-        this.setDataValue('name', value.toLowerCase());
-      },
-      get() {
-        const title = this.getDataValue('name');
-        return capitalize.words(title);
-      }
+      // set(value) {
+      //   this.setDataValue('name', value.toLowerCase());
+      // },
+      // get() {
+      //   const title = this.getDataValue('name');
+      //   return capitalize.words(title);
+      // }
     },
   }, {});
   country.associate = (models) => {

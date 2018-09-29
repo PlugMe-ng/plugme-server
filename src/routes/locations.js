@@ -16,5 +16,7 @@ router.post('/', validations.addLocation, controller.addLocation);
 router.post('/countries', validations.addCountry, controller.addCountry);
 router.delete('/:locationId', controller.deleteLocation);
 router.delete('/countries/:countryId', controller.deleteCountry);
+router.put('/:locationId', controller.updateLocation);
+router.put('/countries/:countryId', controller.updateCountry);
 
 export default router;

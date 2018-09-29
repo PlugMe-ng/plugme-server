@@ -108,4 +108,42 @@ export default new class {
       return res.sendFailure([helpers.Misc.enhanceErrorMessage(error)]);
     }
   }
+
+  /**
+   * Handles updating a location.
+   * @param {Object} req - express request object
+   * @param {Object} res - express response object
+   *
+   * @returns {void}
+   * @memberOf Controller
+   */
+  updateLocation = async (req, res) => {
+    try {
+      const location = await models.location.findById(req.params.locationId);
+      if (!location) throw new Error('Specified location does not exist');
+      await location.update(req.body);
+      return res.sendSuccessAndLog(location, { message: 'Location updated successfully' });
+    } catch (error) {
+      return res.sendFailure([helpers.Misc.enhanceErrorMessage(error)]);
+    }
+  }
+
+  /**
+   * Handles updating a country.
+   * @param {Object} req - express request object
+   * @param {Object} res - express response object
+   *
+   * @returns {void}
+   * @memberOf Controller
+   */
+  updateCountry = async (req, res) => {
+    try {
+      const country = await models.country.findById(req.params.countryId);
+      if (!country) throw new Error('Specified country does not exist');
+      await country.update(req.body);
+      return res.sendSuccessAndLog(country, { message: 'Country updated successfully' });
+    } catch (error) {
+      return res.sendFailure([helpers.Misc.enhanceErrorMessage(error)]);
+    }
+  }
 }();
