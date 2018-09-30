@@ -78,65 +78,6 @@ export default new class {
   }
 
   /**
-   * @method getUserGallery
-   * @desc Retrieves a user gallery contents
-   *
-   * @param { object } req request
-   * @param { object } res response
-   *
-   * @returns {void}
-   */
-  getUserGallery = async (req, res) => {
-    const user = req.userObj;
-    const { limit, offset } = req.meta.pagination;
-    const { attribute, order } = req.meta.sort;
-
-    try {
-      // const userInterestTags = (await user.getInterests({
-      //   joinTableAttributes: [],
-      //   attributes: ['id']
-      // })).map(tag => tag.id);
-
-      const count = await user.countGalleryContents();
-      const contents = await user.getGalleryContents({
-        limit,
-        offset,
-        attributes: { exclude: ['flagCount'] },
-        order: [[attribute, order]],
-        joinTableAttributes: [],
-        include: [{
-          model: models.tag,
-          as: 'tags',
-          attributes: ['id', 'title'],
-          // where: { id: userInterestTags },
-          through: { attributes: [] }
-        }, {
-          model: models.User,
-          as: 'author',
-          attributes: ['id', 'username', 'fullName']
-        }, {
-          model: models.comment,
-          attributes: ['UserId']
-        }, {
-          model: models.User,
-          as: 'likers',
-          attributes: ['id'],
-          through: { attributes: [] }
-        }, {
-          model: models.User,
-          as: 'viewers',
-          attributes: ['id'],
-          through: { attributes: [] }
-        }]
-      });
-      const pagination = helpers.Misc.generatePaginationMeta(req, { count }, limit, offset);
-      return res.sendSuccess(contents, 200, { pagination });
-    } catch (error) {
-      return res.sendFailure([error.message]);
-    }
-  }
-
-  /**
    * @method get
    * @desc This method gets an array of users
    *
@@ -178,11 +119,9 @@ export default new class {
           through: { attributes: [] },
           where: {
             ...(filter.skills && {
-              where: {
-                title: {
-                  [Op.iLike]: {
-                    [Op.any]: filter.skills.split(',').map(tag => tag.trim())
-                  }
+              title: {
+                [Op.iLike]: {
+                  [Op.any]: filter.skills.split(',').map(tag => tag.trim())
                 }
               }
             }),
@@ -192,11 +131,9 @@ export default new class {
           attributes: [],
           where: {
             ...(filter.occupations && {
-              where: {
-                title: {
-                  [Op.iLike]: {
-                    [Op.any]: filter.occupations.split(',').map(tag => tag.trim())
-                  }
+              title: {
+                [Op.iLike]: {
+                  [Op.any]: filter.occupations.split(',').map(tag => tag.trim())
                 }
               }
             }),
