@@ -5,6 +5,14 @@ import helpers from '../helpers';
 
 const sortFn = (a, b) => b.totalLikes - a.totalLikes;
 
+/**
+ * Computes the cummulative stats for major tags through their minor tags
+ * and contents
+ *
+ * @param {any} tags
+ *
+ * @return {Array.<object>} - an array of the tags
+ */
 const getCummulativeStats = tags => tags.map((tag) => {
   tag = tag.get({ plain: true });
 
@@ -34,31 +42,44 @@ const getCummulativeStats = tags => tags.map((tag) => {
   return tag;
 });
 
+/**
+ * Computes the cumulative likes for a list of major tags through their contents
+ * @param {any} tags
+ *
+ * @returns {Array.<object>} tags
+ */
 const computeCumulativeLikes = tags =>
   tags.map((tag) => {
     tag = tag.get({ plain: true });
     tag.totalLikes = 0;
     tag.contents.forEach((content) => {
-      tag.totalLikes += content.totalLikes;
+      tag.totalLikes += content.likers.length;
     });
     tag.minorTags.forEach((minorTag) => {
       minorTag.contents.forEach((content) => {
-        tag.totalLikes += content.totalLikes;
+        tag.totalLikes += content.likers.length;
       });
     });
     return tag;
   });
 
+/**
+ * Retrieves a list of all major tags including their minor tags and sorted
+ * according to the number of likes gathered by their contents within the last
+ * 24 hours
+ *
+ * @returns {Array.<string>} -
+ */
 const getTagsRankedByRecentLikes = async () => {
   const contentAssociation = {
     model: models.content,
     as: 'contents',
-    attributes: ['totalLikes'],
+    attributes: ['id'],
     through: { attributes: [] },
     include: [{
       model: models.User,
       as: 'likers',
-      attributes: [],
+      attributes: ['id'],
       required: true,
       through: {
         attributes: [],
@@ -70,11 +91,11 @@ const getTagsRankedByRecentLikes = async () => {
   const tags = await models.tag.findAll({
     where: { categoryId: null },
     attributes: ['id'],
-    include: [contentAssociation, {
+    include: [{ ...contentAssociation }, {
       model: models.tag,
       as: 'minorTags',
       attributes: ['id'],
-      include: [contentAssociation]
+      include: [{ ...contentAssociation }]
     }]
   });
   return computeCumulativeLikes(tags).sort(sortFn).map(tag => tag.id);
@@ -94,7 +115,7 @@ export default new class {
    * @returns {void}
    * @memberOf Controller
    */
-  galleryTags = async (req, res) => {
+  galleryTagsMajor = async (req, res) => {
     try {
       let tags = await models.tag.findAll({
         where: { categoryId: null },
@@ -230,7 +251,7 @@ export default new class {
         tag = tag.get({ plain: true });
         tag.totalLikes = 0;
         tag.contents.forEach((content) => {
-          tag.totalLikes += content.totalLikes;
+          tag.totalLikes += content.likers.length;
         });
         return tag;
       }).sort(sortFn)

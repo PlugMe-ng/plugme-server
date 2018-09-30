@@ -17,7 +17,7 @@ const router = new Router();
 const { auth: { authenticateUser } } = middleware;
 
 router.get('/', authenticateUser, controller.getUserGallery);
-router.get('/tags', controller.galleryTags);
+router.get('/tags', controller.galleryTagsMajor);
 router.get('/tags/minor', controller.galleryTagsMinor);
 router.get('/tags/:categoryId', controller.galleryTagsMinor);
 router.get('/trending', controller.trendingTags);
