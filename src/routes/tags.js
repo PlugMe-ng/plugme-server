@@ -14,6 +14,7 @@ router.get('/major', controller.getTags);
 
 router.use(auth.authenticateUser, check.currentUserIsAdmin);
 
+router.get('/stats', controller.tagStats);
 router.post('/major', validations.createMajorTag, controller.createTag);
 router.post('/minor', validations.createMinorTag, controller.createTag);
 router.delete('/:tagId', controller.deleteTag);

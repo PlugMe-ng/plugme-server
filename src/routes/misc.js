@@ -14,11 +14,4 @@ router.get(
   controller.getAdminLogs
 );
 
-router.get(
-  '/tags/stats',
-  auth.authenticateUser,
-  check.currentUserIsAdmin,
-  controller.tagStats
-);
-
 export default router;
