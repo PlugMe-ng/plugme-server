@@ -100,7 +100,18 @@ export default new class {
           ]
         }),
         ...(filter.role && { role: filter.role.toLowerCase() }),
-        ...(filter.lastSeen && { lastSeen: { [Op.between]: filter.lastSeen.split(',') } })
+        ...(filter.lastSeen && { lastSeen: { [Op.between]: filter.lastSeen.split(',') } }),
+        ...(filter.plan && {
+          plan: {
+            type: filter.plan,
+            expiresAt: {
+              [Op.or]: [
+                { [Op.gt]: moment.now().toString() },
+                { [Op.eq]: null },
+              ]
+            }
+          }
+        })
       };
 
       const users = await models.User.findAndCount({
@@ -112,33 +123,29 @@ export default new class {
         attributes: {
           exclude: ['password']
         },
-        include: [{
+        include: [...(filter.skills ? [{
           model: models.tag,
           as: 'skills',
           attributes: [],
           through: { attributes: [] },
           where: {
-            ...(filter.skills && {
-              title: {
-                [Op.iLike]: {
-                  [Op.any]: filter.skills.split(',').map(tag => tag.trim())
-                }
+            title: {
+              [Op.iLike]: {
+                [Op.any]: filter.skills.split(',').map(tag => tag.trim())
               }
-            }),
+            }
           }
-        }, {
+        }] : []), ...(filter.occupations ? [{
           model: models.occupation,
           attributes: [],
           where: {
-            ...(filter.occupations && {
-              title: {
-                [Op.iLike]: {
-                  [Op.any]: filter.occupations.split(',').map(tag => tag.trim())
-                }
+            title: {
+              [Op.iLike]: {
+                [Op.any]: filter.occupations.split(',').map(tag => tag.trim())
               }
-            }),
+            }
           }
-        }]
+        }] : [])]
       });
 
       const pagination = helpers.Misc.generatePaginationMeta(req, users, limit, offset);
