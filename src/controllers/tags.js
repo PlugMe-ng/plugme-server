@@ -150,6 +150,18 @@ export default new class {
             attributes: ['id'],
             through: { ...throughFilter }
           }]
+        }, {
+          model: models.opportunity,
+          as: 'opportunities',
+          through: { attributes: [] },
+          attributes: ['id'],
+          where: { status: 'done' },
+          required: false,
+          include: [{
+            model: models.review,
+            attributes: ['id', 'rating'],
+            where: { createdAt: { [Op.between]: period } }
+          }]
         }]
       });
       tags = tags.map((tag) => {
@@ -165,7 +177,17 @@ export default new class {
           tag.totalComments += content.comments.length;
           tag.totalFlags += content.flaggers.length;
         });
+
+        tag.totalAchievements = tag.opportunities.length;
+        tag.averageAchievementRating = 0;
+        tag.opportunities.forEach((opportunity) => {
+          // there would only ever be two ratings for a 'done' opportunity
+          tag.averageAchievementRating +=
+          (opportunity.reviews[0].rating + opportunity.reviews[1].rating) / 2;
+        });
+        tag.averageAchievementRating /= tag.totalAchievements || 1;
         delete tag.contents;
+        delete tag.opportunities;
         return tag;
       });
       return res.sendSuccess(tags);
