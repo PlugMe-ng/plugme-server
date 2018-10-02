@@ -5,30 +5,39 @@ import _ from 'underscore';
 import models from '../models';
 import helpers, { events } from '../helpers';
 import notifications from './notifications';
+import cache from '../cache';
 
 const { isAdmin } = helpers.Misc;
 
+/**
+ * Clears content related caches on update or delete of a content
+ *
+ * @returns {void}
+ */
+const clearCache = () => {
+  cache.del('tags');
+};
+
+
 const addViewEntry = async (user, content) => {
-  if (!user) {
-    return;
-  }
+  if (!user) return;
   const viewer = (await content.getViewers({ where: { id: user.id } }))[0];
 
   if (!viewer) {
     content.addViewer(user);
     content.increment('totalViews');
+    clearCache();
     return;
   }
   const view = viewer.contents_users_views;
   const midnight = new Date().setHours(0, 0, 0);
   const lastViewTime = new Date(view.createdAt).getTime();
 
-  if (lastViewTime > midnight) {
-    return;
-  }
+  if (lastViewTime > midnight) return;
   await view.destroy();
   content.addViewer(user);
   content.increment('totalViews');
+  clearCache();
 };
 
 const notifyFans = async (user, content) => {
@@ -267,9 +276,7 @@ export default new class {
           }
         }]
       });
-      if (!content) {
-        throw new Error('Specified content does not exist');
-      }
+      if (!content) throw new Error('Specified content does not exist');
       addViewEntry(userObj, content);
       return res.sendSuccess(content);
     } catch (error) {
@@ -298,6 +305,7 @@ export default new class {
       }
       await content.addLiker(userObj);
       await content.increment('totalLikes');
+      clearCache();
       return res.sendSuccessAndNotify({
         event: events.LIKE,
         recipients: [content.authorId],
@@ -323,16 +331,10 @@ export default new class {
     const { content, userObj } = req;
     try {
       if (!(await content.hasFlagger(userObj))) {
+        content.addFlagger(userObj, { through: { info: req.body.info } });
         content.increment('flagCount');
       }
-      await content.addFlagger(userObj, {
-        through: {
-          info: req.body.info
-        }
-      });
-      return res.sendSuccess({
-        message: 'Content has been successfully reported'
-      });
+      return res.sendSuccess({ message: 'Content has been successfully reported' });
     } catch (error) {
       return res.sendFailure([error.message]);
     }
@@ -352,6 +354,7 @@ export default new class {
     try {
       if (content.authorId === user.id || isAdmin(user)) {
         content.destroy();
+        clearCache();
         if (isAdmin(user) && content.authorId !== user.id) {
           const flaggers = (await content.getFlaggers({ attributes: ['id'] }))
             .map(flagger => flagger.id);
@@ -390,6 +393,7 @@ export default new class {
       const comment = await models.comment.create(req.body);
       await comment.setUser(userObj);
       await comment.setContent(content);
+      clearCache();
       return res.sendSuccessAndNotify({
         event: events.COMMENT,
         recipients: [content.authorId],
@@ -450,16 +454,13 @@ export default new class {
     const { commentId } = req.params;
     try {
       const comment = await models.comment.findById(commentId);
-      if (!comment) {
-        throw new Error('Specified comment does not exist');
-      }
+      if (!comment) throw new Error('Specified comment does not exist');
       if (comment.UserId !== req.user.id) {
         throw new Error('This comment was added by another user');
       }
       await comment.destroy();
-      return res.sendSuccess({
-        message: 'Comment has been deleted succesfully'
-      });
+      clearCache();
+      return res.sendSuccess({ message: 'Comment has been deleted succesfully' });
     } catch (error) {
       return res.sendFailure([error.message]);
     }

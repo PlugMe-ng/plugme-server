@@ -2,6 +2,7 @@ import { Op } from 'sequelize';
 
 import models from '../models';
 import helpers from '../helpers';
+import cache from '../cache';
 
 const sortFn = (a, b) => b.totalLikes - a.totalLikes;
 
@@ -116,7 +117,12 @@ export default new class {
    * @memberOf Controller
    */
   galleryTagsMajor = async (req, res) => {
+    const CACHE_KEY = ['tags', 'major'];
+
     try {
+      const cachedTags = await cache.hget(...CACHE_KEY);
+      if (cachedTags) return res.sendSuccess(JSON.parse(cachedTags));
+
       let tags = await models.tag.findAll({
         where: { categoryId: null },
         attributes: ['id', 'title'],
@@ -149,6 +155,7 @@ export default new class {
         const index = tagsRankedByRecentLikes.findIndex(id => tag.id === id);
         tagsSortedByRecentLikes[index] = tag;
       });
+      cache.hmset(...CACHE_KEY, JSON.stringify(tagsSortedByRecentLikes));
       return res.sendSuccess(tagsSortedByRecentLikes);
     } catch (error) {
       return res.sendFailure([error.message]);
