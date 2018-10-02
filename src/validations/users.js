@@ -5,7 +5,8 @@ import models from '../models';
 
 const adminUserUpdateRules = {
   role: 'in:member,admin',
-  blocked: 'boolean'
+  blocked: 'boolean',
+  profileModificationCount: 'numeric'
 };
 
 const userUpdateRules = {
@@ -75,7 +76,7 @@ class Validations {
    * @returns {void}
    * @memberOf Validations
    */
-  checks = async (req, res, next) => {
+  userProfileUpdateChecks = async (req, res, next) => {
     try {
       if (req.body.skills && !(await minorTagsOnly(req.body.skills))) {
         throw new Error('Skills can only contain minor tags');
@@ -85,8 +86,11 @@ class Validations {
           throw new Error('Maximum of 5 interest minor tags allowed for basic plan users');
         }
       }
-      if (req.body.occupationId && req.user.meta.occupationModificationCount > 2) {
-        const { occupationId, ...data } = req.body;
+      if ((req.body.occupationId || req.body.fullName || req.body.username) &&
+        req.user.meta.profileModificationCount > 2) {
+        const {
+          occupationId, fullName, username, ...data
+        } = req.body;
         req.body = data;
       }
       return next();

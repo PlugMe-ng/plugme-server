@@ -27,7 +27,7 @@ router.get('/', controller.get);
 router.use(middleware.auth.authenticateUser);
 
 router.post('/:username/fans', controller.addFan);
-router.put('/', validations.userUpdate, validations.checks, controller.update);
+router.put('/', validations.userUpdate, validations.userProfileUpdateChecks, controller.update);
 router.put(
   '/:userId',
   check.currentUserIsAdmin,

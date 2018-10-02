@@ -10,6 +10,20 @@ import config from '../config';
 * Users controller class
 * @class Users
 */
+
+const getUserMetaUpdate = (user, reqBody) => {
+  const {
+    bio, experience, occupationId, fullName, username
+  } = reqBody;
+  return {
+    ...user.meta,
+    ...(bio && { bio }),
+    ...(experience && { experience }),
+    ...((occupationId || fullName || username) &&
+      { profileModificationCount: user.meta.profileModificationCount + 1 || 1 })
+  };
+};
+
 export default new class {
   /**
    * @method getByUserName
@@ -280,7 +294,7 @@ export default new class {
   update = async (req, res) => {
     const { userObj: user } = req;
     const {
-      role, email, hasPendingReview, skills, plan, interests, bio, experience, ...data
+      role, email, hasPendingReview, skills, plan, interests, ...data
     } = req.body;
     try {
       if (interests) {
@@ -291,13 +305,7 @@ export default new class {
       }
       await user.update({
         ...data,
-        meta: {
-          ...user.meta,
-          ...(bio && { bio }),
-          ...(experience && { experience }),
-          ...(req.body.occupationId &&
-            { occupationModificationCount: user.meta.occupationModificationCount + 1 })
-        }
+        meta: getUserMetaUpdate(user, req.body)
       });
       return res.sendSuccess({ message: 'Profile updated successfully' }, 200, { user });
     } catch (error) {
@@ -318,10 +326,18 @@ export default new class {
     try {
       const user = await models.User.findById(req.params.userId);
       if (!user) throw new Error('Specified user does not exist');
-      if (config.SUPER_ADMINS.includes(user.email)) {
+      if (config.SUPER_ADMINS.includes(user.email) && req.user.email !== user.email) {
         throw new Error('You are not permitted to perform this operation');
       }
-      await user.update(req.body);
+      await user.update({
+        ...req.body,
+        ...(req.body.profileModificationCount && {
+          meta: {
+            ...user.meta,
+            profileModificationCount: req.body.profileModificationCount
+          }
+        })
+      });
       return res.sendSuccessAndLog(user, { message: 'User updated successfully' });
     } catch (error) {
       return res.sendFailure([error.message]);
