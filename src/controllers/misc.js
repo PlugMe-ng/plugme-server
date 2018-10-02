@@ -1,5 +1,6 @@
 import { Op } from 'sequelize';
 
+import cache from '../cache';
 import models from '../models';
 import helpers from '../helpers';
 
@@ -49,6 +50,42 @@ export default new class {
       const pagination = helpers.Misc
         .generatePaginationMeta(req, logs, limit, offset);
       return res.sendSuccess(logs.rows, 200, { pagination });
+    } catch (error) {
+      return res.sendFailure([error.message]);
+    }
+  }
+
+  /**
+   * Handles setting the platform backgrounds
+   *
+   * @param {object} req - Express Request Object
+   * @param {object} res - Express Response Object
+   *
+   * @returns {void}
+   * @memberOf Controller
+   */
+  setBackgrounds = async (req, res) => {
+    try {
+      await cache.hmset('backgrounds', req.body);
+      return res.sendSuccess({ message: 'Background successfully updated' });
+    } catch (error) {
+      return res.sendFailure([error.message]);
+    }
+  }
+
+  /**
+   * Handles retrieving the platform backgrounds
+   *
+   * @param {object} req - Express Request Object
+   * @param {object} res - Express Response Object
+   *
+   * @returns {void}
+   * @memberOf Controller
+   */
+  getBackgrounds = async (req, res) => {
+    try {
+      const backgrounds = await cache.hgetall('backgrounds');
+      return res.sendSuccess(backgrounds || {});
     } catch (error) {
       return res.sendFailure([error.message]);
     }
