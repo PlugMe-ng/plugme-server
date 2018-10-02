@@ -8,3 +8,4 @@ export { default as occupations } from './occupations';
 export { default as opportunities } from './opportunities';
 export { default as tags } from './tags';
 export { default as users } from './users';
+export { default as bannerAds } from './banner_ads';

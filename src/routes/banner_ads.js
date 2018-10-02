@@ -1,16 +1,17 @@
 import { Router } from 'express';
 import middleware from '../middleware';
 
-import { misc as controller } from '../controllers';
-import bannerAds from './banner_ads';
+import { bannerAds as controller } from '../controllers';
 
 const { auth, check } = middleware;
-
 const router = new Router();
 
-router.use('/settings/banner-ads', bannerAds);
+router.get('/', controller.get);
 
 router.use(auth.authenticateUser, check.currentUserIsAdmin);
-router.get('/admin/logs', controller.getAdminLogs);
+
+router.post('/', controller.create);
+router.put('/:id', controller.update);
+router.delete('/:id', controller.delete);
 
 export default router;
