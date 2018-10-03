@@ -4,6 +4,35 @@ import moment from 'moment';
 import models from '../models';
 import helpers from '../helpers';
 
+const computeTagStats = tags => tags.map((tag) => {
+  tag = tag.get({ plain: true });
+  tag.totalLikes = 0;
+  tag.totalViews = 0;
+  tag.totalComments = 0;
+  tag.totalFlags = 0;
+  tag.contents.forEach((content) => {
+    tag.totalLikes += content.likers.length;
+    tag.totalViews += content.viewers.length;
+    tag.totalComments += content.comments.length;
+    tag.totalFlags += content.flaggers.length;
+  });
+
+  tag.totalAchievements = tag.opportunities.length;
+  tag.totalReviews = 0;
+  let totalAchievementsRatings = 0;
+  tag.opportunities.forEach((opportunity) => {
+    tag.totalReviews += opportunity.reviews.length;
+    // there would only ever be two ratings at most for a 'done' opportunity
+    opportunity.reviews.forEach((review) => {
+      totalAchievementsRatings += review.rating;
+    });
+  });
+  tag.averageAchievementRating = totalAchievementsRatings / (tag.totalReviews || 1);
+  delete tag.contents;
+  delete tag.opportunities;
+  return tag;
+});
+
 /**
  * @class Controller
  */
@@ -164,32 +193,7 @@ export default new class {
           }]
         }]
       });
-      tags = tags.map((tag) => {
-        tag = tag.get({ plain: true });
-        tag.totalLikes = 0;
-        tag.totalViews = 0;
-        tag.totalComments = 0;
-        tag.totalFlags = 0;
-
-        tag.contents.forEach((content) => {
-          tag.totalLikes += content.likers.length;
-          tag.totalViews += content.viewers.length;
-          tag.totalComments += content.comments.length;
-          tag.totalFlags += content.flaggers.length;
-        });
-
-        tag.totalAchievements = tag.opportunities.length;
-        tag.averageAchievementRating = 0;
-        tag.opportunities.forEach((opportunity) => {
-          // there would only ever be two ratings for a 'done' opportunity
-          tag.averageAchievementRating +=
-          (opportunity.reviews[0].rating + opportunity.reviews[1].rating) / 2;
-        });
-        tag.averageAchievementRating /= tag.totalAchievements || 1;
-        delete tag.contents;
-        delete tag.opportunities;
-        return tag;
-      });
+      tags = computeTagStats(tags);
       return res.sendSuccess(tags);
     } catch (error) {
       return res.sendFailure([error.message]);
