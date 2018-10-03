@@ -74,7 +74,14 @@ module.exports = (sequelize, DataTypes) => {
       defaultValue: false
     },
     meta: {
-      type: DataTypes.JSONB
+      type: DataTypes.JSONB,
+      get() {
+        const meta = this.getDataValue('meta');
+        return {
+          ...meta,
+          profileModificationCount: Number(meta ? (meta.profileModificationCount || 0) : 0),
+        };
+      }
     },
     plan: {
       type: DataTypes.JSONB,
