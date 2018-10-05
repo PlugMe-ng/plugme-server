@@ -80,6 +80,7 @@ module.exports = (sequelize, DataTypes) => {
         return {
           ...meta,
           profileModificationCount: Number(meta ? (meta.profileModificationCount || 0) : 0),
+          occupationModificationCount: 0 // only here for backwards compatibility
         };
       }
     },

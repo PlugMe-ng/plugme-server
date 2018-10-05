@@ -1,8 +1,7 @@
 import { Op } from 'sequelize';
 
-import cache from '../cache';
 import models from '../models';
-import helpers from '../helpers';
+import helpers, { cache } from '../helpers';
 
 /**
  * @class Controller

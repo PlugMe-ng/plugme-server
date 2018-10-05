@@ -1,8 +1,7 @@
 import { Op } from 'sequelize';
 
 import models from '../models';
-import helpers from '../helpers';
-import cache from '../cache';
+import helpers, { cache } from '../helpers';
 
 const sortFn = (a, b) => b.totalLikes - a.totalLikes;
 

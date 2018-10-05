@@ -223,6 +223,7 @@ schedule.scheduleJob({ hour: 0, minute: 0, dayOfWeek: new schedule.Range(0, 6) }
 });
 
 export { eventDescriptions, events, generateEventMailPayload } from './notifications';
+export { default as cache } from './caching';
 
 export default {
   Misc: {
