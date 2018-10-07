@@ -3,6 +3,7 @@ import jwtSocketAuth from 'socketio-jwt-auth';
 
 import config from '../config';
 import models from '../models';
+import { cache } from '../helpers';
 import messaging from './messaging';
 
 const jwtAuth = jwtSocketAuth.authenticate({
@@ -22,13 +23,13 @@ const jwtAuth = jwtSocketAuth.authenticate({
   }
 });
 
-const connectedClients = { };
-
 /**
  * @export
  * @class Socket
  */
 export default class {
+  CONNECTED_CLIENTS = 'socket_clients'
+
   /**
    * Creates an instance of Socket.
    * @param {any} app
@@ -36,17 +37,17 @@ export default class {
    * @memberOf Socket
    */
   constructor(app) {
-    this.io = io(app).use(jwtAuth).on('connection', (socket) => {
+    this.io = io(app).use(jwtAuth).on('connection', async (socket) => {
       const { user } = socket.request;
       if (user.logged_in) {
-        connectedClients[user.id] = socket.id; // TODO: use redis
+        await cache.hmset(this.CONNECTED_CLIENTS, { [user.id]: socket.id });
         messaging.create(socket);
-        socket.on('disconnect', () => {
-          delete connectedClients[user.id];
-          this.io.emit('connected_clients', connectedClients);
+        socket.on('disconnect', async () => {
+          await cache.hdel(this.CONNECTED_CLIENTS, user.id);
+          this.io.emit('connected_clients', await cache.hgetall(this.CONNECTED_CLIENTS));
         });
       }
-      this.io.emit('connected_clients', connectedClients);
+      this.io.emit('connected_clients', await cache.hgetall(this.CONNECTED_CLIENTS));
     });
   }
 
@@ -61,8 +62,8 @@ export default class {
    *
    * @memberOf Socket
    */
-  send = (event, recipient, payload) => {
-    const recipientSocket = connectedClients[recipient];
-    if (recipientSocket) this.io.to(recipientSocket).emit(event, payload);
+  send = async (event, recipient, payload) => {
+    const recipientSocket = await cache.hget(this.CONNECTED_CLIENTS, recipient);
+    this.io.to(recipientSocket).emit(event, payload);
   }
 }
