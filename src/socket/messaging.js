@@ -25,17 +25,22 @@ const createConversation = async (users) => {
  * @returns {string} - conversationId
  */
 const getUsersConversations = async (users) => {
-  const conversations = (await models.users_conversations.findAll({
-    group: ['conversationId'],
-    attributes: ['conversationId'],
-    where: { participantId: users },
+  const conversations = (await models.conversation.findAll({
+    order: [['createdAt', 'DESC']],
+    includeIgnoreAttributes: false,
+    group: ['conversation.id'],
+    having: where(fn('COUNT', (fn('DISTINCT', col('participants.id')))), { [Op.eq]: users.length }),
     include: [{
-      model: models.conversation,
+      model: models.User,
+      as: 'participants',
+      required: true,
       attributes: [],
-      required: true
-    }],
-    having: where(fn('COUNT', (fn('DISTINCT', col('participantId')))), { [Op.eq]: users.length })
-  })).map(conversation => conversation.conversationId);
+      through: {
+        attributes: [],
+        where: { participantId: users }
+      },
+    }]
+  })).map(conversation => conversation.id);
   // Temporary: for testing
   if (conversations.length > 1) notifsIO.io.emit(config.dev_support_notif, conversations);
   return conversations;
@@ -47,14 +52,15 @@ const getUsersConversations = async (users) => {
  * NOTE: same participants may have multiple conversationIds in rare cases
  *
  * @param {Array.<string>} users - ids of conversation participants
- * @returns {string} - conversationId
+ * @returns {Array.<string>} - conversationId
  */
 const findOrCreateConversation = async (users) => {
   const participants = Array.from(new Set(users)).sort();
   if (participants.length < 2) throw new Error('Not enough participants');
 
-  const conversations = await getUsersConversations(participants);
-  return conversations.length ? conversations : createConversation(participants);
+  let conversations = await getUsersConversations(participants);
+  if (conversations.length === 0) conversations = await createConversation(participants);
+  return conversations;
 };
 
 /**
@@ -74,10 +80,13 @@ const checkPermissions = (user) => {
 export default new class {
   create = async (socket) => {
     const { user } = socket.request;
+    socket.messaging = { inProgress: false }; // trying to prevent race condition
 
     socket.on('messaging', async ({
       recipients, conversationId, limit = 20, offset = 0
     }) => {
+      if (socket.messaging.inProgress) return;
+      socket.messaging.inProgress = true;
       try {
         checkPermissions(user);
         const conversations = conversationId ? [conversationId]
@@ -97,8 +106,10 @@ export default new class {
             offset
           }
         });
+        socket.messaging.inProgress = false;
       } catch (error) {
         socket.emit('error_messaging', [error.message]);
+        socket.messaging.inProgress = false;
       }
     });
 
@@ -106,7 +117,7 @@ export default new class {
       try {
         checkPermissions(user);
         message = await models.message.create({ ...message, senderId: user.id });
-        await this.notifyRecipients(user, message);
+        this.notifyRecipients(user, message);
       } catch (error) {
         socket.emit('error_messaging', [error.message]);
       }
@@ -120,12 +131,12 @@ export default new class {
         include: [{
           model: models.User,
           as: 'participants',
-          attributes: ['id']
+          attributes: ['id'],
+          through: { attributes: [] }
         }]
-      })).participants.map((participant) => {
-      notifsIO.send('new_message', participant.id, message);
-      return participant.id;
-    });
+      })).participants.map(participant => participant.id);
+
+    recipients.forEach((recipient) => { notifsIO.send('new_message', recipient, message); });
     notifications.create({
       author: user, event: events.NEW_MESSAGE, recipients, entity: message
     });

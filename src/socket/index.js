@@ -43,10 +43,10 @@ export default class {
         messaging.create(socket);
         socket.on('disconnect', () => {
           delete connectedClients[user.id];
-          socket.emit('connected_clients', connectedClients);
+          this.io.emit('connected_clients', connectedClients);
         });
       }
-      socket.emit('connected_clients', connectedClients);
+      this.io.emit('connected_clients', connectedClients);
     });
   }
 
