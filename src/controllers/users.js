@@ -6,10 +6,6 @@ import helpers, { events } from '../helpers';
 import models from '../models';
 import config from '../config';
 
-/**
-* Users controller class
-* @class Users
-*/
 
 const getUserMetaUpdate = (user, reqBody) => {
   const {
@@ -24,6 +20,10 @@ const getUserMetaUpdate = (user, reqBody) => {
   };
 };
 
+/**
+* Users controller class
+* @class Users
+*/
 export default new class {
   /**
    * @method getByUserName
@@ -419,5 +419,37 @@ export default new class {
     } catch (error) {
       return res.sendFailure([error.message]);
     }
+  }
+
+  /**
+   * @desc Handles retrieving user's conversations
+   *
+   * @param { object } req request
+   * @param { object } res response
+   *
+   * @returns { object } response
+   */
+  getConversations = async (req, res) => {
+    const { limit, offset } = req.meta.pagination;
+
+    const count = await req.userObj.countConversations();
+    const conversations = await req.userObj.getConversations({
+      limit,
+      offset,
+      joinTableAttributes: [],
+      include: [{
+        model: models.message,
+        separate: true,
+        limit: 1,
+        order: [['createdAt', 'DESC']]
+      }, {
+        model: models.User,
+        as: 'participants',
+        through: { attributes: [] },
+        attributes: ['id', 'username', 'fullName', 'photo']
+      }]
+    });
+    const pagination = helpers.Misc.generatePaginationMeta(req, { count });
+    return res.sendSuccess(conversations, 200, { pagination });
   }
 }();

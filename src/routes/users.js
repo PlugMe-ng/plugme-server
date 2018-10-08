@@ -16,15 +16,16 @@ import { users as controller } from '../controllers';
 
 const router = new Router();
 
-const { check } = middleware;
+const { check, auth } = middleware;
 
 router.post('/subscriptions', controller.subscription);
+router.get('/conversations', auth.authenticateUser, controller.getConversations);
 router.get('/:username', controller.getByUsername);
 router.get('/:username/fans', controller.getUserFans);
 router.get('/:username/fanOf', controller.getUserFansOf);
 router.get('/', controller.get);
 
-router.use(middleware.auth.authenticateUser);
+router.use(auth.authenticateUser);
 
 router.post('/:username/fans', controller.addFan);
 router.put('/', validations.userUpdate, validations.userProfileUpdateChecks, controller.update);

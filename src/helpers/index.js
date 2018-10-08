@@ -29,18 +29,8 @@ import { events } from './notifications';
  *
  * @returns { object } the output user object
  */
-function generatePaginationMeta(req, dbResult, limit = 20, offset = 0) {
-  limit = Number(limit) || 20;
-  offset = Number(offset) || 0;
-
-  // limit cannot be less than 1
-  if (limit < 1) {
-    limit = 1;
-  }
-  // offset cannot be less than 0
-  if (offset < 0) {
-    offset = 0;
-  }
+function generatePaginationMeta(req, dbResult) {
+  const { limit, offset } = req.meta.pagination;
 
   const protocol =
   (req.secure || req.connection.encrypted) ? 'https:' : 'http:';

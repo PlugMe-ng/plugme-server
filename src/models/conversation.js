@@ -13,6 +13,7 @@ module.exports = (sequelize, DataTypes) => {
       otherKey: 'participantId',
       through: 'users_conversations'
     });
+    conversation.hasMany(models.message);
   };
   return conversation;
 };
