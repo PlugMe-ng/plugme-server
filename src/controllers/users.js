@@ -430,10 +430,31 @@ export default new class {
    * @returns { object } response
    */
   getConversations = async (req, res) => {
+    const { userObj: user } = req;
     const { limit, offset } = req.meta.pagination;
+    const { query } = req.meta.search;
 
-    const count = await req.userObj.countConversations();
-    const conversations = await req.userObj.getConversations({
+    const participantsAssociation = {
+      model: models.User,
+      as: 'participants',
+      attributes: [],
+      through: { attributes: [] },
+      where: {
+        id: { [Op.ne]: user.id },
+        ...(query && {
+          [Op.or]: [
+            { username: { [Op.iLike]: `%${query}%` } },
+            { fullName: { [Op.iLike]: `%${query}%` } }
+          ]
+        })
+      }
+    };
+
+    const count = await user.countConversations({
+      includeIgnoreAttributes: false,
+      include: [{ ...participantsAssociation }]
+    });
+    const conversations = await user.getConversations({
       limit,
       offset,
       joinTableAttributes: [],
@@ -443,10 +464,8 @@ export default new class {
         limit: 1,
         order: [['createdAt', 'DESC']]
       }, {
-        model: models.User,
-        as: 'participants',
-        through: { attributes: [] },
-        attributes: ['id', 'username', 'fullName', 'photo']
+        ...participantsAssociation,
+        attributes: ['id', 'username', 'fullName', 'photo'],
       }]
     });
     const pagination = helpers.Misc.generatePaginationMeta(req, { count });
