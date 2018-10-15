@@ -30,5 +30,7 @@ module.exports = {
   PAYSTACK_SECRET_KEY: process.env.PAYSTACK_SECRET_KEY,
   PAYMENT_VERIFICATION_URL: 'https://api.paystack.co/transaction/verify',
   SUPER_ADMINS: process.env.SUPER_ADMINS ? process.env.SUPER_ADMINS.split(',') : [],
-  REDIS_URL: process.env.REDIS_URL
+  REDIS_URL: process.env.REDIS_URL,
+  ALGOLIA_API_KEY: process.env.ALGOLIA_API_KEY,
+  ALGOLIA_APP_NAME: 'KUWYV3IWLE'
 };
