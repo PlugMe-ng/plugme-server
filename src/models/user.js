@@ -93,10 +93,10 @@ module.exports = (sequelize, DataTypes) => {
   }, {
     getterMethods: {
       bio() {
-        return this.meta ? this.meta.bio : null;
+        return this.getDataValue('meta').bio;
       },
       experience() {
-        return this.meta ? this.meta.experience : null;
+        return this.getDataValue('meta').experience;
       }
     }
   });

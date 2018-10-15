@@ -5,6 +5,7 @@ import _ from 'underscore';
 import models from '../models';
 import helpers, { events, cache } from '../helpers';
 import notifications from './notifications';
+import { contentSearchIndex, usersSearchIndex, tagsSearchIndex } from '../search_indexing';
 
 const { isAdmin } = helpers.Misc;
 
@@ -17,6 +18,19 @@ const clearCache = () => {
   cache.del('tags');
 };
 
+const updateSearchIndexes = async (content) => {
+  contentSearchIndex.sync(content.id);
+  usersSearchIndex.sync(content.authorId);
+  const tagIds = (content.tags || await content.getTags({ attributes: ['id'] }))
+    .map(tag => tag.id);
+  tagsSearchIndex.sync(tagIds);
+};
+
+const runUpdateHooks = (content) => {
+  clearCache();
+  updateSearchIndexes(content);
+};
+
 
 const addViewEntry = async (user, content) => {
   if (!user) return;
@@ -25,7 +39,7 @@ const addViewEntry = async (user, content) => {
   if (!viewer) {
     content.addViewer(user);
     content.increment('totalViews');
-    clearCache();
+    runUpdateHooks(content);
     return;
   }
   const view = viewer.contents_users_views;
@@ -36,7 +50,7 @@ const addViewEntry = async (user, content) => {
   await view.destroy();
   content.addViewer(user);
   content.increment('totalViews');
-  clearCache();
+  runUpdateHooks(content);
 };
 
 const notifyFans = async (user, content) => {
@@ -125,20 +139,17 @@ export default new class {
         }, {
           model: models.tag,
           as: 'tags',
-          attributes: ['title'],
-          through: {
-            attributes: []
-          }
+          attributes: ['id', 'title'],
+          through: { attributes: [] }
         }]
       });
       notifyFans(userObj, content);
       populateUsersGalleries(content);
       updateUserPlan(userObj);
+      updateSearchIndexes(content);
       return res.sendSuccess({ ...content.get() });
     } catch (error) {
-      if (content) {
-        content.destroy();
-      }
+      if (content) content.destroy();
       return res.sendFailure([error.message]);
     }
   }
@@ -298,13 +309,14 @@ export default new class {
       if (await content.hasLiker(userObj)) {
         await content.removeLiker(userObj);
         await content.decrement('totalLikes');
+        runUpdateHooks(content);
         return res.sendSuccess({
           message: 'You have successfully unliked this content'
         });
       }
       await content.addLiker(userObj);
       await content.increment('totalLikes');
-      clearCache();
+      runUpdateHooks(content);
       return res.sendSuccessAndNotify({
         event: events.LIKE,
         recipients: [content.authorId],
@@ -351,27 +363,35 @@ export default new class {
   deleteContent = async (req, res) => {
     const { content, user } = req;
     try {
-      if (content.authorId === user.id || isAdmin(user)) {
-        content.destroy();
-        clearCache();
-        if (isAdmin(user) && content.authorId !== user.id) {
-          const flaggers = (await content.getFlaggers({ attributes: ['id'] }))
-            .map(flagger => flagger.id);
-          notifications.create({
-            author: req.userObj,
-            entity: content,
-            event: events.CONTENT_DELETE,
-            recipients: [...flaggers, content.authorId],
-          });
-          return res.sendSuccessAndLog(content, {
-            message: 'Content has been deleted succesfully'
-          });
-        }
-        return res.sendSuccess({
+      if (content.authorId !== user.id || !isAdmin(user)) {
+        throw new Error('This content belongs to another user');
+      }
+
+      if (isAdmin(user) && content.authorId !== user.id) {
+        const flaggers = (await content.getFlaggers({ attributes: ['id'] }))
+          .map(flagger => flagger.id);
+        notifications.create({
+          author: req.userObj,
+          entity: content,
+          event: events.CONTENT_DELETE,
+          recipients: [...flaggers, content.authorId],
+        });
+        res.sendSuccessAndLog(content, {
+          message: 'Content has been deleted succesfully'
+        });
+      } else {
+        res.sendSuccess({
           message: 'Content has been deleted succesfully'
         });
       }
-      throw new Error('This content belongs to another user');
+      // some associations are needed before deleting the content
+      const contentTags = await content.getTags.map(tag => tag.id);
+
+      await content.destroy();
+      contentSearchIndex.deleteRecord(content.id);
+      usersSearchIndex.sync(content.authorId);
+      tagsSearchIndex.sync(contentTags);
+      return;
     } catch (error) {
       return res.sendFailure([error.message]);
     }
@@ -392,7 +412,7 @@ export default new class {
       const comment = await models.comment.create(req.body);
       await comment.setUser(userObj);
       await comment.setContent(content);
-      clearCache();
+      runUpdateHooks(content);
       return res.sendSuccessAndNotify({
         event: events.COMMENT,
         recipients: [content.authorId],
@@ -458,7 +478,7 @@ export default new class {
         throw new Error('This comment was added by another user');
       }
       await comment.destroy();
-      clearCache();
+      runUpdateHooks(await models.content.findById(comment.contentId));
       return res.sendSuccess({ message: 'Comment has been deleted succesfully' });
     } catch (error) {
       return res.sendFailure([error.message]);

@@ -3,6 +3,7 @@ import moment from 'moment';
 
 import models from '../models';
 import helpers from '../helpers';
+import { tagsSearchIndex } from '../search_indexing';
 
 const computeTagStats = tags => tags.map((tag) => {
   tag = tag.get({ plain: true });
@@ -78,6 +79,7 @@ export default new class {
   createTag = async (req, res) => {
     try {
       const tag = await models.tag.create(req.body);
+      tagsSearchIndex.sync(tag.id);
       return res.sendSuccessAndLog(tag);
     } catch (error) {
       return res.sendFailure([helpers.Misc.enhanceErrorMessage(error)]);
@@ -96,10 +98,9 @@ export default new class {
   deleteTag = async (req, res) => {
     try {
       const tag = await models.tag.findById(req.params.tagId);
-      if (!tag) {
-        throw new Error('Specified tag does not exist');
-      }
+      if (!tag) throw new Error('Specified tag does not exist');
       tag.destroy();
+      tagsSearchIndex.deleteRecord(tag.id);
       return res.sendSuccessAndLog(tag, { message: 'Tag successfully deleted' });
     } catch (error) {
       res.sendFailure([error.message]);
@@ -118,10 +119,9 @@ export default new class {
   updateTag = async (req, res) => {
     try {
       const tag = await models.tag.findById(req.params.tagId);
-      if (!tag) {
-        throw new Error('Specified tag does not exist');
-      }
+      if (!tag) throw new Error('Specified tag does not exist');
       await tag.update({ title: req.body.title });
+      tagsSearchIndex.sync(tag.id);
       return res.sendSuccessAndLog(tag, { message: 'Tag successfully updated' });
     } catch (error) {
       res.sendFailure([error.message]);

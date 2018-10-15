@@ -5,6 +5,7 @@ import { Op } from 'sequelize';
 import helpers, { events } from '../helpers';
 import models from '../models';
 import config from '../config';
+import { usersSearchIndex } from '../search_indexing';
 
 
 const getUserMetaUpdate = (user, reqBody) => {
@@ -297,16 +298,13 @@ export default new class {
       role, email, hasPendingReview, skills, plan, interests, ...data
     } = req.body;
     try {
-      if (interests) {
-        await user.setInterests(interests);
-      }
-      if (skills) {
-        await user.setSkills(skills);
-      }
+      if (interests) await user.setInterests(interests);
+      if (skills) await user.setSkills(skills);
       await user.update({
         ...data,
         meta: getUserMetaUpdate(user, req.body)
       });
+      usersSearchIndex.sync(user.id);
       return res.sendSuccess({ message: 'Profile updated successfully' }, 200, { user });
     } catch (error) {
       return res.sendFailure([helpers.Misc.enhanceErrorMessage(error)]);

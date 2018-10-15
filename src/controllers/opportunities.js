@@ -4,6 +4,7 @@ import moment from 'moment';
 import models from '../models';
 import helpers, { events } from '../helpers';
 import notifications from './notifications';
+import { opportunitiesSearchIndex as searchIndex } from '../search_indexing';
 
 /**
  * @description Checks that the opportunity being created is not a
@@ -17,20 +18,15 @@ import notifications from './notifications';
  * @memberOf Controller
  */
 const duplicateOpportunityUploadCheck = async (userObj, req) => {
-  const lastUploadedOpportunity = (await models.opportunity.findAll({
-    attributes: ['createdAt', 'title'],
-    limit: 1,
-    order: [['createdAt', 'DESC']],
+  const lastUploadedOpportunity = (await models.opportunity.findOne({
+    attributes: [],
     where: {
       pluggerId: userObj.id,
-      title: req.body.title
+      title: req.body.title,
+      createdAt: { [Op.gt]: moment().subtract(10, 'minutes').toDate() }
     }
-  }))[0];
-  if (!lastUploadedOpportunity) return;
-
-  if (moment().isBetween(moment(lastUploadedOpportunity.createdAt), moment().add(10, 'minutes'))) {
-    throw new Error('Duplicate opportunity');
-  }
+  }));
+  if (lastUploadedOpportunity) throw new Error('Duplicate opportunity');
 };
 
 /**
@@ -185,12 +181,11 @@ export default new class {
           model: models.tag,
           as: 'tags',
           attributes: ['id', 'title'],
-          through: {
-            attributes: []
-          }
+          through: { attributes: [] }
         }]
       });
       notifyUsers(opportunity);
+      searchIndex.sync(opportunity.id);
       return res.sendSuccess(opportunity);
     } catch (error) {
       if (opportunity) {
@@ -379,9 +374,8 @@ export default new class {
 
       await opportunity.addPlugEntry(userObj);
       if (opportunity.plugEntries.length + 1 === MAX_ENTRIES) {
-        await opportunity.update({
-          status: 'pending'
-        });
+        await opportunity.update({ status: 'pending' });
+        searchIndex.sync(opportunity.id);
       }
       const { plugEntries, ...data } = opportunity.get({ plain: true });
       return res.sendSuccessAndNotify({
@@ -479,6 +473,7 @@ export default new class {
         achieverId: userId
       });
       notifyUnselectedAchievers(opportunity, plugger);
+      searchIndex.sync(opportunity.id);
       return res.sendSuccessAndNotify({
         event: events.OPPORTUNITY_ACHIEVER_SET,
         recipients: [userId],
@@ -539,6 +534,7 @@ export default new class {
       } else {
         await opportunity.update({ status: 'done' });
       }
+      searchIndex.sync(opportunity.id);
       return userObj.id === opportunity.pluggerId ?
         res.sendSuccessAndNotify({
           event: events.OPPORTUNITY_REVIEW,
@@ -574,6 +570,7 @@ export default new class {
         recipients: [opportunity.pluggerId],
         entity: opportunity
       });
+      searchIndex.deleteRecord(opportunity.id);
       return res.sendSuccessAndLog(opportunity, { message: 'Opportuntiy deleted successfully' });
     } catch (error) {
       return res.sendFailure([error.message]);
