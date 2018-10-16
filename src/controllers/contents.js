@@ -409,9 +409,12 @@ export default new class {
   addComment = async (req, res) => {
     const { userObj, content } = req;
     try {
-      const comment = await models.comment.create(req.body);
-      await comment.setUser(userObj);
-      await comment.setContent(content);
+      const comment = await models.comment
+        .create({
+          ...req.body,
+          UserId: userObj.id,
+          contentId: content.id
+        });
       runUpdateHooks(content);
       return res.sendSuccessAndNotify({
         event: events.COMMENT,
