@@ -20,6 +20,8 @@ const { check, auth } = middleware;
 
 router.post('/subscriptions', controller.subscription);
 router.get('/conversations', auth.authenticateUser, controller.getConversations);
+router.get('/conversations/unread_count', auth.authenticateUser, controller.getUnreadConversationsCount);
+
 router.get('/:username', controller.getByUsername);
 router.get('/:username/fans', controller.getUserFans);
 router.get('/:username/fanOf', controller.getUserFansOf);

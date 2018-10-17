@@ -23,19 +23,6 @@ const sendEmailNotification = ({
 
 const isDuplicateNotif = async ({ event, recipientId, author }) => {
   switch (event) {
-    case events.NEW_MESSAGE: {
-      const unreadMessageNotif = await models.notification.findOne({
-        attributes: [],
-        order: [['createdAt', 'DESC']],
-        where: {
-          userId: recipientId,
-          read: false,
-          authorId: author.id,
-          'meta.event': event
-        }
-      });
-      return !!unreadMessageNotif;
-    }
     case events.SUBSCRIPTION_END: {
       const subcriptionEndNotifExists = await models.notification.findOne({
         attributes: [],

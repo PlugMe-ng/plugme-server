@@ -1,10 +1,15 @@
 module.exports = (sequelize, DataTypes) => {
-  const usersConversations = sequelize.define('users_conversations', {
+  const userConversation = sequelize.define('user_conversation', {
+    read: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: true
+    }
   }, {
     tableName: 'users_conversations'
   });
-  usersConversations.associate = (models) => {
-    usersConversations.belongsTo(models.conversation);
+  userConversation.associate = (models) => {
+    userConversation.belongsTo(models.conversation);
+    userConversation.belongsTo(models.User, { foreignKey: 'participantId' });
   };
-  return usersConversations;
+  return userConversation;
 };

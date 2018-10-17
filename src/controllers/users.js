@@ -455,7 +455,8 @@ export default new class {
     const conversations = await user.getConversations({
       limit,
       offset,
-      joinTableAttributes: [],
+      order: [[models.sequelize.literal('"users_conversations"."updatedAt"'), 'DESC']],
+      joinTableAttributes: ['read'],
       include: [{
         model: models.message,
         separate: true,
@@ -463,10 +464,25 @@ export default new class {
         order: [['createdAt', 'DESC']]
       }, {
         ...participantsAssociation,
+        duplicating: false,
         attributes: ['id', 'username', 'fullName', 'photo'],
       }]
     });
     const pagination = helpers.Misc.generatePaginationMeta(req, { count });
     return res.sendSuccess(conversations, 200, { pagination });
+  }
+
+  /**
+   * @param { object } req request
+   * @param { object } res response
+   *
+   * @returns { object } response
+   */
+  getUnreadConversationsCount = async (req, res) => {
+    const { user } = req;
+    const count = await models.user_conversation.count({
+      where: { read: false, participantId: user.id }
+    });
+    return res.sendSuccess(count);
   }
 }();

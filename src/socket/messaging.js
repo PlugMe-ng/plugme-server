@@ -1,10 +1,8 @@
 import moment from 'moment';
 
 import models from '../models';
-import { notifications } from '../controllers';
 import { notifsIO } from '../server';
 import config from '../config';
-import { events } from '../helpers';
 
 const {
   where, fn, col, Op
@@ -89,14 +87,19 @@ export default new class {
       socket.messaging.inProgress = true;
       try {
         checkPermissions(user);
+
         const conversations = conversationId ? [conversationId]
           : await findOrCreateConversation([user.id, ...recipients]);
+
         const messages = await models.message.findAndCount({
           limit,
           offset,
           where: { conversationId: conversations },
           order: [['createdAt', 'asc']]
         });
+
+        this.updateConversationReadStatus(conversations[0], user.id);
+
         socket.emit('messaging', {
           messages: messages.rows,
           conversationId: conversations[0],
@@ -106,6 +109,7 @@ export default new class {
             offset
           }
         });
+
         socket.messaging.inProgress = false;
       } catch (error) {
         socket.emit('error_messaging', [error.message]);
@@ -117,28 +121,50 @@ export default new class {
       try {
         checkPermissions(user);
         message = await models.message.create({ ...message, senderId: user.id });
-        this.notifyRecipients(user, message);
+        this.notifyRecipients(message);
       } catch (error) {
         socket.emit('error_messaging', [error.message]);
       }
     });
   }
 
-  notifyRecipients = async (user, message) => {
-    const recipients = (await models.conversation
-      .findById(message.conversationId, {
-        attributes: [],
-        include: [{
-          model: models.User,
-          as: 'participants',
-          attributes: ['id'],
-          through: { attributes: [] }
-        }]
-      })).participants.map(participant => participant.id);
+  /**
+   * Updates the read status of a conversation for the participating users
+   * Also notifies the participants of a new message over socket
+   *
+   * @param {Object} message
+   *
+   * @returns {void}
+   */
+  notifyRecipients = async (message) => {
+    const { conversationId, senderId } = message;
 
-    recipients.forEach((recipient) => { notifsIO.send('new_message', recipient, message); });
-    notifications.create({
-      author: user, event: events.NEW_MESSAGE, recipients, entity: message
+    models.user_conversation.update({ read: true }, {
+      where: { conversationId, participantId: senderId },
     });
+
+    const [, rows] = await models.user_conversation.update({ read: false }, {
+      where: { conversationId, participantId: { [Op.ne]: senderId } },
+      returning: true
+    });
+
+    [...rows.map(row => row.participantId), senderId]
+      .forEach((recipient) => {
+        notifsIO.send('new_message', recipient, message);
+      });
   }
+
+  /**
+   * Marks a conversation as read for the specified user
+   *
+   * @param {string} conversationId
+   * @param {string} userId
+   *
+   * @returns {void}
+   */
+  updateConversationReadStatus = (conversationId, userId) =>
+    models.user_conversation.update({ read: true }, {
+      where: { conversationId, participantId: userId, read: false },
+      silent: true
+    });
 }();
