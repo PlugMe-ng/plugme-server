@@ -31,12 +31,9 @@ class ContentsIndex extends Index {
       where: { ...(id && { id }) },
       attributes: {
         include: [['id', 'objectID']],
-        exclude: ['updatedAt', 'authorId'],
+        exclude: ['updatedAt', 'authorId', 'totalLikes', 'totalViews', 'flagCount'],
       },
       include: [{
-        model: models.comment,
-        attributes: ['id']
-      }, {
         model: models.tag,
         as: 'tags',
         attributes: ['title'],
@@ -50,8 +47,6 @@ class ContentsIndex extends Index {
     contents = contents.map((content) => {
       content = content.get({ plain: true });
       content.createdAt = moment(content.createdAt).valueOf();
-      content.totalComments = content.comments.length;
-      delete content.comments;
       return content;
     });
     return this.index.addObjects(contents);
@@ -59,3 +54,11 @@ class ContentsIndex extends Index {
 }
 
 export default new ContentsIndex();
+
+if (require.main === module) {
+  new ContentsIndex().sync().then(() => {
+    process.exit();
+  }).catch(() => {
+    process.exit(2);
+  });
+}

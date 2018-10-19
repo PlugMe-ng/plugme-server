@@ -27,7 +27,7 @@ class UsersIndex extends Index {
    */
   sync = async (id) => {
     let users = await models.User.findAll({
-      attributes: [['id', 'objectID'], 'fullName', 'username', 'photo', 'meta', 'createdAt'],
+      attributes: [['id', 'objectID'], 'fullName', 'username', 'photo', 'meta'],
       where: { ...(id && { id }) },
       include: [{
         model: models.occupation,
@@ -39,14 +39,6 @@ class UsersIndex extends Index {
           model: models.country,
           attributes: ['name']
         }]
-      }, {
-        model: models.content,
-        as: 'contents',
-        attributes: ['totalLikes', 'totalViews'],
-        include: [{
-          model: models.comment,
-          attributes: ['id']
-        }]
       }]
     });
     users = users.map((user) => {
@@ -55,12 +47,7 @@ class UsersIndex extends Index {
       user.bio = user.meta.bio;
       user.experience = user.meta.experience;
 
-      user.totalLikes = user.contents.reduce((acc, content) => acc + content.totalLikes, 0);
-      user.totalViews = user.contents.reduce((acc, content) => acc + content.totalViews, 0);
-      user.totalComments = user.contents.reduce((acc, content) => acc + content.comments.length, 0);
-
       delete user.meta;
-      delete user.contents;
       return user;
     });
     return this.index.addObjects(users);
@@ -68,3 +55,11 @@ class UsersIndex extends Index {
 }
 
 export default new UsersIndex();
+
+if (require.main === module) {
+  new UsersIndex().sync().then(() => {
+    process.exit();
+  }).catch(() => {
+    process.exit(2);
+  });
+}

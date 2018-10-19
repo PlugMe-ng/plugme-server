@@ -25,31 +25,22 @@ class Index extends BaseIndex {
    */
   sync = async (id) => {
     const tags = await models.tag.findAll({
-      includeIgnoreAttributes: false,
-      group: ['tag.id'],
       attributes: {
-        include: [
-          ['id', 'objectID'],
-          [models.sequelize.fn('sum', models.sequelize.col('contents.totalLikes')), 'totalLikes'],
-          [models.sequelize.fn('sum', models.sequelize.col('contents.totalViews')), 'totalViews'],
-          [models.sequelize.fn('count', models.sequelize.col('contents->comments.contentId')), 'totalComments'],
-        ],
-        exclude: ['id', 'updatedAt', 'createdAt', 'categoryId']
+        include: [['id', 'objectID']],
+        exclude: ['id', 'updatedAt', 'createdAt']
       },
       where: { ...(id && { id }) },
-      include: [{
-        model: models.content,
-        as: 'contents',
-        attributes: [],
-        through: { attributes: [] },
-        include: [{
-          model: models.comment,
-          attributes: []
-        }]
-      }]
     });
     return this.index.addObjects(tags);
   }
 }
 
 export default new Index();
+
+if (require.main === module) {
+  new Index().sync().then(() => {
+    process.exit();
+  }).catch(() => {
+    process.exit(2);
+  });
+}

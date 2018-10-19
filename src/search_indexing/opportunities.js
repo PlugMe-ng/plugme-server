@@ -69,3 +69,12 @@ class OpportunitiesIndex extends Index {
 }
 
 export default new OpportunitiesIndex();
+
+if (require.main === module) {
+  new OpportunitiesIndex().sync().then(() => {
+    process.exit();
+  }).catch(() => {
+    process.exit(2);
+  });
+}
+

@@ -18,20 +18,6 @@ const clearCache = () => {
   cache.del('tags');
 };
 
-const updateSearchIndexes = async (content) => {
-  contentSearchIndex.sync(content.id);
-  usersSearchIndex.sync(content.authorId);
-  const tagIds = (content.tags || await content.getTags({ attributes: ['id'] }))
-    .map(tag => tag.id);
-  tagsSearchIndex.sync(tagIds);
-};
-
-const runUpdateHooks = (content) => {
-  clearCache();
-  updateSearchIndexes(content);
-};
-
-
 const addViewEntry = async (user, content) => {
   if (!user) return;
   const viewer = (await content.getViewers({ where: { id: user.id } }))[0];
@@ -39,7 +25,7 @@ const addViewEntry = async (user, content) => {
   if (!viewer) {
     content.addViewer(user);
     content.increment('totalViews');
-    runUpdateHooks(content);
+    clearCache();
     return;
   }
   const view = viewer.contents_users_views;
@@ -50,7 +36,7 @@ const addViewEntry = async (user, content) => {
   await view.destroy();
   content.addViewer(user);
   content.increment('totalViews');
-  runUpdateHooks(content);
+  clearCache();
 };
 
 const notifyFans = async (user, content) => {
@@ -146,7 +132,7 @@ export default new class {
       notifyFans(userObj, content);
       populateUsersGalleries(content);
       updateUserPlan(userObj);
-      updateSearchIndexes(content);
+      contentSearchIndex.sync(content.id);
       return res.sendSuccess({ ...content.get() });
     } catch (error) {
       if (content) content.destroy();
@@ -309,14 +295,14 @@ export default new class {
       if (await content.hasLiker(userObj)) {
         await content.removeLiker(userObj);
         await content.decrement('totalLikes');
-        runUpdateHooks(content);
+        clearCache();
         return res.sendSuccess({
           message: 'You have successfully unliked this content'
         });
       }
       await content.addLiker(userObj);
       await content.increment('totalLikes');
-      runUpdateHooks(content);
+      clearCache();
       return res.sendSuccessAndNotify({
         event: events.LIKE,
         recipients: [content.authorId],
@@ -384,13 +370,9 @@ export default new class {
           message: 'Content has been deleted succesfully'
         });
       }
-      // some associations are needed before deleting the content
-      const contentTags = await content.getTags.map(tag => tag.id);
 
       await content.destroy();
       contentSearchIndex.deleteRecord(content.id);
-      usersSearchIndex.sync(content.authorId);
-      tagsSearchIndex.sync(contentTags);
       return;
     } catch (error) {
       return res.sendFailure([error.message]);
@@ -415,7 +397,7 @@ export default new class {
           UserId: userObj.id,
           contentId: content.id
         });
-      runUpdateHooks(content);
+      clearCache();
       return res.sendSuccessAndNotify({
         event: events.COMMENT,
         recipients: [content.authorId],
@@ -481,7 +463,7 @@ export default new class {
         throw new Error('This comment was added by another user');
       }
       await comment.destroy();
-      runUpdateHooks(await models.content.findById(comment.contentId));
+      clearCache();
       return res.sendSuccess({ message: 'Comment has been deleted succesfully' });
     } catch (error) {
       return res.sendFailure([error.message]);

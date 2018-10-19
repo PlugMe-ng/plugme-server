@@ -18,6 +18,7 @@ import crypto from 'crypto';
 import models from '../models';
 import { createJwtToken, sendAuthActionMail, generateUserName } from '../helpers/auth';
 import helpers from '../helpers';
+import searchIndex from '../search_indexing/users';
 
 /**
 * Controls endpoints for authentication and authorization
@@ -100,11 +101,13 @@ export default new class {
             ...payload,
             username: generateUserName(payload.fullName)
           }
-        }).spread(user =>
-          res.sendSuccess({
+        }).spread((user, created) => {
+          if (created) searchIndex.sync(user.id);
+          return res.sendSuccess({
             user: helpers.Misc.updateUserAttributes(user),
             userToken: createJwtToken(user)
-          }));
+          });
+        });
     } catch (error) {
       return res.sendFailure([error.message]);
     }
@@ -215,6 +218,7 @@ export default new class {
         throw new Error('Token has expired, Please request a new one');
       }
       await user.update({ verified: true });
+      searchIndex.sync(user.id);
       record.destroy();
       return res.sendSuccess({
         user: helpers.Misc.updateUserAttributes(user),
