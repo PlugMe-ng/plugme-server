@@ -25,7 +25,7 @@ module.exports = {
     operatorsAliases: false,
   },
   SECRET: process.env.SECRET,
-  FE_URL: 'https://plugme-client-staging.herokuapp.com',
+  FE_URL: process.env.PLUGME_FE_URL,
   dev_support_notif: process.env.DEV_SUPPORT_NOTIFICATION,
   PAYSTACK_SECRET_KEY: process.env.PAYSTACK_SECRET_KEY,
   PAYMENT_VERIFICATION_URL: 'https://api.paystack.co/transaction/verify',
