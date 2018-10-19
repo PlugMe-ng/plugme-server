@@ -15,7 +15,7 @@ export default class Index {
    * @memberOf UsersIndex
    */
   constructor(indexName, settings = {}) {
-    this.index = client.initIndex(indexName);
+    this.index = client.initIndex(`${this.getEnvPrefix()}${indexName}`);
     this.index.setSettings(settings);
   }
 
@@ -39,5 +39,9 @@ export default class Index {
    */
   sync = (objectId) => {
     throw new Error('syncIndex method must be overridden');
+  }
+
+  getEnvPrefix = () => { // eslint-disable-line
+    return process.env.NODE_ENV === 'production' ? '' : 'dev_';
   }
 }

@@ -12,7 +12,7 @@ class Index extends BaseIndex {
    * @memberOf Index
    */
   constructor() {
-    super('dev_TAGS');
+    super('TAGS');
   }
 
   /**

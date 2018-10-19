@@ -11,7 +11,7 @@ class UsersIndex extends Index {
    * @memberOf UsersIndex
    */
   constructor() {
-    super('dev_USERS', {
+    super('USERS', {
       attributesForFaceting: ['searchable(location)', 'searchable(occupation.title)'],
       searchableAttributes: ['fullName', 'username', 'bio', 'experience'],
     });

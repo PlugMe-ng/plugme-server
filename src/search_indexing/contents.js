@@ -12,7 +12,7 @@ class ContentsIndex extends Index {
    * @memberOf ContentsIndex
    */
   constructor() {
-    super('dev_CONTENTS', {
+    super('CONTENTS', {
       searchableAttributes: ['title', 'description', 'tags.title', 'author.username', 'author.fullName'],
       attributesForFaceting: ['searchable(tags.title)', 'mediaType'],
     });

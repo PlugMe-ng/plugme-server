@@ -14,7 +14,7 @@ class OpportunitiesIndex extends Index {
    * @memberOf OpportunitiesIndex
    */
   constructor() {
-    super('dev_OPPORTUNITIES');
+    super('OPPORTUNITIES');
   }
 
   /**
