@@ -107,7 +107,7 @@ export default new class {
   }
 
   update = async (req, res) => {
-    const id = req.params.notificationId;
+    const id = req.params.notificationId || req.body.ids;
 
     try {
       await models.notification.update(

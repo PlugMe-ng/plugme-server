@@ -8,5 +8,6 @@ const { auth } = middleware;
 
 router.get('/', auth.authenticateUser, controller.get);
 router.put('/:notificationId', controller.update);
+router.put('/', controller.update);
 
 export default router;
