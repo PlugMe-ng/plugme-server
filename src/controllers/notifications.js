@@ -38,6 +38,19 @@ const isDuplicateNotif = async ({ event, recipientId, author }) => {
       });
       return !!subcriptionEndNotifExists;
     }
+    case events.COMMENT:
+    case events.NEW_CONTENT: {
+      return !!(await models.notification.findOne({
+        attributes: [],
+        order: [['createdAt', 'DESC']],
+        where: {
+          authorId: author.id,
+          userId: recipientId,
+          read: false,
+          'meta.event': event,
+        }
+      }));
+    }
     default:
       return false;
   }
