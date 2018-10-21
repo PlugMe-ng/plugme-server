@@ -30,6 +30,7 @@ router.use(middleware.auth.authenticateUser);
 router.post(
   '/',
   middleware.check.userHasActiveSubscription,
+  middleware.check.userProfileUpdated,
   validations.createContent,
   validations.checkMinorTagInclusion,
   validations.userPlanLimit,

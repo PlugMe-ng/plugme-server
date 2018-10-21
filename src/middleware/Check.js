@@ -97,4 +97,24 @@ export default class Check {
       return res.sendFailure([error.message]);
     }
   }
+
+  /**
+  * Checks if a user has completed their profile
+  * @param {object} req express request object
+  * @param {object} res express response object
+  * @param {object} next the next middleware or controller
+  *
+  * @returns {any} the next middleware or controller
+  */
+  async userProfileUpdated(req, res, next) {
+    const { user } = req;
+    try {
+      if (!user.photo || !user.locationId || !user.occupationId) {
+        throw new Error('Please update your profile to complete this action');
+      }
+      return next();
+    } catch (error) {
+      return res.sendFailure([error.message]);
+    }
+  }
 }
