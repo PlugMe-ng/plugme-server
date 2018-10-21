@@ -264,11 +264,15 @@ export default new class {
           }
         }, {
           model: models.User,
-          attributes: ['id', 'username', 'fullName'],
           as: 'plugger',
-          ...(filter.plugger && {
-            where: { username: filter.plugger.toLowerCase() }
-          }),
+          attributes: ['id', 'username', 'fullName', 'photo'],
+          where: {
+            ...(filter.plugger && { username: { [Op.iLike]: filter.plugger } })
+          },
+          // include: [{
+          //   model: models.occupation,
+          //   attributes: ['id', 'title']
+          // }],
         }, {
           model: models.User,
           attributes: ['id', 'username', 'fullName'],
