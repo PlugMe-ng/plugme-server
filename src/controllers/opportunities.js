@@ -259,20 +259,16 @@ export default new class {
               }
             }
           }),
-          through: {
-            attributes: []
-          }
+          through: { attributes: [] }
         }, {
           model: models.User,
           as: 'plugger',
-          attributes: ['id', 'username', 'fullName', 'photo'],
-          where: {
-            ...(filter.plugger && { username: { [Op.iLike]: filter.plugger } })
-          },
-          // include: [{
-          //   model: models.occupation,
-          //   attributes: ['id', 'title']
-          // }],
+          attributes: ['id', 'username', 'fullName', 'photo', 'occupationId'],
+          ...(filter.plugger && { where: { username: { [Op.iLike]: filter.plugger } } }),
+          include: [{
+            model: models.occupation,
+            attributes: ['id', 'title'],
+          }],
         }, {
           model: models.User,
           attributes: ['id', 'username', 'fullName'],
