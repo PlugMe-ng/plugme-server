@@ -9,6 +9,7 @@ const { auth, check } = middleware;
 const router = new Router();
 
 router.get('/settings/backgrounds', controller.getBackgrounds);
+router.post('/payment-webhooks', controller.paymentWebHooks);
 router.use('/settings/banner-ads', bannerAds);
 
 router.use(auth.authenticateUser, check.currentUserIsAdmin);

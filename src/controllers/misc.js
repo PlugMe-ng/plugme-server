@@ -1,7 +1,10 @@
 import { Op } from 'sequelize';
+import crypto from 'crypto';
+import moment from 'moment';
 
 import models from '../models';
 import helpers, { cache } from '../helpers';
+import config from '../config';
 
 /**
  * @class Controller
@@ -87,6 +90,34 @@ export default new class {
       return res.sendSuccess(backgrounds || {});
     } catch (error) {
       return res.sendFailure([error.message]);
+    }
+  }
+
+  /**
+   * @desc Handles user plan subscription as a webhook from Paystack
+   *
+   * @param { object } req request
+   * @param { object } res response
+   *
+   * @returns { object } response
+   */
+  paymentWebHooks = async (req, res) => {
+    const authHash = crypto.createHmac('sha512', config.PAYSTACK_SECRET_KEY)
+      .update(JSON.stringify(req.body)).digest('hex');
+    if (authHash !== req.headers['x-paystack-signature']) return res.status(401).end();
+
+    res.status(200).end();
+    switch (req.body.event) {
+      case 'charge.success':
+      case 'subscription.create': {
+        const { amount, customer: { email } } = req.body.data;
+        const { type, validity } = helpers.Misc.subscriptionPlans[Number(amount / 100)];
+        return models.User.update({
+          plan: { type, expiresAt: moment().add(...validity).valueOf() },
+        }, { where: { email } });
+      }
+      default:
+        break;
     }
   }
 }();

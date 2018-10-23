@@ -385,39 +385,17 @@ export default new class {
   }
 
   /**
+   * @deprecated
    * @desc Handles user plan subscription
+   * Only here for backwards compatibility
    *
    * @param { object } req request
    * @param { object } res response
    *
    * @returns { object } response
    */
-  subscription = async (req, res) => {
-    const { reference: trxRef } = req.body;
-    if (!trxRef) {
-      throw new Error('transaction reference token is required');
-    }
-    try {
-      const response = await axios.get(`${config.PAYMENT_VERIFICATION_URL}/${trxRef}`, {
-        headers: { Authorization: `Bearer ${config.PAYSTACK_SECRET_KEY}` }
-      });
-      const { status, amount, customer: { email } } = response.data.data;
-      if (status !== 'success') {
-        throw new Error('Could not verify payment');
-      }
-      const { type, validity } = helpers.Misc.subscriptionPlans[Number(amount / 100)];
-
-      await models.User.update({
-        plan: {
-          type,
-          expiresAt: moment().add(...validity).valueOf()
-        },
-      }, { where: { email } });
-      return res.sendSuccess({ message: 'User plan updated successfully' });
-    } catch (error) {
-      return res.sendFailure([error.message]);
-    }
-  }
+  subscription = async (req, res) =>
+    res.sendSuccess({ message: 'User plan updated successfully' })
 
   /**
    * @desc Handles retrieving user's conversations
