@@ -28,7 +28,7 @@ export default new class {
     };
 
     try {
-      const logs = await models.adminAction.findAndCount({
+      const logs = await models.adminAction.findAndCountAll({
         limit,
         offset,
         where,

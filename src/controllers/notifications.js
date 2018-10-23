@@ -95,7 +95,7 @@ export default new class {
     const { attribute, order } = req.meta.sort;
 
     try {
-      const userNotifs = await models.notification.findAndCount({
+      const userNotifs = await models.notification.findAndCountAll({
         distinct: true,
         limit,
         offset,

@@ -91,7 +91,7 @@ export default new class {
         const conversations = conversationId ? [conversationId]
           : await findOrCreateConversation([user.id, ...recipients]);
 
-        const messages = await models.message.findAndCount({
+        const messages = await models.message.findAndCountAll({
           limit,
           offset,
           where: { conversationId: conversations },

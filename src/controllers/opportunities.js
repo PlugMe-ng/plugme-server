@@ -223,7 +223,7 @@ export default new class {
     };
 
     try {
-      const opportunities = await models.opportunity.findAndCount({
+      const opportunities = await models.opportunity.findAndCountAll({
         distinct: true,
         limit,
         offset,

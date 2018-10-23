@@ -129,7 +129,7 @@ export default new class {
         })
       };
 
-      const users = await models.User.findAndCount({
+      const users = await models.User.findAndCountAll({
         distinct: true,
         where,
         limit,
