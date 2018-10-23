@@ -1,5 +1,3 @@
-
-
 module.exports = {
   up: (queryInterface, Sequelize) => queryInterface.createTable('locations', {
     id: {
@@ -17,7 +15,7 @@ module.exports = {
         model: 'countries',
         key: 'id'
       },
-      onDelete: 'SET NULL',
+      onDelete: 'CASCADE',
       onUpdate: 'CASCADE'
     },
     createdAt: {
