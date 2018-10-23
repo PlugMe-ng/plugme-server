@@ -373,6 +373,7 @@ export default new class {
 
       await content.destroy();
       contentSearchIndex.deleteRecord(content.id);
+      clearCache();
       return;
     } catch (error) {
       return res.sendFailure([error.message]);
