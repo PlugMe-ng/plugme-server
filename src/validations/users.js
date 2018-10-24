@@ -23,7 +23,7 @@ const userUpdateRules = {
 
 const minorTagsOnly = async (tags) => {
   for (let i = 0; i < tags.length; i += 1) {
-    const tag = await models.tag.findById(tags[i]); // eslint-disable-line
+    const tag = await models.tag.findByPk(tags[i]); // eslint-disable-line
     if (!tag || !tag.categoryId) return false;
   }
   return true;

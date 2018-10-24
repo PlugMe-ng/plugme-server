@@ -48,7 +48,7 @@ class Validations {
     const validation = new Validator(req.body, createMinorTagRules);
     validation.fails(() =>
       res.sendFailure(getErrors(validation, createMinorTagRules)));
-    const tag = await models.tag.findById(req.body.categoryId);
+    const tag = await models.tag.findByPk(req.body.categoryId);
     if (!tag) {
       return res.sendFailure(['Specified tag does not exist']);
     }

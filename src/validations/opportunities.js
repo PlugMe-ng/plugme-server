@@ -68,7 +68,7 @@ class Validate {
       try {
         const tagId = req.body.tags[i];
         /* eslint-disable no-await-in-loop */
-        const tag = await models.tag.findById(tagId);
+        const tag = await models.tag.findByPk(tagId);
         if (!tag) {
           throw new Error('One of the specified minor tags does not exist');
         }

@@ -92,7 +92,7 @@ class Validate {
     const { contentId } = req.params;
     let content;
     try {
-      content = await models.content.findById(contentId);
+      content = await models.content.findByPk(contentId);
     } catch (error) {
       return res.sendFailure([`Invalid contentId - ${error.message}`]);
     }
@@ -117,7 +117,7 @@ class Validate {
     try {
       for (let i = 0; i < tags.length; i += 1) {
         /* eslint-disable no-await-in-loop */
-        const tag = await models.tag.findById(tags[i]);
+        const tag = await models.tag.findByPk(tags[i]);
         if (tag && tag.categoryId) {
           return next();
         }

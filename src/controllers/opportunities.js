@@ -165,7 +165,7 @@ export default new class {
       await opportunity.setLocation(locationId);
       await opportunity.setPlugger(userObj);
 
-      opportunity = await models.opportunity.findById(opportunity.id, {
+      opportunity = await models.opportunity.findByPk(opportunity.id, {
         include: [{
           model: models.location,
           attributes: ['id', 'name'],
@@ -306,7 +306,7 @@ export default new class {
   getOpportunityById = async (req, res) => {
     const { opportunityId } = req.params;
     try {
-      const opportunity = await models.opportunity.findById(opportunityId, {
+      const opportunity = await models.opportunity.findByPk(opportunityId, {
         include: [{
           model: models.User,
           as: 'plugger',
@@ -357,7 +357,7 @@ export default new class {
     const { userObj } = req;
     const { opportunityId } = req.params;
     try {
-      const opportunity = await models.opportunity.findById(opportunityId, {
+      const opportunity = await models.opportunity.findByPk(opportunityId, {
         include: [{
           model: models.User,
           as: 'plugEntries',
@@ -402,7 +402,7 @@ export default new class {
   getOpportunityApplications = async (req, res) => {
     const { opportunityId } = req.params;
     try {
-      const opportunity = await models.opportunity.findById(opportunityId, {
+      const opportunity = await models.opportunity.findByPk(opportunityId, {
         attributes: [],
         include: [{
           model: models.User,
@@ -455,7 +455,7 @@ export default new class {
     const { userObj: plugger } = req;
 
     try {
-      const opportunity = await models.opportunity.findById(opportunityId);
+      const opportunity = await models.opportunity.findByPk(opportunityId);
       if (!opportunity) {
         throw new Error('Specified opportunity does not exist');
       }
@@ -501,7 +501,7 @@ export default new class {
     const { userObj } = req;
 
     try {
-      const opportunity = await models.opportunity.findById(opportunityId, {
+      const opportunity = await models.opportunity.findByPk(opportunityId, {
         include: [{
           model: models.User,
           as: 'plugger',
@@ -559,7 +559,7 @@ export default new class {
    */
   delete = async (req, res) => {
     try {
-      const opportunity = await models.opportunity.findById(req.params.opportunityId);
+      const opportunity = await models.opportunity.findByPk(req.params.opportunityId);
       if (!opportunity) throw new Error('Specified opportunity does not exist');
 
       opportunity.destroy();

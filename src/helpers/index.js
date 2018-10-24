@@ -12,6 +12,7 @@ import querystring from 'querystring';
 import url from 'url';
 import schedule from 'node-schedule';
 import moment from 'moment';
+import { UniqueConstraintError, Op } from 'sequelize';
 
 import models from '../models';
 import notifications from '../controllers/notifications';
@@ -104,7 +105,7 @@ function updateUserAttributes(user) {
 }
 
 const enhanceErrorMessage = (error) => {
-  if (error instanceof models.sequelize.UniqueConstraintError) {
+  if (error instanceof UniqueConstraintError) {
     return `${error.parent.detail}`;
   }
   return error.message;
@@ -190,7 +191,7 @@ const subscriptionPlans = {
 const sendPlanExpirationNotif = async () => {
   const now = moment();
   const days5 = moment().add(5, 'days');
-  const { gte, lte } = models.sequelize.Op;
+  const { gte, lte } = Op;
 
   const users = (await models.User.findAll({
     attributes: ['id'],

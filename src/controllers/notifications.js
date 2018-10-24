@@ -1,4 +1,5 @@
 import moment from 'moment';
+import { Op } from 'sequelize';
 
 import models from '../models';
 import { notifsIO } from '../server';
@@ -17,7 +18,7 @@ const generateMeta = (event, entity) => {
 const sendEmailNotification = ({
   recipientId, event, author, entity
 }) => {
-  models.User.findById(recipientId, { attributes: ['email', 'fullName'] })
+  models.User.findByPk(recipientId, { attributes: ['email', 'fullName'] })
     .then(recipient => sendMail(generateEventMailPayload[event](author, recipient, entity)));
 };
 
@@ -31,8 +32,8 @@ const isDuplicateNotif = async ({ event, recipientId, author }) => {
           userId: recipientId,
           'meta.event': event,
           createdAt: {
-            [models.sequelize.Op.lte]: moment().toDate(),
-            [models.sequelize.Op.gte]: moment().subtract(5, 'days').toDate()
+            [Op.lte]: moment().toDate(),
+            [Op.gte]: moment().subtract(5, 'days').toDate()
           }
         }
       });

@@ -21,7 +21,7 @@ export default new class {
 
   update = async (req, res) => {
     try {
-      const ad = await models.bannerAd.findById(req.params.id);
+      const ad = await models.bannerAd.findByPk(req.params.id);
       if (!ad) throw new Error('Specified ad does not exist');
       await models.bannerAd.update(req.body, {
         where: { id: req.params.id }
@@ -34,7 +34,7 @@ export default new class {
 
   delete = async (req, res) => {
     try {
-      const ad = await models.bannerAd.findById(req.params.id);
+      const ad = await models.bannerAd.findByPk(req.params.id);
       if (!ad) throw new Error('Specified ad does not exist');
       await models.bannerAd.destroy({ where: { id: req.params.id } });
       return res.sendSuccessAndLog(ad, { message: 'Ad deleted successfully' });

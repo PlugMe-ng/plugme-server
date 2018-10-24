@@ -97,7 +97,7 @@ export default new class {
    */
   deleteTag = async (req, res) => {
     try {
-      const tag = await models.tag.findById(req.params.tagId);
+      const tag = await models.tag.findByPk(req.params.tagId);
       if (!tag) throw new Error('Specified tag does not exist');
       tag.destroy();
       tagsSearchIndex.deleteRecord(tag.id);
@@ -118,7 +118,7 @@ export default new class {
    */
   updateTag = async (req, res) => {
     try {
-      const tag = await models.tag.findById(req.params.tagId);
+      const tag = await models.tag.findByPk(req.params.tagId);
       if (!tag) throw new Error('Specified tag does not exist');
       await tag.update({ title: req.body.title });
       tagsSearchIndex.sync(tag.id);

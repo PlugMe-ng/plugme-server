@@ -57,7 +57,7 @@ export default new class {
   deleteOccupation = async (req, res) => {
     try {
       const occupation = await models.occupation
-        .findById(req.params.occupationId);
+        .findByPk(req.params.occupationId);
       if (!occupation) {
         throw new Error('Specified occupation does not exist');
       }
@@ -80,7 +80,7 @@ export default new class {
   update = async (req, res) => {
     try {
       const occupation = await models.occupation
-        .findById(req.params.occupationId);
+        .findByPk(req.params.occupationId);
       if (!occupation) throw new Error('Specified occupation does not exist');
       await occupation.update({ title: req.body.title });
       return res.sendSuccessAndLog(occupation, { message: 'Occupation modified successfully' });

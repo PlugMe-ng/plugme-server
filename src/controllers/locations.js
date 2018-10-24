@@ -77,7 +77,7 @@ export default new class {
    */
   deleteLocation = async (req, res) => {
     try {
-      const location = await models.location.findById(req.params.locationId);
+      const location = await models.location.findByPk(req.params.locationId);
       if (!location) {
         throw new Error('Specified location does not exist');
       }
@@ -98,7 +98,7 @@ export default new class {
    */
   deleteCountry = async (req, res) => {
     try {
-      const country = await models.country.findById(req.params.countryId);
+      const country = await models.country.findByPk(req.params.countryId);
       if (!country) {
         throw new Error('Specified country does not exist');
       }
@@ -119,7 +119,7 @@ export default new class {
    */
   updateLocation = async (req, res) => {
     try {
-      const location = await models.location.findById(req.params.locationId);
+      const location = await models.location.findByPk(req.params.locationId);
       if (!location) throw new Error('Specified location does not exist');
       await location.update(req.body);
       return res.sendSuccessAndLog(location, { message: 'Location updated successfully' });
@@ -138,7 +138,7 @@ export default new class {
    */
   updateCountry = async (req, res) => {
     try {
-      const country = await models.country.findById(req.params.countryId);
+      const country = await models.country.findByPk(req.params.countryId);
       if (!country) throw new Error('Specified country does not exist');
       await country.update(req.body);
       return res.sendSuccessAndLog(country, { message: 'Country updated successfully' });

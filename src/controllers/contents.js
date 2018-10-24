@@ -117,7 +117,7 @@ export default new class {
       });
       await content.setAuthor(userObj);
       await content.setTags(req.body.tags);
-      content = await models.content.findById(content.id, {
+      content = await models.content.findByPk(content.id, {
         include: [{
           model: models.User,
           as: 'author',
@@ -253,7 +253,7 @@ export default new class {
     const { contentId } = req.params;
     const { userObj } = req;
     try {
-      const content = await models.content.findById(contentId, {
+      const content = await models.content.findByPk(contentId, {
         include: [{
           model: models.User,
           as: 'author',
@@ -458,7 +458,7 @@ export default new class {
   deleteComment = async (req, res) => {
     const { commentId } = req.params;
     try {
-      const comment = await models.comment.findById(commentId);
+      const comment = await models.comment.findByPk(commentId);
       if (!comment) throw new Error('Specified comment does not exist');
       if (comment.UserId !== req.user.id) {
         throw new Error('This comment was added by another user');

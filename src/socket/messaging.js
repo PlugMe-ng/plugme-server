@@ -1,12 +1,10 @@
 import moment from 'moment';
+import { where, fn, col, Op } from 'sequelize';
 
 import models from '../models';
 import { notifsIO } from '../server';
 import config from '../config';
 
-const {
-  where, fn, col, Op
-} = models.sequelize;
 
 const createConversation = async (users) => {
   const conversation = await models.conversation.create();
