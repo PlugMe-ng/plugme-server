@@ -2,13 +2,11 @@ import sendGrid from '@sendgrid/mail';
 
 sendGrid.setApiKey(process.env.SENDGRID_API_KEY);
 
-export default ({ address, subject, content }) => {
-  const mailData = {
+export default ({ templateId, data, address }) => {
+  sendGrid.send({
+    templateId,
     to: address,
-    from: 'info@plugme.com.ng',
-    subject,
-    text: content,
-    html: content
-  };
-  sendGrid.send(mailData);
+    from: 'PlugMe <info@plugme.com.ng>',
+    dynamic_template_data: data
+  });
 };

@@ -32,52 +32,38 @@ export const eventDescriptions = {
 
 export const generateEventMailPayload = {
   opportunity_achiever_set: (author, recipient, entity) => ({
-    subject: 'You have been plugged to an opportunity',
-    content:
-      `
-      <p>Hi ${recipient.fullName},</p>
-
-      <p>You have been PLUGGED to this <a href="${config.FE_URL}/opportunity/${author.username}/${entity.id}">opportunity</a> and will be duly contacted by the Plugger for further information</p>
-      `,
-    address: recipient.email
+    address: recipient.email,
+    data: {
+      fullName: recipient.fullName,
+      link: `${config.FE_URL}/opportunity/${author.username}/${entity.id}`
+    },
+    templateId: 'd-be38a16538034927b1d36de77437acd6'
   }),
 
   opportunity_achiever_set_others: (author, recipient, entity) => ({
-    subject: 'You were not plugged to an opportunity',
-    content:
-      `
-      <p>Hi ${recipient.fullName}</p>
-
-      <p>Unfortunately, you were not plugged to this <a href="${config.FE_URL}/${author.username}/opportunity/${entity.id}">opportunity</a></p>
-
-      <p>There are more opportunities waiting for you on <a href="${config.FE_URL}">PlugMe</a> however</p>
-      `,
-    address: recipient.email
+    address: recipient.email,
+    data: {
+      fullName: recipient.fullName,
+      link: `${config.FE_URL}/opportunity/${author.username}/${entity.id}`
+    },
+    templateId: 'd-3e34222d905f4ca5a4a0083e53702c54'
   }),
 
   new_opportunity: (author, recipient, entity) => ({
-    subject: 'New opportunity is available',
-    content:
-    `
-    <p>Hi ${recipient.fullName}</p>
-
-    <p>A new <a href="${config.FE_URL}/${author.username}/opportunity/${entity.id}">opportunity</a> that match your skills tag has been uploaded.</p>
-
-    <p>Hurry now to apply for this opportuntiy before it passes.</p>
-    `,
-    address: recipient.email
+    address: recipient.email,
+    templateId: 'd-f3626fd10a5c41d39615b102fa08c7a0',
+    data: {
+      fullName: recipient.fullName,
+      link: `${config.FE_URL}/opportunity/${author.username}/${entity.id}`
+    }
   }),
 
   subscription_end: (author, recipient, entity) => ({
-    subject: 'Your current subscription will expire in 5 days',
-    content:
-    `
-    <p>Hi ${recipient.fullName}</p>
-
-    <p>Your current subscription plan will expire in 5 days, after which you will no longer be able to upload contents or get plugged to new opportunities</p>
-
-    <p>Please renew or upgrade your plan as soon as possible</p>
-    `,
-    address: recipient.email
+    address: recipient.email,
+    templateId: 'd-6c2e66010d8944f082b15b511501f165',
+    data: {
+      fullName: recipient.fullName,
+      link: `${config.FE_URL}/subscribe`
+    }
   })
 };

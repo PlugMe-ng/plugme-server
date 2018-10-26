@@ -7,50 +7,11 @@ import sendMail from './mailing';
 
 const createToken = async (user, type) => {
   const seed = crypto.randomBytes(20);
-  const token = crypto.createHash('sha1')
-    .update(seed + user.email).digest('hex');
-
-  const authAction = await models.emailAuthAction
-    .create({ token, type });
+  const token = crypto.createHash('sha1').update(seed + user.email).digest('hex');
+  const authAction = await models.emailAuthAction.create({ token, type });
   authAction.setUser(user.id);
   return token;
 };
-
-// TODO: customize verification token with html and include FE url link
-const createVerificationMessage = (user, verificationToken) => ({
-  content: `
-    <p>Hi, ${user.fullName}</p>
-
-    <p>Please verify your PlugMe account using the link below</p>
-
-    <a href="${config.FE_URL}/verify-account?token=${verificationToken}">Verify your account</a>
-
-    <p>If the link above does not work, copy and paste the link below in your browser<p>
-
-    ${config.FE_URL}/verify-account?token=${verificationToken}
-  `,
-  subject: 'Verify Your PlugMe Account'
-});
-
-const createPasswordResetMail = (user, token) =>
-  ({
-    mailContent: `
-    <p>Hi, ${user.fullName}</p>
-    
-    <p>You requested a password reset, click the link below to reset your password</p>
-    
-    <a href="${config.FE_URL}/password-reset?token=${token}">Reset your password</a>
-    
-    <p>If the link above does not work, copy and paste the link below in your browser<p>
-    
-    ${config.FE_URL}/password-reset?token=${token}
-    
-    <p>Note that the link is valid for 12 hours</p>
-    
-    <p>Please ignore this mail if you did not request a password reset</p>
-    `,
-    subject: 'Reset Your PlugMe Account Password'
-  });
 
 export const generateUserName = (name) => {
   const randomInt = crypto.randomBytes(20).readUInt16BE();
@@ -63,16 +24,25 @@ export const createJwtToken = user =>
 export const sendAuthActionMail = async (user, type) => {
   const token = await createToken(user, type);
   switch (type) {
-    case 'verify': {
-      const { content, subject } = createVerificationMessage(user, token);
-      sendMail({ address: user.email, subject, content });
-    }
+    case 'verify':
+      sendMail({
+        templateId: 'd-80aa362028504dffa50fcd7cfd17d617',
+        address: user.email,
+        data: {
+          fullName: user.fullName,
+          link: `${config.FE_URL}/verify-account?token=${token}`
+        }
+      });
       break;
-    case 'reset': {
-      const { subject, mailContent: content } =
-        createPasswordResetMail(user, token);
-      sendMail({ address: user.email, subject, content });
-    }
+    case 'reset':
+      sendMail({
+        templateId: 'd-755be4a5d84d42379f040f7479562cf2',
+        address: user.email,
+        data: {
+          fullName: user.fullName,
+          link: `${config.FE_URL}/password-reset?token=${token}`,
+        },
+      });
       break;
     default:
       break;
