@@ -24,6 +24,11 @@ module.exports = {
     url: process.env.DATABASE_URL,
     operatorsAliases: false,
   },
+  staging: {
+    dialect: 'postgres',
+    url: process.env.DATABASE_URL,
+    operatorsAliases: false,
+  },
   SECRET: process.env.SECRET,
   FE_URL: process.env.PLUGME_FE_URL,
   dev_support_notif: process.env.DEV_SUPPORT_NOTIFICATION,
