@@ -349,7 +349,7 @@ export default new class {
   deleteContent = async (req, res) => {
     const { content, user } = req;
     try {
-      if (content.authorId !== user.id || !isAdmin(user)) {
+      if (content.authorId !== user.id && !isAdmin(user)) {
         throw new Error('This content belongs to another user');
       }
 
