@@ -1,10 +1,14 @@
 import { Op } from 'sequelize';
 import crypto from 'crypto';
 import moment from 'moment';
+import sgClient from '@sendgrid/client';
+import isEmail from 'validator/lib/isEmail';
 
 import models from '../models';
 import helpers, { cache } from '../helpers';
 import config from '../config';
+
+sgClient.setApiKey(process.env.SENDGRID_API_KEY);
 
 /**
  * @class Controller
@@ -118,6 +122,29 @@ export default new class {
       }
       default:
         break;
+    }
+  }
+
+  /**
+   * @desc Handles newsletter subscription
+   *
+   * @param { object } req request
+   * @param { object } res response
+   *
+   * @returns { object } response
+   */
+  subscribeNewsletterRecipient = async (req, res) => {
+    const { email } = req.body;
+    try {
+      if (!email || !isEmail(email)) throw new Error('Please input a valid email');
+      await sgClient.request({
+        method: 'POST',
+        url: '/v3/contactdb/recipients',
+        body: [{ email }]
+      });
+      return res.sendSuccess({ message: 'Success' });
+    } catch (error) {
+      return res.sendFailure([error.message]);
     }
   }
 }();

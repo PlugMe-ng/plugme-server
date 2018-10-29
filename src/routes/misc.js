@@ -11,6 +11,7 @@ const router = new Router();
 router.get('/settings/backgrounds', controller.getBackgrounds);
 router.post('/payment-webhooks', controller.paymentWebHooks);
 router.use('/settings/banner-ads', bannerAds);
+router.post('/newsletter/subscriptions', controller.subscribeNewsletterRecipient);
 
 router.use(auth.authenticateUser, check.currentUserIsAdmin);
 
