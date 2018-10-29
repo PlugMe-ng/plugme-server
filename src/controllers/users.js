@@ -299,6 +299,7 @@ export default new class {
     try {
       if (interests) await user.setInterests(interests);
       if (skills) await user.setSkills(skills);
+      if (data.photo && user.photo) helpers.Misc.deleteImagesFromCloud([user.photo]);
       await user.update({
         ...data,
         meta: getUserMetaUpdate(user, req.body)

@@ -1,6 +1,7 @@
 import moment from 'moment';
 import { Op } from 'sequelize';
 import _ from 'underscore';
+import cloudinary from 'cloudinary';
 
 import models from '../models';
 import helpers, { events, cache } from '../helpers';
@@ -374,6 +375,7 @@ export default new class {
       await content.destroy();
       contentSearchIndex.deleteRecord(content.id);
       clearCache();
+      helpers.Misc.deleteImagesFromCloud(content.mediaUrls);
       return;
     } catch (error) {
       return res.sendFailure([error.message]);

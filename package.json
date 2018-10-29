@@ -45,6 +45,7 @@
     "capitalize": "^1.0.0",
     "chai": "^4.1.2",
     "chai-http": "^4.0.0",
+    "cloudinary": "^1.11.0",
     "cors": "^2.8.4",
     "dotenv": "^5.0.1",
     "express": "^4.16.3",

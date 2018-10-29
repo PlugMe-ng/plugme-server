@@ -13,6 +13,7 @@ import url from 'url';
 import schedule from 'node-schedule';
 import moment from 'moment';
 import { UniqueConstraintError, Op } from 'sequelize';
+import cloudinary from 'cloudinary';
 
 import models from '../models';
 import notifications from '../controllers/notifications';
@@ -213,6 +214,22 @@ schedule.scheduleJob({ hour: 0, minute: 0, dayOfWeek: new schedule.Range(0, 6) }
   sendPlanExpirationNotif();
 });
 
+/**
+ * @param {Array.<string>} urls
+ *
+ * @returns {void}
+ */
+const deleteImagesFromCloud = (urls) => {
+  if (!urls || !Array.isArray(urls)) return;
+  const imagePublicIds = urls.map((imageUrl) => {
+    if (imageUrl.includes('res.cloudinary.com')) {
+      return imageUrl.slice(imageUrl.lastIndexOf('/') + 1, imageUrl.lastIndexOf('.'));
+    }
+    return null;
+  }).filter(imageUrl => !!imageUrl);
+  if (imagePublicIds.length) cloudinary.v2.api.delete_resources(imagePublicIds);
+};
+
 export { eventDescriptions, events, generateEventMailPayload } from './notifications';
 export { default as cache } from './caching';
 
@@ -224,6 +241,7 @@ export default {
     isAdmin,
     logAdminAction,
     getTimeFromNow,
-    subscriptionPlans
+    subscriptionPlans,
+    deleteImagesFromCloud
   }
 };
