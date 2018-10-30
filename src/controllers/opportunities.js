@@ -410,6 +410,9 @@ export default new class {
           through: { attributes: [] },
           attributes: ['id', 'username', 'fullName'],
           include: [{
+            model: models.occupation,
+            attributes: ['title']
+          }, {
             model: models.content,
             as: 'contents',
             attributes: ['totalViews', 'totalLikes'],
@@ -420,9 +423,7 @@ export default new class {
           }]
         }]
       });
-      if (!opportunity) {
-        throw new Error('Specified opportunity does not exist');
-      }
+      if (!opportunity) throw new Error('Specified opportunity does not exist');
       const { plugEntries: users } = opportunity.get({ plain: true });
       users.forEach((user) => {
         user.totalViews = 0;
