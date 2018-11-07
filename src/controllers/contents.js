@@ -1,12 +1,11 @@
 import moment from 'moment';
 import { Op } from 'sequelize';
 import _ from 'underscore';
-import cloudinary from 'cloudinary';
 
 import models from '../models';
 import helpers, { events, cache } from '../helpers';
 import notifications from './notifications';
-import { contentSearchIndex, usersSearchIndex, tagsSearchIndex } from '../search_indexing';
+import { contentSearchIndex } from '../search_indexing';
 
 const { isAdmin } = helpers.Misc;
 

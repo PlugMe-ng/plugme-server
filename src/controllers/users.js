@@ -305,7 +305,11 @@ export default new class {
         meta: getUserMetaUpdate(user, req.body)
       });
       usersSearchIndex.sync(user.id);
-      return res.sendSuccess({ message: 'Profile updated successfully' }, 200, { user });
+      return res.sendSuccess({
+        message: 'Profile updated successfully'
+      }, 200, {
+        user: helpers.Misc.updateUserAttributes(user)
+      });
     } catch (error) {
       return res.sendFailure([helpers.Misc.enhanceErrorMessage(error)]);
     }
