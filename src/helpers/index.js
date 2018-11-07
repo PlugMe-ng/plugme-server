@@ -171,11 +171,11 @@ const subscriptionPlans = {
     type: 'basic',
     validity: [1, 'year']
   },
-  2500: {
+  2450: {
     type: 'pro',
     validity: [3, 'months']
   },
-  7500: {
+  7450: {
     type: 'pro',
     validity: [1, 'year']
   },
