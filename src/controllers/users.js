@@ -336,7 +336,7 @@ export default new class {
         ...(req.body.profileModificationCount && {
           meta: {
             ...user.meta,
-            profileModificationCount: req.body.profileModificationCount
+            profileModificationCount: Number(req.body.profileModificationCount)
           }
         })
       });
