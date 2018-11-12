@@ -41,35 +41,9 @@ export default class Check {
   * @returns {any} the next middleware or controller
   */
   async userHasPendingReview(req, res, next) {
+    const ERROR_MESSAGE = 'You will need to clear all outstanding reviews to successfully create and publish a new opportunity.';
     try {
-      if (req.user.hasPendingReview) {
-        throw new Error('User has a pending opportunity review.');
-      }
-      next();
-    } catch (error) {
-      return res.sendFailure([error.message]);
-    }
-  }
-
-  /**
-  * Confirm that a user with the specified ID in the req params exists
-  * @param {object} req express request object
-  * @param {object} res express response object
-  * @param {object} next the next middleware or controller
-  *
-  * @returns {any} the next middleware or controller
-  */
-  async userWithParamsIdExists(req, res, next) {
-    try {
-      const existingUser = await models.User.findOne({
-        where: { id: req.params.userId }
-      });
-      if (!existingUser) {
-        throw new Error('User with the specified ID does not exist.');
-      }
-
-      req.existingUser = existingUser;
-
+      if (req.user.hasPendingReview) throw new Error(ERROR_MESSAGE);
       next();
     } catch (error) {
       return res.sendFailure([error.message]);

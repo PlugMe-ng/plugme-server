@@ -188,9 +188,7 @@ export default new class {
       searchIndex.sync(opportunity.id);
       return res.sendSuccess(opportunity);
     } catch (error) {
-      if (opportunity) {
-        await opportunity.destroy();
-      }
+      if (opportunity) opportunity.destroy();
       return res.sendFailure([error.message]);
     }
   }
