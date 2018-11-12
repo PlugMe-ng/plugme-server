@@ -10,6 +10,26 @@ import { contentSearchIndex } from '../search_indexing';
 const { isAdmin } = helpers.Misc;
 
 /**
+ * @param {Object} user - user
+ * @param {Object} data - Express request object
+ *
+ * @returns {void}
+ *
+ * @memberOf Controller
+ */
+const duplicateContentUploadCheck = async (user, data) => {
+  const lastUploadedContent = (await models.content.findOne({
+    attributes: [],
+    where: {
+      authorId: user.id,
+      title: data.title,
+      createdAt: { [Op.gt]: moment().subtract(10, 'minutes').toDate() }
+    }
+  }));
+  if (lastUploadedContent) throw new Error('Duplicate content');
+};
+
+/**
  * Clears content related caches on update or delete of a content
  *
  * @returns {void}
@@ -112,6 +132,8 @@ export default new class {
     let content;
     try {
       const { userObj } = req;
+      await duplicateContentUploadCheck(userObj, req.body);
+
       content = await models.content.create({
         ...req.body, totalViews: 0, totalLikes: 0
       });
