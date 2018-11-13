@@ -39,6 +39,7 @@ const isDuplicateNotif = async ({ event, recipientId, author }) => {
       });
       return !!subcriptionEndNotifExists;
     }
+    case events.NEW_FAN:
     case events.COMMENT:
     case events.NEW_CONTENT: {
       return !!(await models.notification.findOne({
