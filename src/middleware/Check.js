@@ -33,24 +33,6 @@ export default class Check {
   }
 
   /**
-  * Confirm that the currently authenticated user is an admin
-  * @param {object} req express request object
-  * @param {object} res express response object
-  * @param {object} next the next middleware or controller
-  *
-  * @returns {any} the next middleware or controller
-  */
-  async userHasPendingReview(req, res, next) {
-    const ERROR_MESSAGE = 'You will need to clear all outstanding reviews to successfully create and publish a new opportunity.';
-    try {
-      if (req.user.hasPendingReview) throw new Error(ERROR_MESSAGE);
-      next();
-    } catch (error) {
-      return res.sendFailure([error.message]);
-    }
-  }
-
-  /**
   * Middleware for restricting a user with expired subscription
   * @param {object} req express request object
   * @param {object} res express response object

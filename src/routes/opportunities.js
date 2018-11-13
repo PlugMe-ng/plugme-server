@@ -24,7 +24,6 @@ router.use(auth.authenticateUser);
 router.post(
   '/',
   check.userHasActiveSubscription,
-  check.userHasPendingReview,
   check.userProfileUpdated,
   validations.createOpportunity,
   validations.verifyTags,
@@ -40,7 +39,6 @@ router.delete(
 router.post(
   '/:opportunityId/applications',
   check.userHasActiveSubscription,
-  check.userHasPendingReview,
   controller.opportunityApplication
 );
 

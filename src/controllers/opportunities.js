@@ -66,11 +66,12 @@ const createOpportunityReviewsChecks = (opportunity, user) => {
  * @returns {void}
  */
 const opportunityApplicationChecks = async (opportunity, user) => {
-  if (!opportunity) {
-    throw new Error('Opportunity with the specified id does not exist');
-  }
+  if (!opportunity) throw new Error('Opportunity with the specified id does not exist');
   if (opportunity.pluggerId === user.id) {
     throw new Error('You cannot apply for an opportunity you created');
+  }
+  if (user.hasPendingReview) {
+    throw new Error('Kindly submit all outstanding reviews to get plugged to a new opportunity');
   }
   if (opportunity.status !== 'available') {
     throw new Error('This opportunity has passed');
@@ -158,6 +159,9 @@ export default new class {
       const { tags, locationId } = req.body;
       const { userObj } = req;
 
+      if (userObj.hasPendingReview) {
+        throw new Error('Kindly submit all outstanding reviews to publish a new opportunity');
+      }
       await duplicateOpportunityUploadCheck(userObj, req);
 
       opportunity = await models.opportunity.create({ ...req.body, status: 'available' });
