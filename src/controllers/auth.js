@@ -207,7 +207,7 @@ export default new class {
           }]
         });
       if (!record) {
-        throw new Error('Verification token does not exist');
+        throw new Error('Verification token does not exist or has already been used');
       }
       const { createdAt, User: user } = record;
       const tokenExpirationTime =
@@ -217,7 +217,7 @@ export default new class {
         record.destroy();
         throw new Error('Token has expired, Please request a new one');
       }
-      await user.update({ verified: true });
+      user.update({ verified: true });
       searchIndex.sync(user.id);
       record.destroy();
       return res.sendSuccess({
@@ -225,7 +225,7 @@ export default new class {
         userToken: createJwtToken(user)
       });
     } catch (error) {
-      res.sendFailure([error.message]);
+      return res.sendFailure([error.message]);
     }
   }
 
