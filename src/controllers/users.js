@@ -1,5 +1,6 @@
 import moment from 'moment';
 import { Op } from 'sequelize';
+import isUUID from 'validator/lib/isUUID';
 
 import helpers, { events } from '../helpers';
 import models from '../models';
@@ -34,10 +35,11 @@ export default new class {
    *
    * @returns { object } response
    */
-  async getByUsername(req, res) {
+  async getByUsernameOrId(req, res) {
+    const identifier = req.params.usernameOrId;
     try {
       let user = await models.User.findOne({
-        where: { username: req.params.username },
+        where: { [isUUID(identifier, 4) ? 'id' : 'username']: identifier },
         attributes: { exclude: ['password', 'occupationId', 'locationId'] },
         include: [{
           model: models.content,
@@ -65,9 +67,7 @@ export default new class {
           attributes: ['id', 'title']
         }]
       });
-      if (!user) {
-        throw new Error('User not found');
-      }
+      if (!user) throw new Error('User not found');
 
       const totalFansOf = await user.countFansOf();
       const totalFans = await user.countFans();

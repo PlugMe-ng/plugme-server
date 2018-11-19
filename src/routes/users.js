@@ -22,7 +22,7 @@ router.post('/subscriptions', controller.subscription);
 router.get('/conversations', auth.authenticateUser, controller.getConversations);
 router.get('/conversations/unread_count', auth.authenticateUser, controller.getUnreadConversationsCount);
 
-router.get('/:username', controller.getByUsername);
+router.get('/:usernameOrId', controller.getByUsernameOrId);
 router.get('/:username/fans', controller.getUserFans);
 router.get('/:username/fanOf', controller.getUserFansOf);
 router.get('/', controller.get);
