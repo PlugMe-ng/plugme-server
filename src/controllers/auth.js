@@ -14,11 +14,18 @@ import axios from 'axios';
 import bcrypt from 'bcrypt';
 import { OAuth2Client } from 'google-auth-library';
 import crypto from 'crypto';
+import moment from 'moment';
 
 import models from '../models';
 import { createJwtToken, sendAuthActionMail, generateUserName } from '../helpers/auth';
 import helpers from '../helpers';
 import searchIndex from '../search_indexing/users';
+
+const checkTokenValidity = (createdAt) => {
+  if (moment().isAfter(moment(createdAt).add(6, 'hours'))) {
+    throw new Error('Token has expired, Please request a new one');
+  }
+};
 
 /**
 * Controls endpoints for authentication and authorization
@@ -196,7 +203,6 @@ export default new class {
    * @memberOf Auth
    */
   emailVerification = async (req, res) => {
-    const tokenValidityPeriod = 43200000;
     const { token } = req.body;
     try {
       const record = await models.emailAuthAction
@@ -210,16 +216,13 @@ export default new class {
         throw new Error('Verification token does not exist or has already been used');
       }
       const { createdAt, User: user } = record;
-      const tokenExpirationTime =
-        new Date(createdAt).getTime() + tokenValidityPeriod;
-
-      if (Date.now() > tokenExpirationTime) {
-        record.destroy();
-        throw new Error('Token has expired, Please request a new one');
+      record.destroy();
+      if (user.verified) {
+        throw new Error('Account has already been verified, proceed to sign in');
       }
+      checkTokenValidity(createdAt);
       user.update({ verified: true });
       searchIndex.sync(user.id);
-      record.destroy();
       return res.sendSuccess({
         user: helpers.Misc.updateUserAttributes(user),
         userToken: createJwtToken(user)
@@ -238,34 +241,24 @@ export default new class {
    * @memberOf Auth
    */
   requestEmailVerification = async (req, res) => {
+    res.sendSuccess({
+      message: 'Success: You will receive an email if the specified address is registered'
+    });
+
     const { email } = req.body;
-    try {
-      const user = await models.User
-        .findOne({
-          where: { email },
-          include: [{
-            model: models.emailAuthAction,
-            required: false,
-            where: { type: 'verify' }
-          }]
-        });
-      if (!user) {
-        throw new Error('Invalid credentials');
-      }
-      if (user.verified) {
-        throw new Error('Account has been verified already');
-      }
-      const { emailAuthAction } = user;
-      if (emailAuthAction) {
-        await emailAuthAction.destroy();
-      }
-      sendAuthActionMail(user.get(), 'verify');
-      return res.sendSuccess({
-        message: 'Verification mail sent successfully'
+    const user = await models.User
+      .findOne({
+        where: { email },
+        include: [{
+          model: models.emailAuthAction,
+          required: false,
+          where: { type: 'verify' }
+        }]
       });
-    } catch (error) {
-      res.sendFailure([error.message]);
-    }
+    if (!user) return;
+    const { emailAuthAction } = user;
+    if (emailAuthAction) await emailAuthAction.destroy();
+    sendAuthActionMail(user.get(), 'verify');
   }
 
   /**
@@ -277,31 +270,23 @@ export default new class {
    * @memberOf Auth
    */
   requestPasswordReset = async (req, res) => {
+    res.sendSuccess({
+      message: 'Success: You will receive an email if the specified address is registered'
+    });
     const { email } = req.body;
-    try {
-      const user = await models.User
-        .findOne({
-          where: { email },
-          include: [{
-            model: models.emailAuthAction,
-            required: false,
-            where: { type: 'reset' }
-          }]
-        });
-      if (!user) {
-        throw new Error('Invalid credentials');
-      }
-      const { emailAuthAction } = user;
-      if (emailAuthAction) {
-        emailAuthAction.destroy();
-      }
-      sendAuthActionMail(user.get(), 'reset');
-      return res.sendSuccess({
-        message: 'Password reset mail sent successfully'
+    const user = await models.User
+      .findOne({
+        where: { email },
+        include: [{
+          model: models.emailAuthAction,
+          required: false,
+          where: { type: 'reset' }
+        }]
       });
-    } catch (error) {
-      res.sendFailure([error.message]);
-    }
+    if (!user) return;
+    const { emailAuthAction } = user;
+    if (emailAuthAction) emailAuthAction.destroy();
+    sendAuthActionMail(user.get(), 'reset');
   }
 
   /**
@@ -312,7 +297,6 @@ export default new class {
    * @memberOf Auth
    */
   passwordReset = async (req, res) => {
-    const tokenValidityPeriod = 43200000;
     const { token, password } = req.body;
     try {
       const record = await models.emailAuthAction
@@ -322,17 +306,11 @@ export default new class {
             model: models.User
           }]
         });
-      if (!record) {
-        throw new Error('Reset token does not exist');
-      }
+      if (!record) throw new Error('Reset token does not exist');
       const { createdAt, User: user } = record;
-      const tokenExpirationTime =
-        new Date(createdAt).getTime() + tokenValidityPeriod;
+      record.destroy();
+      checkTokenValidity(createdAt);
 
-      if (Date.now() > tokenExpirationTime) {
-        record.destroy();
-        throw new Error('Reset Token has expired, Please request a new one');
-      }
       await user.update({
         password: await bcrypt.hash(
           password,
@@ -340,7 +318,6 @@ export default new class {
         ),
         verified: true
       });
-      record.destroy();
       return res.sendSuccess({
         message: 'Password Reset successful'
       }, 200, {
