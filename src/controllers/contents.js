@@ -62,7 +62,11 @@ const addViewEntry = async (user, content) => {
 const notifyFans = async (user, content) => {
   const fans = (await user.getFans({ attributes: ['id'] })).map(fan => fan.id);
   notifications.create({
-    author: user, event: events.NEW_CONTENT, recipients: fans, entity: content
+    author: user,
+    event: events.NEW_CONTENT,
+    recipients: fans,
+    entity: content,
+    includeEmail: true
   });
 };
 
