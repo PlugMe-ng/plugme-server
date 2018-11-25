@@ -383,7 +383,8 @@ export default new class {
       return res.sendSuccessAndNotify({
         event: events.OPPORTUNITY_APPLICATION,
         recipients: [opportunity.pluggerId],
-        entity: opportunity
+        entity: opportunity,
+        includeEmail: true
       }, {
         message: 'Opportunity plugged successfully'
       }, 200, { ...data });

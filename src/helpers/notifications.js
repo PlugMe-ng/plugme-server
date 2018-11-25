@@ -39,6 +39,7 @@ export const templateIds = {
   [events.LIKE]: 'd-3e19e4763d6045acb98f263cdab96177',
   [events.COMMENT]: 'd-530910ae20b441ad8915a21e4658cdcd',
   [events.NEW_CONTENT]: 'd-2efe463bcd6c4272868d2958e4f11b36',
+  [events.OPPORTUNITY_APPLICATION]: 'd-4e0f5c6b9dba48c394ed637293f1034e',
   EMAIL_VERIFICATION: 'd-80aa362028504dffa50fcd7cfd17d617',
   PASSWORD_RESET: 'd-755be4a5d84d42379f040f7479562cf2',
 };
@@ -76,6 +77,7 @@ const generateMailData = ({
     case events.OPPORTUNITY_ACHIEVER_SET:
     case events.OPPORTUNITY_ACHIEVER_SET_OTHERS:
     case events.NEW_OPPORTUNITY:
+    case events.OPPORTUNITY_APPLICATION:
       data = {
         fullName: recipient.fullName,
         link: `${config.FE_URL}/opportunity/${author.username}/${entity.id}`
