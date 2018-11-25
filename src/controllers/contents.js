@@ -426,7 +426,8 @@ export default new class {
       return res.sendSuccessAndNotify({
         event: events.COMMENT,
         recipients: [content.authorId],
-        entity: content
+        entity: content,
+        includeEmail: true
       }, comment.get());
     } catch (error) {
       return res.sendFailure([error.message]);

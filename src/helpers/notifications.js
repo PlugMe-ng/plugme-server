@@ -37,6 +37,7 @@ export const templateIds = {
   [events.SUBSCRIPTION_END]: 'd-6c2e66010d8944f082b15b511501f165',
   [events.NEW_FAN]: 'd-fa2d4cfaa23b42dc97136b6f095e189e',
   [events.LIKE]: 'd-3e19e4763d6045acb98f263cdab96177',
+  [events.COMMENT]: 'd-530910ae20b441ad8915a21e4658cdcd',
   EMAIL_VERIFICATION: 'd-80aa362028504dffa50fcd7cfd17d617',
   PASSWORD_RESET: 'd-755be4a5d84d42379f040f7479562cf2',
 };
@@ -92,6 +93,7 @@ const generateMailData = ({
       };
       break;
     case events.LIKE:
+    case events.COMMENT:
       data = {
         authorFullName: author.fullName,
         link: `${config.FE_URL}/content/${entity.id}`
