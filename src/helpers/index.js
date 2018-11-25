@@ -229,7 +229,7 @@ const deleteImagesFromCloud = (urls) => {
   if (imagePublicIds.length) cloudinary.v2.api.delete_resources(imagePublicIds);
 };
 
-export { eventDescriptions, events, generateEventMailPayload } from './notifications';
+export { eventDescriptions, events, generateNotifMailPayload } from './notifications';
 export { default as cache } from './caching';
 
 export default {

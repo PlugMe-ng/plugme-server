@@ -1,8 +1,16 @@
 import models from '../models';
 import { notifsIO } from '../server';
 import sendMail from '../helpers/mailing';
-import helpers, { events, eventDescriptions, generateEventMailPayload } from '../helpers';
+import helpers, { events, eventDescriptions, generateNotifMailPayload } from '../helpers';
 
+/**
+ * Generates meta data for a notification to be stored in the db
+ *
+ * @param {any} event
+ * @param {any} [entity]
+ * @returns {Object} - an object including the event type, id of database entity on which event is
+ * triggered and a more detailed description
+ */
 const generateMeta = (event, entity) => {
   const meta = {};
   if (entity) meta[entity.constructor.name.toLowerCase()] = entity.id;
@@ -14,10 +22,13 @@ const generateMeta = (event, entity) => {
 
 const sendEmailNotification = ({
   recipientId, event, author, entity
-}) => {
-  models.User.findByPk(recipientId, { attributes: ['email', 'fullName'] })
-    .then(recipient => sendMail(generateEventMailPayload[event](author, recipient, entity)));
-};
+}) =>
+  models.User
+    .findByPk(recipientId, { attributes: ['email', 'fullName'] })
+    .then(recipient =>
+      sendMail(generateNotifMailPayload({
+        event, author, entity, recipient
+      })));
 
 const isDuplicateNotif = async ({ event, recipientId, author }) => {
   switch (event) {
@@ -45,9 +56,8 @@ export default new class {
    * @param {Object} payload
    * @param {Object} payload.author - triggerer of the event
    * @param {string} payload.event - type of event triggered
-   * @param {Array.<string>} payload.recipients - an array of recipientIds of
-   * the event
-   * @param {Object} payload.entity - action object
+   * @param {Array.<string>} payload.recipients - an array of recipientIds of the event
+   * @param {Object} [payload.entity] - action object
    * @param {boolean} [payload.includeEmail] - include email notification
    *
    * @returns {void}

@@ -16,54 +16,82 @@ export const events = {
 };
 
 export const eventDescriptions = {
-  like: 'liked your content',
-  comment: 'commented on your content',
-  opportunity_application: 'has plugged to an opportunity you uploaded',
-  opportunity_achiever_set: 'has plugged you to an opportunity',
-  opportunity_achiever_set_others: 'You were not plugged to this opportunity',
-  opportunity_review: 'has reviewed your opportunity',
-  new_fan: 'is now a fan of yours',
-  new_content: 'has published a new content',
-  new_opportunity: 'has uploaded a new opportuntity',
-  content_delete: 'Content deleted by admin',
-  opportunity_delete: 'Opportunity deleted by admin',
-  subscription_end: 'Your subscription will expire in 5 days, please renew your subscription'
+  [events.LIKE]: 'liked your content',
+  [events.COMMENT]: 'commented on your content',
+  [events.OPPORTUNITY_APPLICATION]: 'has plugged to an opportunity you uploaded',
+  [events.OPPORTUNITY_ACHIEVER_SET]: 'has plugged you to an opportunity',
+  [events.OPPORTUNITY_ACHIEVER_SET_OTHERS]: 'You were not plugged to this opportunity',
+  [events.OPPORTUNITY_REVIEW]: 'has reviewed your opportunity',
+  [events.NEW_FAN]: 'is now a fan of yours',
+  [events.NEW_CONTENT]: 'has published a new content',
+  [events.NEW_OPPORTUNITY]: 'has uploaded a new opportuntity',
+  [events.CONTENT_DELETE]: 'Content deleted by admin',
+  [events.OPPORTUNITY_DELETE]: 'Opportunity deleted by admin',
+  [events.SUBSCRIPTION_END]: 'Your subscription will expire in 5 days, please renew your subscription'
 };
 
-export const generateEventMailPayload = {
-  opportunity_achiever_set: (author, recipient, entity) => ({
-    address: recipient.email,
-    data: {
-      fullName: recipient.fullName,
-      link: `${config.FE_URL}/opportunity/${author.username}/${entity.id}`
-    },
-    templateId: 'd-be38a16538034927b1d36de77437acd6'
-  }),
+export const templateIds = {
+  [events.OPPORTUNITY_ACHIEVER_SET]: 'd-be38a16538034927b1d36de77437acd6',
+  [events.OPPORTUNITY_ACHIEVER_SET_OTHERS]: 'd-3e34222d905f4ca5a4a0083e53702c54',
+  [events.NEW_OPPORTUNITY]: 'd-f3626fd10a5c41d39615b102fa08c7a0',
+  [events.SUBSCRIPTION_END]: 'd-6c2e66010d8944f082b15b511501f165',
+  [events.NEW_FAN]: 'd-fa2d4cfaa23b42dc97136b6f095e189e',
+  EMAIL_VERIFICATION: 'd-80aa362028504dffa50fcd7cfd17d617',
+  PASSWORD_RESET: 'd-755be4a5d84d42379f040f7479562cf2',
+};
 
-  opportunity_achiever_set_others: (author, recipient, entity) => ({
-    address: recipient.email,
-    data: {
-      fullName: recipient.fullName,
-      link: `${config.FE_URL}/opportunity/${author.username}/${entity.id}`
-    },
-    templateId: 'd-3e34222d905f4ca5a4a0083e53702c54'
-  }),
+/**
+ * Generates the required payload for sending an email notification based on the specified event
+ * @param {Object} payload
+ * @param {Object} payload.author - triggerer of the event
+ * @param {string} payload.event - type of event triggered
+ * @param {Object} payload.recipient - an object specifying the recipients details
+ * email address and fullName
+ * @param {Object} payload.entity - action object
+ *
+ * @returns {void}
+ */
+export const generateNotifMailPayload = ({
+  event, author, entity, recipient
+}) => {
+  const data = generateMailData({ event, author, recipient, entity }); // eslint-disable-line
 
-  new_opportunity: (author, recipient, entity) => ({
+  return {
+    data,
     address: recipient.email,
-    templateId: 'd-f3626fd10a5c41d39615b102fa08c7a0',
-    data: {
-      fullName: recipient.fullName,
-      link: `${config.FE_URL}/opportunity/${author.username}/${entity.id}`
-    }
-  }),
+    templateId: templateIds[event],
+    // this equal the notifications unsubscribe groupId from sendgrid dashboard
+    unsubscribeGroupId: 8034
+  };
+};
 
-  subscription_end: (author, recipient, entity) => ({
-    address: recipient.email,
-    templateId: 'd-6c2e66010d8944f082b15b511501f165',
-    data: {
-      fullName: recipient.fullName,
-      link: `${config.FE_URL}/subscribe`
-    }
-  })
+const generateMailData = ({
+  event, recipient, author, entity
+}) => {
+  let data = {};
+  switch (event) {
+    case events.OPPORTUNITY_ACHIEVER_SET:
+    case events.OPPORTUNITY_ACHIEVER_SET_OTHERS:
+    case events.NEW_OPPORTUNITY:
+      data = {
+        fullName: recipient.fullName,
+        link: `${config.FE_URL}/opportunity/${author.username}/${entity.id}`
+      };
+      break;
+    case events.SUBSCRIPTION_END:
+      data = {
+        fullName: recipient.fullName,
+        link: `${config.FE_URL}/subscribe`
+      };
+      break;
+    case events.NEW_FAN:
+      data = {
+        fanFullName: author.fullName,
+        link: `${config.FE_URL}/notification`
+      };
+      break;
+    default:
+      break;
+  }
+  return data;
 };
