@@ -34,6 +34,7 @@ const isDuplicateNotif = async ({ event, recipientId, author }) => {
   switch (event) {
     case events.NEW_FAN:
     case events.COMMENT:
+    case events.LIKE:
     case events.NEW_CONTENT: {
       return !!(await models.notification.findOne({
         attributes: [],

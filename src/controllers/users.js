@@ -380,7 +380,8 @@ export default new class {
       return res.sendSuccessAndNotify({
         event: events.NEW_FAN,
         recipients: [user.id],
-        entity: user
+        entity: user,
+        includeEmail: true
       }, {
         message: 'You are now a fan of the user'
       });
