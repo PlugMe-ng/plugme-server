@@ -102,6 +102,7 @@ export default new class {
    */
   async get(req, res) {
     try {
+      const { user } = req;
       const { limit, offset } = req.meta.pagination;
       const { attribute, order } = req.meta.sort;
       const { where: filter } = req.meta.filter;
@@ -135,7 +136,7 @@ export default new class {
         offset,
         order: [[attribute, order]],
         attributes: {
-          exclude: ['password']
+          exclude: ['password', ...(!user || !helpers.Misc.isAdmin(user)) ? ['email'] : []]
         },
         include: [...(filter.skills ? [{
           model: models.tag,
