@@ -1,6 +1,3 @@
-import moment from 'moment';
-import { Op } from 'sequelize';
-
 import models from '../models';
 import { notifsIO } from '../server';
 import sendMail from '../helpers/mailing';
@@ -24,21 +21,6 @@ const sendEmailNotification = ({
 
 const isDuplicateNotif = async ({ event, recipientId, author }) => {
   switch (event) {
-    case events.SUBSCRIPTION_END: {
-      const subcriptionEndNotifExists = await models.notification.findOne({
-        attributes: [],
-        order: [['createdAt', 'DESC']],
-        where: {
-          userId: recipientId,
-          'meta.event': event,
-          createdAt: {
-            [Op.lte]: moment().toDate(),
-            [Op.gte]: moment().subtract(5, 'days').toDate()
-          }
-        }
-      });
-      return !!subcriptionEndNotifExists;
-    }
     case events.NEW_FAN:
     case events.COMMENT:
     case events.NEW_CONTENT: {

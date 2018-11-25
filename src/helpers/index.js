@@ -190,16 +190,15 @@ const subscriptionPlans = {
 };
 
 const sendPlanExpirationNotif = async () => {
-  const now = moment();
-  const days5 = moment().add(5, 'days');
-  const { gte, lte } = Op;
+  const days5 = moment().add(4, 'days');
+  const { gte, lt } = Op;
 
   const users = (await models.User.findAll({
     attributes: ['id'],
     where: {
       'plan.expiresAt': {
-        [gte]: now.valueOf(),
-        [lte]: days5.valueOf(),
+        [gte]: days5.valueOf(),
+        [lt]: days5.add(1, 'day').valueOf(),
       }
     }
   })).map(user => user.id);
