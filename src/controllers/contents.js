@@ -328,7 +328,8 @@ export default new class {
       return res.sendSuccessAndNotify({
         event: events.LIKE,
         recipients: [content.authorId],
-        entity: content
+        entity: content,
+        includeEmail: true
       }, {
         message: 'You have successfully liked this content'
       });
