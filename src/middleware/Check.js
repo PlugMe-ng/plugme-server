@@ -8,6 +8,14 @@
 import moment from 'moment';
 import models from '../models';
 
+const minorTagsOnly = async (tags) => {
+  for (let i = 0; i < tags.length; i += 1) {
+    const tag = await models.tag.findByPk(tags[i]); // eslint-disable-line
+    if (!tag || !tag.categoryId) return false;
+  }
+  return true;
+};
+
 /**
 * Middleware for checks
 * @class Check
@@ -67,6 +75,40 @@ export default class Check {
     try {
       if (!user.photo || !user.locationId || !user.occupationId) {
         throw new Error('Please update your profile to complete this action');
+      }
+      return next();
+    } catch (error) {
+      return res.sendFailure([error.message]);
+    }
+  }
+
+  /**
+   * Inlcudes required checks for user profile update
+   * @param {Express.Request} req - Express Request Object
+   * @param {Express.Response} res - Express Response Objetc
+   * @param {Function} next - Express Next Function
+   *
+   * @returns {void}
+   * @memberOf Validations
+   */
+  userProfileUpdate = async (req, res, next) => {
+    const MAX_PROFILE_EDIT_COUNT = 9;
+    try {
+      if (req.body.skills && !(await minorTagsOnly(req.body.skills))) {
+        throw new Error('Skills can only contain minor tags');
+      }
+      if (req.body.interests && req.userObj.plan.type === 'basic') {
+        if (req.body.interests.length > 5 || !(await minorTagsOnly(req.body.interests))) {
+          throw new Error('Maximum of 5 minor interest tags allowed for basic plan users');
+        }
+      }
+      const { occupationId, fullName, username, ...data } = req.body; // eslint-disable-line
+      const { user } = req;
+      if (((occupationId && user.occupationId !== occupationId)
+      || (fullName && user.fullName !== fullName)
+      || (username && user.username !== username))
+      && user.meta.profileModificationCount > MAX_PROFILE_EDIT_COUNT) {
+        throw new Error('You can no longer modify your profile, please contact support');
       }
       return next();
     } catch (error) {

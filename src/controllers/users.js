@@ -16,7 +16,9 @@ const getUserMetaUpdate = (user, reqBody) => {
     ...user.meta,
     ...(bio && { bio }),
     ...(experience && { experience }),
-    ...((occupationId || fullName || username) &&
+    ...(((occupationId && user.occupationId !== occupationId)
+      || (fullName && user.fullName !== fullName)
+      || (username && user.username !== username)) &&
       { profileModificationCount: user.meta.profileModificationCount + 1 || 1 })
   };
 };

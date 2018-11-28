@@ -30,7 +30,7 @@ router.get('/', auth.optionalUserAuthentication, controller.get);
 router.use(auth.authenticateUser);
 
 router.post('/:username/fans', controller.addFan);
-router.put('/', validations.userUpdate, validations.userProfileUpdateChecks, controller.update);
+router.put('/', validations.userUpdate, check.userProfileUpdate, controller.update);
 router.put(
   '/:userId',
   check.currentUserIsAdmin,
