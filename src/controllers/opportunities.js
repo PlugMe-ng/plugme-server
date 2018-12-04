@@ -66,6 +66,8 @@ const createOpportunityReviewsChecks = (opportunity, user) => {
  * @returns {void}
  */
 const opportunityApplicationChecks = async (opportunity, user) => {
+  const REQUIRED_USER_CONTENTS_COUNT = 9;
+
   if (!opportunity) throw new Error('Opportunity with the specified id does not exist');
   if (opportunity.pluggerId === user.id) {
     throw new Error('You cannot apply for an opportunity you created');
@@ -73,8 +75,9 @@ const opportunityApplicationChecks = async (opportunity, user) => {
   if (user.hasPendingReview) {
     throw new Error('Kindly submit all outstanding reviews to get plugged to a new opportunity');
   }
-  if (opportunity.status !== 'available') {
-    throw new Error('This opportunity has passed');
+  if (opportunity.status !== 'available') throw new Error('This opportunity has passed');
+  if ((await user.countContents()) < REQUIRED_USER_CONTENTS_COUNT) {
+    throw new Error('Minimum of 9 portfolio contents required to plug to an opportunity');
   }
   const userSkills = (await user.getSkills({
     joinTableAttributes: []
