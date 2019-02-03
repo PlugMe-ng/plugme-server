@@ -9,7 +9,7 @@ const { auth, check } = middleware;
 const router = new Router();
 
 router.get('/settings/backgrounds', controller.getBackgrounds);
-router.post('/payment-webhooks', controller.paymentWebHooks);
+router.post('/payment-webhooks', controller.handleUserSubscription);
 router.use('/settings/banner-ads', bannerAds);
 router.post('/newsletter/subscriptions', controller.subscribeNewsletterRecipient);
 

@@ -105,7 +105,7 @@ export default new class {
    *
    * @returns { object } response
    */
-  paymentWebHooks = async (req, res) => {
+  handleUserSubscription = async (req, res) => {
     const authHash = crypto.createHmac('sha512', config.PAYSTACK_SECRET_KEY)
       .update(JSON.stringify(req.body)).digest('hex');
     if (authHash !== req.headers['x-paystack-signature']) return res.status(401).end();

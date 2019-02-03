@@ -92,7 +92,7 @@ export default class Check {
    * @memberOf Validations
    */
   userProfileUpdate = async (req, res, next) => {
-    const MAX_PROFILE_EDIT_COUNT = 9;
+    const MAX_OCCUPATION_EDIT_COUNT = 6;
     try {
       if (req.body.skills && !(await minorTagsOnly(req.body.skills))) {
         throw new Error('Skills can only contain minor tags');
@@ -102,14 +102,15 @@ export default class Check {
           throw new Error('Maximum of 5 minor interest tags allowed for basic plan users');
         }
       }
-      const { occupationId, fullName, username, ...data } = req.body; // eslint-disable-line
+      const { occupationId, ...data } = req.body; // eslint-disable-line
       const { user } = req;
-      if (((occupationId && user.occupationId !== occupationId)
-      || (fullName && user.fullName !== fullName)
-      || (username && user.username !== username))
-      && user.meta.profileModificationCount > MAX_PROFILE_EDIT_COUNT) {
-        throw new Error('You can no longer modify your profile, please contact support');
+      if (((occupationId && user.occupationId !== occupationId))
+        && user.meta.profileModificationCount > MAX_OCCUPATION_EDIT_COUNT) {
+        throw new Error('You can no longer modify your occupation, please contact support');
       }
+      // if (fullName && user.accountActivated) {
+      //   throw new Error('Cannot modify username - Account has been activated');
+      // }
       return next();
     } catch (error) {
       return res.sendFailure([error.message]);
