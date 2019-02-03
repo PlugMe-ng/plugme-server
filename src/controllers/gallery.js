@@ -199,7 +199,7 @@ export default new class {
         });
         tag.contents = tag.contents.slice(0, 1);
         return tag;
-      });
+      }).sort((a, b) => b.totalLikes - a.totalLikes);
       return res.sendSuccess(tags);
     } catch (error) {
       return res.sendFailure([error.message]);
