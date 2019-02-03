@@ -1,3 +1,5 @@
+import { Op } from 'sequelize';
+
 /**
  * @fileOverview Check middleware
  *
@@ -8,13 +10,14 @@
 import moment from 'moment';
 import models from '../models';
 
-const minorTagsOnly = async (tags) => {
-  for (let i = 0; i < tags.length; i += 1) {
-    const tag = await models.tag.findByPk(tags[i]); // eslint-disable-line
-    if (!tag || !tag.categoryId) return false;
-  }
-  return true;
-};
+const minorTagsOnly = async tags =>
+  (await models.tag.findAll({
+    where: {
+      id: { [Op.in]: tags },
+      categoryId: { [Op.eq]: null }
+    }
+  }))
+    .length === 0;
 
 /**
 * Middleware for checks
@@ -97,12 +100,15 @@ export default class Check {
       if (req.body.skills && !(await minorTagsOnly(req.body.skills))) {
         throw new Error('Skills can only contain minor tags');
       }
-      if (req.body.interests && req.userObj.plan.type === 'basic') {
-        if (req.body.interests.length > 5 || !(await minorTagsOnly(req.body.interests))) {
-          throw new Error('Maximum of 5 minor interest tags allowed for basic plan users');
+      if (req.body.interests) {
+        if (!(await minorTagsOnly(req.body.interests))) {
+          throw new Error('Interests can only contain minor tags');
+        }
+        if (req.userObj.plan.type === 'basic' && req.body.interests.length > 5) {
+          throw new Error('Maximum of 5 interest tags allowed for basic plan users');
         }
       }
-      const { occupationId, ...data } = req.body; // eslint-disable-line
+      const { occupationId } = req.body;
       const { user } = req;
       if (((occupationId && user.occupationId !== occupationId))
         && user.meta.profileModificationCount > MAX_OCCUPATION_EDIT_COUNT) {
