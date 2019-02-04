@@ -45,6 +45,10 @@ export default new class {
           model: models.content,
           as: 'contents',
           attributes: ['totalLikes', 'totalViews'],
+          include: [{
+            model: models.comment,
+            attributes: ['id']
+          }]
         }, {
           model: models.tag,
           as: 'interests',
@@ -65,6 +69,25 @@ export default new class {
         }, {
           model: models.occupation,
           attributes: ['id', 'title']
+        }, {
+          model: models.opportunity,
+          as: 'achievements',
+          required: false,
+          attributes: ['id'],
+          where: {
+            status: 'done'
+          },
+          include: [{
+            model: models.review,
+            attributes: ['rating'],
+            include: [{
+              model: models.User,
+              attributes: [],
+              where: {
+                [isUUID(identifier, 4) ? ['id'] : 'username']: { [Op.ne]: identifier }
+              }
+            }]
+          }]
         }]
       });
       if (!user) throw new Error('User not found');
@@ -78,12 +101,20 @@ export default new class {
 
       user.totalLikes = 0;
       user.totalViews = 0;
+      user.totalComments = 0;
+      user.totalContents = user.contents.length;
+      user.totalAchievements = user.achievements.length;
+      user.averageRating = +(user.achievements
+        .reduce((acc, opportunity) => acc + opportunity.reviews[0].rating, 0)
+        / (user.totalAchievements || 1)).toFixed(2);
 
       user.contents.forEach((content) => {
         user.totalLikes += content.totalLikes;
         user.totalViews += content.totalViews;
+        user.totalComments += content.comments.length;
       });
       delete user.contents;
+      delete user.achievements;
 
       return res.sendSuccess(user);
     } catch (error) {
