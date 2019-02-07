@@ -10,12 +10,15 @@ import { usersSearchIndex } from '../search_indexing';
 
 const getUserMetaUpdate = (user, reqBody) => {
   const {
-    bio, experience, occupationId
+    bio, experience, expertise, bookingInfo, contentDescription, occupationId
   } = reqBody;
   return {
     ...user.meta,
     ...(bio && { bio }),
+    ...(expertise && { expertise }),
     ...(experience && { experience }),
+    ...(bookingInfo && { bookingInfo }),
+    ...(contentDescription && { contentDescription }),
     ...(((occupationId && user.occupationId !== occupationId)) &&
       { profileModificationCount: user.meta.profileModificationCount + 1 || 1 })
   };

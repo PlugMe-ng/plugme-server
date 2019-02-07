@@ -11,11 +11,14 @@ const userUpdateRules = {
   occupationId: 'string',
   locationId: 'string',
   username: 'alpha_dash|min:5|max:20',
-  fullName: 'string|between:5,25',
+  fullName: 'string|between:5,30',
   skills: 'array|min:1|max:3',
   interests: 'array|min:1',
-  bio: 'string|max:270',
-  experience: 'string|max:270',
+  bio: 'string|max:300',
+  experience: 'string|max:300',
+  expertise: 'string|max:300',
+  bookingInfo: 'string|max:30',
+  contentDescription: 'string|max:300',
   photo: 'url'
 };
 
