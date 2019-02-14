@@ -115,9 +115,11 @@ export default new class {
       case 'charge.success':
       case 'subscription.create': {
         const { amount, customer: { email } } = req.body.data;
-        const { type, validity } = helpers.Misc.subscriptionPlans[Number(amount / 100)];
+        const { name, validity } = helpers.Misc
+          .subscriptionPlans
+          .getPlanFromAmount([Number(amount / 100)]);
         return models.User.update({
-          plan: { type, expiresAt: moment().add(...validity).valueOf() },
+          plan: { type: name, expiresAt: moment().add(...validity).valueOf() },
         }, { where: { email } });
       }
       default:

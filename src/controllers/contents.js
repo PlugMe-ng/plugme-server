@@ -98,19 +98,19 @@ const populateUsersGalleries = async (content) => {
   interestedUsers = _.shuffle(interestedUsers);
 
   switch (content.author.plan.type) {
-    case 'basic': {
+    case helpers.Misc.subscriptionPlans.BASIC.name: {
       const reach = Math.ceil(interestedUsers.length / 2);
       const users = interestedUsers.slice(0, reach);
       content.setUsers(users);
       break;
     }
-    case 'pro': {
+    case helpers.Misc.subscriptionPlans.PROFESSIONAL.name: {
       const reach = Math.ceil(interestedUsers.length * (3 / 4));
       const users = interestedUsers.slice(0, reach);
       content.setUsers(users);
       break;
     }
-    case 'premium': {
+    case helpers.Misc.subscriptionPlans.BUSINESS.name: {
       content.setUsers(interestedUsers);
       break;
     }
@@ -156,7 +156,7 @@ export default new class {
         }]
       });
       notifyFans(userObj, content);
-      populateUsersGalleries(content);
+      // populateUsersGalleries(content);
       updateUserPlan(userObj);
       contentSearchIndex.sync(content.id);
       return res.sendSuccess({ ...content.get() });

@@ -7,7 +7,9 @@
  */
 
 import Validator from 'validatorjs';
+import { Op } from 'sequelize';
 import models from '../models';
+import helpers from '../helpers';
 
 const contentCreationRules = {
   title: 'required|string',
@@ -115,14 +117,17 @@ class Validate {
   checkMinorTagInclusion = async (req, res, next) => {
     const { tags } = req.body;
     try {
-      for (let i = 0; i < tags.length; i += 1) {
-        /* eslint-disable no-await-in-loop */
-        const tag = await models.tag.findByPk(tags[i]);
-        if (tag && tag.categoryId) {
-          return next();
+      const hasMinorTag = await models.tag.findOne({
+        attributes: ['id'],
+        where: {
+          id: tags,
+          categoryId: { [Op.ne]: null }
         }
+      });
+      if (!hasMinorTag) {
+        throw new Error('Content must include at least one minor tag');
       }
-      throw new Error('Content must include at least one minor tag');
+      return next();
     } catch (error) {
       return res.sendFailure([error.message]);
     }
@@ -143,17 +148,17 @@ class Validate {
 
     try {
       switch (userPlan) {
-        case 'basic':
+        case helpers.Misc.subscriptionPlans.BASIC.name:
           if (tags.length > 1) {
             throw new Error('Your plan supports uploading content with a minor tag only');
           }
           return next();
-        case 'pro':
+        case helpers.Misc.subscriptionPlans.PROFESSIONAL.name:
           if (tags.length > 2) {
             throw new Error('Your plan supports uploading content with two tags only');
           }
           return next();
-        case 'premium':
+        case helpers.Misc.subscriptionPlans.BUSINESS.name:
           return next();
         default:
           break;

@@ -82,7 +82,7 @@ module.exports = (sequelize, DataTypes) => {
     plan: {
       type: DataTypes.JSONB,
       defaultValue: {
-        type: 'pro',
+        type: 'basic',
         expiresAt: null
       }
     },

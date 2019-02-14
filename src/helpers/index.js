@@ -163,29 +163,28 @@ const logAdminAction = (req, actionObject) => {
 };
 
 const subscriptionPlans = {
-  1500: {
-    type: 'basic',
-    validity: [3, 'months']
+  BASIC: {
+    name: 'basic'
   },
-  4500: {
-    type: 'basic',
+  PROFESSIONAL: {
+    name: 'professional',
+    price: 5000,
     validity: [1, 'year']
   },
-  2450: {
-    type: 'pro',
-    validity: [3, 'months']
-  },
-  7450: {
-    type: 'pro',
+  BUSINESS: {
+    name: 'business',
+    price: 10000,
     validity: [1, 'year']
   },
-  3500: {
-    type: 'premium',
-    validity: [3, 'months']
-  },
-  10000: {
-    type: 'premium',
-    validity: [1, 'year']
+  getPlanFromAmount: (amount) => {
+    switch (amount) {
+      case subscriptionPlans.BUSINESS.price:
+        return subscriptionPlans.BUSINESS;
+      case subscriptionPlans.PROFESSIONAL.price:
+        return subscriptionPlans.PROFESSIONAL;
+      default:
+        break;
+    }
   }
 };
 
@@ -240,7 +239,7 @@ export default {
     isAdmin,
     logAdminAction,
     getTimeFromNow,
-    subscriptionPlans,
-    deleteImagesFromCloud
+    deleteImagesFromCloud,
+    subscriptionPlans
   }
 };
