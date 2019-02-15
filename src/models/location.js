@@ -19,6 +19,7 @@ module.exports = (sequelize, DataTypes) => {
   location.associate = (models) => {
     location.belongsTo(models.country);
     location.hasMany(models.opportunity);
+    location.hasMany(models.localgovernment);
   };
   return location;
 };

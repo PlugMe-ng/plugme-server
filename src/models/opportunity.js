@@ -1,5 +1,3 @@
-
-
 module.exports = (sequelize, DataTypes) => {
   const opportunity = sequelize.define('opportunity', {
     id: {
@@ -61,6 +59,7 @@ module.exports = (sequelize, DataTypes) => {
       foreignKey: 'achieverId'
     });
     opportunity.hasMany(models.review);
+    opportunity.belongsTo(models.localgovernment, { foreignKey: 'lgaId' });
   };
   return opportunity;
 };

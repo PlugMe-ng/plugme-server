@@ -123,11 +123,15 @@ const notifyUsers = async (opportunity) => {
   const recipients = (await models.User.findAll({
     attributes: ['id'],
     where: { 'plan.type': { [Op.ne]: 'basic' } },
-    include: [{
+    include: [...[!opportunity.lgaId ? {
+      model: models.localgovernment,
+      attributes: [],
+      where: { id: opportunity.lgaId }
+    } : {
       model: models.location,
       attributes: [],
       where: { id: opportunity.locationId }
-    }, {
+    }], {
       model: models.tag,
       as: 'skills',
       attributes: [],
@@ -159,7 +163,7 @@ export default new class {
   createOpportunity = async (req, res) => {
     let opportunity;
     try {
-      const { tags, locationId } = req.body;
+      const { tags } = req.body;
       const { userObj } = req;
 
       if (userObj.hasPendingReview) {
@@ -167,10 +171,12 @@ export default new class {
       }
       await duplicateOpportunityUploadCheck(userObj, req);
 
-      opportunity = await models.opportunity.create({ ...req.body, status: 'available' });
+      opportunity = await models.opportunity.create({
+        ...req.body,
+        status: 'available',
+        pluggerId: userObj.id
+      });
       await opportunity.setTags(tags);
-      await opportunity.setLocation(locationId);
-      await opportunity.setPlugger(userObj);
 
       opportunity = await models.opportunity.findByPk(opportunity.id, {
         include: [{
@@ -180,6 +186,9 @@ export default new class {
             model: models.country,
             attributes: ['id', 'name']
           }]
+        }, {
+          model: models.localgovernment,
+          attributes: ['id', 'name']
         }, {
           model: models.User,
           attributes: ['id', 'username', 'fullName'],

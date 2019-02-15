@@ -198,6 +198,7 @@ module.exports = (sequelize, DataTypes) => {
       as: 'galleryContents'
     });
     User.hasMany(models.notification, { foreignKey: 'userId' });
+    User.belongsTo(models.localgovernment, { foreignKey: 'lgaId' });
   };
 
   return User;

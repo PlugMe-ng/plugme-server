@@ -64,23 +64,20 @@ class Validate {
    * @memberOf Validate
    */
   async verifyTags(req, res, next) {
-    for (let i = 0; i < req.body.tags.length; i += 1) {
-      try {
-        const tagId = req.body.tags[i];
-        /* eslint-disable no-await-in-loop */
-        const tag = await models.tag.findByPk(tagId);
-        if (!tag) {
-          throw new Error('One of the specified minor tags does not exist');
+    try {
+      const includesMajorTag = !!(await models.tag.findOne({
+        where: {
+          id: req.body.tags,
+          categoryId: null
         }
-        if (!tag.categoryId) {
-          throw new Error('Opportunities can only be created with minor tags');
-        }
-      } catch (error) {
-        res.sendFailure([error.message]);
-        return;
+      }));
+      if (includesMajorTag) {
+        throw new Error('Opportunities can only be created with minor tags');
       }
+      return next();
+    } catch (error) {
+      return res.sendFailure([error.message]);
     }
-    next();
   }
 
   /**
