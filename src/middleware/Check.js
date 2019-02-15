@@ -77,7 +77,7 @@ export default class Check {
     const { user } = req;
     try {
       if (!user.photo || !user.locationId || !user.occupationId) {
-        throw new Error('Please update your profile to complete this action');
+        throw new Error('Please update your Bio to complete this action');
       }
       return next();
     } catch (error) {
