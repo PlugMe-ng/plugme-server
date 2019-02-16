@@ -9,6 +9,7 @@ import { Op } from 'sequelize';
  */
 import moment from 'moment';
 import models from '../models';
+import helpers from '../helpers';
 
 const minorTagsOnly = async tags =>
   (await models.tag.findAll({
@@ -121,5 +122,26 @@ export default class Check {
     } catch (error) {
       return res.sendFailure([error.message]);
     }
+  }
+
+  /**
+   * Checks if the user plan type is PROFESSIONAL. The account type cannot perform some actions.
+   * @param {Express.Request} req - Express Request Object
+   * @param {Express.Response} res - Express Response Objetc
+   * @param {Function} next - Express Next Function
+   *
+   * @returns {void}
+   * @memberOf Validations
+   */
+  userPlanIsSupported = (req, res, next) => {
+    const { user } = req;
+    try {
+      if (user.plan.type === helpers.Misc.subscriptionPlans.PROFESSIONAL.name) {
+        throw new Error('Please upgrade your plan to perform this action');
+      }
+    } catch (error) {
+      return res.sendFailure([error.message]);
+    }
+    return next();
   }
 }

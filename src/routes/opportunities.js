@@ -25,6 +25,7 @@ router.post(
   '/',
   check.userHasActiveSubscription,
   check.userProfileUpdated,
+  check.userPlanIsSupported,
   validations.createOpportunity,
   validations.verifyTags,
   controller.createOpportunity
