@@ -39,6 +39,9 @@ class UsersIndex extends Index {
           model: models.country,
           attributes: ['name']
         }]
+      }, {
+        model: models.localgovernment,
+        attributes: ['name']
       }]
     });
     users = users.map((user) => {
@@ -46,6 +49,7 @@ class UsersIndex extends Index {
       user.location = user.location && `${user.location.name}, ${user.location.country.name}`;
       user.bio = user.meta.bio;
       user.experience = user.meta.experience;
+      user.expertise = user.meta.expertise;
 
       delete user.meta;
       return user;
