@@ -117,7 +117,7 @@ export default new class {
         const { amount, customer: { email } } = req.body.data;
         const { name, validity } = helpers.Misc
           .subscriptionPlans
-          .getPlanFromAmount([Number(amount / 100)]);
+          .getPlanFromAmount(Number(amount / 100));
         return models.User.update({
           plan: { type: name, expiresAt: moment().add(...validity).valueOf() },
         }, { where: { email } });
