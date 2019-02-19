@@ -91,6 +91,9 @@ export default new class {
               }
             }]
           }]
+        }, {
+          model: models.localgovernment,
+          attributes: ['id', 'name']
         }]
       });
       if (!user) throw new Error('User not found');
