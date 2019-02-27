@@ -423,7 +423,7 @@ export default new class {
           model: models.User,
           as: 'plugEntries',
           through: { attributes: [] },
-          attributes: ['id', 'username', 'fullName'],
+          attributes: ['id', 'username', 'fullName', 'photo'],
           include: [{
             model: models.occupation,
             attributes: ['title']
