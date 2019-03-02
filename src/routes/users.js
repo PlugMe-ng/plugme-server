@@ -40,7 +40,7 @@ router.put(
   controller.adminUserUpdate
 );
 router.post(
-  '/profile-verifications',
+  '/verifications',
   check.userPlanIsSupported([BUSINESS, PROFESSIONAL]),
   controller.verifyProfile
 );
