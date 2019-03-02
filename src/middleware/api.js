@@ -32,6 +32,11 @@ export default (req, res, next) => {
     return res.sendSuccess(data, status, meta);
   };
 
+  res.sendSuccessWithPaginationMeta = (data, meta, status = 200) => {
+    const pagination = helpers.Misc.generatePaginationMeta(req, data);
+    return res.sendSuccess(data.rows, status, { pagination, ...meta });
+  };
+
   /**
    * @param {Object} payload
    * @param {string} payload.event - type of event triggered
