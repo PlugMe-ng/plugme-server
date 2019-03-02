@@ -120,7 +120,7 @@ export default new class {
     try {
       const tag = await models.tag.findByPk(req.params.tagId);
       if (!tag) throw new Error('Specified tag does not exist');
-      await tag.update({ title: req.body.title });
+      await tag.update(req.body);
       tagsSearchIndex.sync(tag.id);
       return res.sendSuccessAndLog(tag, { message: 'Tag successfully updated' });
     } catch (error) {
