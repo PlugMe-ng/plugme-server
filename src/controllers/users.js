@@ -543,4 +543,47 @@ export default new class {
       return res.sendFailure([error.message]);
     }
   }
+
+  /**
+   * Handles retrieving profile verification requests
+   * @param {Express.Request} req - Express Request Object
+   * @param {Express.Response} res - Express Response Objecr
+   *
+   * @returns {void}
+   */
+  getProfileVerifications = async (req, res) => {
+    const { limit, offset } = req.meta.pagination;
+    const { attribute, order } = req.meta.sort;
+    const { where: filter } = req.meta.filter;
+
+    const data = await models.profileVerification.findAndCountAll({
+      limit,
+      offset,
+      order: [[attribute, order]],
+      where: {
+        ...(filter.status && { status: filter.status })
+      },
+      include: [{
+        model: models.User,
+        attributes: ['id', 'username', 'email', 'fullName', 'plan', 'occupationId', 'locationId'],
+        where: {
+          ...(filter.plan && { 'plan.type': filter.plan })
+        },
+        include: [{
+          model: models.occupation,
+          attributes: [],
+          where: {
+            ...(filter.occupation && { id: filter.occupation })
+          }
+        }, {
+          model: models.location,
+          attributes: [],
+          where: {
+            ...(filter.location && { id: filter.location })
+          }
+        }]
+      }]
+    });
+    return res.sendSuccessWithPaginationMeta(data);
+  }
 }();

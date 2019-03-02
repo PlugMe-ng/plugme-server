@@ -23,6 +23,12 @@ const { Misc: { subscriptionPlans: { BUSINESS, PROFESSIONAL } } } = helpers;
 router.post('/subscriptions', controller.subscription);
 router.get('/conversations', auth.authenticateUser, controller.getConversations);
 router.get('/conversations/unread_count', auth.authenticateUser, controller.getUnreadConversationsCount);
+router.get(
+  '/verifications',
+  auth.authenticateUser,
+  check.currentUserIsAdmin,
+  controller.getProfileVerifications
+);
 
 router.get('/:usernameOrId', controller.getByUsernameOrId);
 router.get('/:username/fans', controller.getUserFans);
