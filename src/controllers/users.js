@@ -332,7 +332,7 @@ export default new class {
   update = async (req, res) => {
     const { userObj: user } = req;
     const {
-      role, email, hasPendingReview, skills, plan, interests, ...data
+      role, email, hasPendingReview, skills, plan, interests, profileVerified, ...data
     } = req.body;
     try {
       if (interests) await user.setInterests(interests);
@@ -505,5 +505,42 @@ export default new class {
       where: { read: false, participantId: user.id }
     });
     return res.sendSuccess(count);
+  }
+
+  /**
+   * Handles profile verification request
+   *
+   * @param {Express.Request} req - Express Request Object
+   * @param {Express.Response} res - Express Response Objecr
+   *
+   * @returns {void}
+   */
+  verifyProfile = async (req, res) => {
+    const AUTO_SET_VERIFIED_DURATION = moment.duration(9, 'minutes').asMilliseconds();
+    try {
+      const { userObj: user } = req;
+      if (user.profileVerified) throw new Error('Profile already verified');
+      const hasPendingRequest = await models.profileVerification.findOne({
+        order: [['createdAt', 'DESC']],
+        where: {
+          userId: user.id,
+          status: 'pending'
+        }
+      });
+      if (hasPendingRequest) throw new Error('You have a pending verification request');
+      await models.profileVerification.create({
+        ...req.body,
+        userId: user.id,
+        status: 'pending'
+      });
+      setTimeout(() => {
+        user.update({
+          profileVerified: true
+        });
+      }, AUTO_SET_VERIFIED_DURATION);
+      return res.sendSuccess();
+    } catch (error) {
+      return res.sendFailure([error.message]);
+    }
   }
 }();

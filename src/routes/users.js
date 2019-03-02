@@ -13,10 +13,12 @@ import { Router } from 'express';
 import middleware from '../middleware';
 import { users as validations } from '../validations';
 import { users as controller } from '../controllers';
+import helpers from '../helpers';
 
 const router = new Router();
 
 const { check, auth } = middleware;
+const { Misc: { subscriptionPlans: { BUSINESS, PROFESSIONAL } } } = helpers;
 
 router.post('/subscriptions', controller.subscription);
 router.get('/conversations', auth.authenticateUser, controller.getConversations);
@@ -36,6 +38,11 @@ router.put(
   check.currentUserIsAdmin,
   validations.adminUserUpdate,
   controller.adminUserUpdate
+);
+router.post(
+  '/profile-verifications',
+  check.userPlanIsSupported([BUSINESS, PROFESSIONAL]),
+  controller.verifyProfile
 );
 
 export default router;

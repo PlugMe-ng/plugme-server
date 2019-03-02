@@ -69,7 +69,7 @@ export default new class {
   signup = async (req, res) => {
     try {
       const {
-        role, verified, meta, plan, ...data
+        role, verified, meta, plan, profileVerified, ...data
       } = req.body;
       const user = await models.User.create({
         ...data,

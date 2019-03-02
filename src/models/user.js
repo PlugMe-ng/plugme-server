@@ -89,6 +89,10 @@ module.exports = (sequelize, DataTypes) => {
     lastSeen: {
       type: DataTypes.DATE,
       defaultValue: new Date()
+    },
+    profileVerified: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false
     }
   }, {
     getterMethods: {
