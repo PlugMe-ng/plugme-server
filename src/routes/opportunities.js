@@ -10,6 +10,9 @@ import { Router } from 'express';
 import middleware from '../middleware';
 import { opportunities as validations } from '../validations';
 import { opportunities as controller } from '../controllers';
+import helpers from '../helpers';
+
+const { Misc: { subscriptionPlans: { BASIC, BUSINESS } } } = helpers;
 
 const { auth, check } = middleware;
 
@@ -25,7 +28,7 @@ router.post(
   '/',
   check.userHasActiveSubscription,
   check.userProfileUpdated,
-  check.userPlanIsSupported,
+  check.userPlanIsSupported([BASIC, BUSINESS]),
   validations.createOpportunity,
   validations.verifyTags,
   controller.createOpportunity

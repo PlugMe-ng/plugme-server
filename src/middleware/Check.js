@@ -125,18 +125,17 @@ export default class Check {
   }
 
   /**
-   * Checks if the user plan type is PROFESSIONAL. The account type cannot perform some actions.
-   * @param {Express.Request} req - Express Request Object
-   * @param {Express.Response} res - Express Response Objetc
-   * @param {Function} next - Express Next Function
+   * Checks if the user plan is in the supportedPlans
+   * @param {Array} supportedPlans - List of plans supported for this action -
+   * defined in @see {@link helpers.Misc.subscriptionPlans}
    *
-   * @returns {void}
+   * @returns {Function} - An express middleware to handle the request
    * @memberOf Validations
    */
-  userPlanIsSupported = (req, res, next) => {
+  userPlanIsSupported = supportedPlans => (req, res, next) => {
     const { user } = req;
     try {
-      if (user.plan.type === helpers.Misc.subscriptionPlans.PROFESSIONAL.name) {
+      if (!supportedPlans.map(plan => plan.name).includes(user.plan.type)) {
         throw new Error('Please upgrade your plan to perform this action');
       }
     } catch (error) {
