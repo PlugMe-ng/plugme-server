@@ -123,7 +123,7 @@ const notifyUsers = async (opportunity) => {
   const recipients = (await models.User.findAll({
     attributes: ['id'],
     where: { 'plan.type': { [Op.ne]: 'basic' } },
-    include: [...[!opportunity.lgaId ? {
+    include: [...[opportunity.lgaId ? {
       model: models.localgovernment,
       attributes: [],
       where: { id: opportunity.lgaId }
