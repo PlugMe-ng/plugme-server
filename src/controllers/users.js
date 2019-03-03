@@ -540,37 +540,41 @@ export default new class {
    */
   getProfileVerifications = async (req, res) => {
     const { limit, offset } = req.meta.pagination;
-    const { attribute, order } = req.meta.sort;
     const { where: filter } = req.meta.filter;
+    const { where, fn, col } = models.Sequelize;
 
-    const data = await models.profileVerification.findAndCountAll({
+    const data = await models.User.findAndCountAll({
       limit,
       offset,
-      order: [[attribute, order]],
+      attributes: ['id', 'username', 'fullName', 'email', 'plan', 'photo', 'blocked', 'profileVerified'],
+      order: [['profileVerifications', 'createdAt', 'DESC']],
+      group: ['User.id', 'profileVerifications.id'],
+      having: where(fn('COUNT', (fn('DISTINCT', col('profileVerifications.id')))), { [Op.gt]: 0 }),
       where: {
-        ...(filter.status && { status: filter.status })
+        ...(filter.plan && { 'plan.type': filter.plan })
       },
       include: [{
-        model: models.User,
-        attributes: ['id', 'username', 'email', 'fullName', 'plan', 'occupationId', 'locationId'],
+        duplicating: false,
+        model: models.profileVerification,
         where: {
-          ...(filter.plan && { 'plan.type': filter.plan })
-        },
-        include: [{
-          model: models.occupation,
-          attributes: [],
-          where: {
-            ...(filter.occupation && { id: filter.occupation })
-          }
-        }, {
-          model: models.location,
-          attributes: [],
-          where: {
-            ...(filter.location && { id: filter.location })
-          }
-        }]
+          ...(filter.status && { status: filter.status })
+        }
+      },
+      {
+        model: models.occupation,
+        attributes: [],
+        where: {
+          ...(filter.occupation && { id: filter.occupation })
+        }
+      }, {
+        model: models.location,
+        attributes: [],
+        where: {
+          ...(filter.location && { id: filter.location })
+        }
       }]
     });
+    data.count = data.count.length;
     return res.sendSuccessWithPaginationMeta(data);
   }
 

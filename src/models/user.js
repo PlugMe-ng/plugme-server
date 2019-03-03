@@ -203,6 +203,9 @@ module.exports = (sequelize, DataTypes) => {
     });
     User.hasMany(models.notification, { foreignKey: 'userId' });
     User.belongsTo(models.localgovernment, { foreignKey: 'lgaId' });
+    User.hasMany(models.profileVerification, {
+      foreignKey: 'userId',
+    });
   };
 
   return User;
