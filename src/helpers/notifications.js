@@ -12,7 +12,9 @@ export const events = {
   CONTENT_DELETE: 'content_delete',
   OPPORTUNITY_DELETE: 'opportunity_delete',
   NEW_OPPORTUNITY: 'new_opportunity',
-  SUBSCRIPTION_END: 'subscription_end'
+  SUBSCRIPTION_END: 'subscription_end',
+  REJECTED_VERIFICATION_REQUEST: 'rejected_verification_request',
+  APPROVED_VERIFICATION_REQUEST: 'approved_verification_request'
 };
 
 export const eventDescriptions = {
@@ -27,7 +29,9 @@ export const eventDescriptions = {
   [events.NEW_OPPORTUNITY]: 'has uploaded a new opportuntity',
   [events.CONTENT_DELETE]: 'Content deleted by admin',
   [events.OPPORTUNITY_DELETE]: 'Opportunity deleted by admin',
-  [events.SUBSCRIPTION_END]: 'Your subscription will expire in 5 days, please renew your subscription'
+  [events.SUBSCRIPTION_END]: 'Your subscription will expire in 5 days, please renew your subscription',
+  [events.REJECTED_VERIFICATION_REQUEST]: 'Unfortunately, your portfolio verification request was declined. Please check your email for more information.',
+  [events.APPROVED_VERIFICATION_REQUEST]: 'Congratulations, your portfolio has been permanently verified.'
 };
 
 export const templateIds = {
@@ -40,6 +44,8 @@ export const templateIds = {
   [events.COMMENT]: 'd-530910ae20b441ad8915a21e4658cdcd',
   [events.NEW_CONTENT]: 'd-2efe463bcd6c4272868d2958e4f11b36',
   [events.OPPORTUNITY_APPLICATION]: 'd-4e0f5c6b9dba48c394ed637293f1034e',
+  [events.REJECTED_VERIFICATION_REQUEST]: 'd-2b3f0bf59ed148499f7b9d6abfb52a5a',
+  [events.APPROVED_VERIFICATION_REQUEST]: 'd-22f7a5c909124a868245c54ade1fef14',
   EMAIL_VERIFICATION: 'd-80aa362028504dffa50fcd7cfd17d617',
   PASSWORD_RESET: 'd-755be4a5d84d42379f040f7479562cf2',
 };
@@ -101,6 +107,17 @@ const generateMailData = ({
       data = {
         authorFullName: author.fullName,
         link: `${config.FE_URL}/content/${entity.id}`
+      };
+      break;
+    case events.REJECTED_VERIFICATION_REQUEST:
+      data = {
+        fullName: recipient.fullName,
+        comment: entity.comment
+      };
+      break;
+    case events.APPROVED_VERIFICATION_REQUEST:
+      data = {
+        fullName: recipient.fullName
       };
       break;
     default:

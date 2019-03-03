@@ -23,7 +23,8 @@ const userUpdateRules = {
 };
 
 const updateProfileVerificationRules = {
-  status: 'required|in:approved,rejected'
+  status: 'required|in:approved,rejected',
+  comment: 'required_if:status,rejected'
 };
 
 const profileVerificationRequestRules = {

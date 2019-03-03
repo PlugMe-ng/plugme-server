@@ -525,7 +525,7 @@ export default new class {
         status: 'pending'
       });
       user.update({ profileVerified: true });
-      return res.sendSuccess();
+      return res.sendSuccess({ message: 'Profile verification request submitted successfully' });
     } catch (error) {
       return res.sendFailure([error.message]);
     }
@@ -583,7 +583,7 @@ export default new class {
    */
   updateProfileVerification = async (req, res) => {
     const { id } = req.params;
-    const { status } = req.body;
+    const { status, comment } = req.body;
 
     try {
       const verificationRequest = await models.profileVerification.findByPk(id, {
@@ -592,9 +592,18 @@ export default new class {
       if (!verificationRequest) throw new Error('Specified request does not exist');
 
       const { User: user } = verificationRequest;
-      await verificationRequest.update({ status });
+      await verificationRequest.update({ status, comment });
       await user.update({ profileVerified: status === 'approved' });
-      return res.sendSuccess({ message: 'Operation Successful' });
+      return res.sendSuccessAndNotify({
+        event: status === 'approved'
+          ? events.APPROVED_VERIFICATION_REQUEST
+          : events.REJECTED_VERIFICATION_REQUEST,
+        recipients: [user.id],
+        entity: verificationRequest,
+        includeEmail: true
+      }, {
+        message: 'Operation successful'
+      });
     } catch (error) {
       return res.sendFailure([error.message]);
     }

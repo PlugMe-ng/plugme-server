@@ -12,6 +12,9 @@ module.exports = (sequelize, DataTypes) => {
     status: {
       type: DataTypes.ENUM('pending', 'approved', 'rejected'),
       defaultValue: 'pending'
+    },
+    comment: {
+      type: DataTypes.TEXT
     }
   }, {
     tableName: 'profile_verifications'
