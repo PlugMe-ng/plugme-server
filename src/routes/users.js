@@ -47,6 +47,7 @@ router.put(
 );
 router.post(
   '/verifications',
+  check.userHasActiveSubscription,
   check.userPlanIsSupported([BUSINESS, PROFESSIONAL]),
   controller.verifyProfile
 );
