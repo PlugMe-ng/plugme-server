@@ -516,30 +516,15 @@ export default new class {
    * @returns {void}
    */
   verifyProfile = async (req, res) => {
-    const AUTO_SET_VERIFIED_DURATION = moment.duration(9, 'minutes').asMilliseconds();
     try {
       const { userObj: user } = req;
       if (user.profileVerified) throw new Error('Profile already verified');
-      const hasPendingRequest = await models.profileVerification.findOne({
-        order: [['createdAt', 'DESC']],
-        where: {
-          userId: user.id,
-          status: 'pending'
-        }
-      });
-      if (hasPendingRequest) throw new Error('You have a pending verification request');
-      const request = await models.profileVerification.create({
+      await models.profileVerification.create({
         ...req.body,
         userId: user.id,
         status: 'pending'
       });
-      setTimeout(async () => {
-        // admin may have already updated the request before this auto-set-verified
-        // therefore, do not update the user in that case
-        await request.reload();
-        if (request.status !== 'pending') return;
-        user.update({ profileVerified: true });
-      }, AUTO_SET_VERIFIED_DURATION);
+      user.update({ profileVerified: true });
       return res.sendSuccess();
     } catch (error) {
       return res.sendFailure([error.message]);
