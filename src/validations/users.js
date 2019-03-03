@@ -26,6 +26,10 @@ const updateProfileVerificationRules = {
   status: 'required|in:approved,rejected'
 };
 
+const profileVerificationRequestRules = {
+  documents: 'required|array|min:1',
+};
+
 /**
  * @class Validations
  */
@@ -78,6 +82,23 @@ class Validations {
     const validation = new Validator(req.body, updateProfileVerificationRules);
     validation.fails(() => res
       .sendFailure(getErrors(validation, updateProfileVerificationRules)));
+    validation.passes(() => next());
+  }
+
+  /**
+   * Validates profile verification request data
+   *
+   * @param {Express.Request} req - Express Request Object
+   * @param {Express.Response} res - Express Response Objetc
+   * @param {Function} next - Express Next Function
+   *
+   * @returns {void}
+   * @memberOf Validations
+   */
+  profileVerificationRequest = async (req, res, next) => {
+    const validation = new Validator(req.body, profileVerificationRequestRules);
+    validation.fails(() => res
+      .sendFailure(getErrors(validation, profileVerificationRequestRules)));
     validation.passes(() => next());
   }
 }
