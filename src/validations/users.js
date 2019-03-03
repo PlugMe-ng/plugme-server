@@ -22,6 +22,10 @@ const userUpdateRules = {
   photo: 'url'
 };
 
+const updateProfileVerificationRules = {
+  status: 'required|in:approved,rejected'
+};
+
 /**
  * @class Validations
  */
@@ -57,6 +61,23 @@ class Validations {
     const validation = new Validator(req.body, userUpdateRules);
     validation.fails(() => res
       .sendFailure(getErrors(validation, userUpdateRules)));
+    validation.passes(() => next());
+  }
+
+  /**
+   * Validates user update data
+   *
+   * @param {Express.Request} req - Express Request Object
+   * @param {Express.Response} res - Express Response Objetc
+   * @param {Function} next - Express Next Function
+   *
+   * @returns {void}
+   * @memberOf Validations
+   */
+  updateProfileVerification = async (req, res, next) => {
+    const validation = new Validator(req.body, updateProfileVerificationRules);
+    validation.fails(() => res
+      .sendFailure(getErrors(validation, updateProfileVerificationRules)));
     validation.passes(() => next());
   }
 }

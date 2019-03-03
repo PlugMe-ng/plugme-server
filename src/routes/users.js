@@ -50,5 +50,11 @@ router.post(
   check.userPlanIsSupported([BUSINESS, PROFESSIONAL]),
   controller.verifyProfile
 );
+router.put(
+  '/verifications/:id',
+  check.currentUserIsAdmin,
+  validations.updateProfileVerification,
+  controller.updateProfileVerification
+);
 
 export default router;

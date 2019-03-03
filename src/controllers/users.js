@@ -528,15 +528,17 @@ export default new class {
         }
       });
       if (hasPendingRequest) throw new Error('You have a pending verification request');
-      await models.profileVerification.create({
+      const request = await models.profileVerification.create({
         ...req.body,
         userId: user.id,
         status: 'pending'
       });
-      setTimeout(() => {
-        user.update({
-          profileVerified: true
-        });
+      setTimeout(async () => {
+        // admin may have already updated the request before this auto-set-verified
+        // therefore, do not update the user in that case
+        await request.reload();
+        if (request.status !== 'pending') return;
+        user.update({ profileVerified: true });
       }, AUTO_SET_VERIFIED_DURATION);
       return res.sendSuccess();
     } catch (error) {
@@ -585,5 +587,31 @@ export default new class {
       }]
     });
     return res.sendSuccessWithPaginationMeta(data);
+  }
+
+  /**
+   * Handles approving or rejecting profile modification requests.
+   * @param {Express.Request} req - Express Request Object
+   * @param {Express.Response} res - Express Response Objecr
+   *
+   * @returns {void}
+   */
+  updateProfileVerification = async (req, res) => {
+    const { id } = req.params;
+    const { status } = req.body;
+
+    try {
+      const verificationRequest = await models.profileVerification.findByPk(id, {
+        include: [{ model: models.User }]
+      });
+      if (!verificationRequest) throw new Error('Specified request does not exist');
+
+      const { User: user } = verificationRequest;
+      await verificationRequest.update({ status });
+      await user.update({ profileVerified: status === 'approved' });
+      return res.sendSuccess({ message: 'Operation Successful' });
+    } catch (error) {
+      return res.sendFailure([error.message]);
+    }
   }
 }();
