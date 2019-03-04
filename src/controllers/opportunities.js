@@ -79,6 +79,9 @@ const opportunityApplicationChecks = async (opportunity, user) => {
   if ((await user.countContents()) < REQUIRED_USER_CONTENTS_COUNT) {
     throw new Error('Please upload your creative works to get plugged to this opportunity.');
   }
+  if (!opportunity.allowedplans.includes[user.plan.type]) {
+    throw new Error(`This opportunity is only available for ${opportunity.achieversPlanTypes} users`);
+  }
   const userSkills = (await user.getSkills({
     joinTableAttributes: []
   })).map(skill => skill.id);
@@ -122,7 +125,9 @@ const notifyUnselectedAchievers = async (opportunity, author) => {
 const notifyUsers = async (opportunity) => {
   const recipients = (await models.User.findAll({
     attributes: ['id'],
-    where: { 'plan.type': { [Op.ne]: 'basic' } },
+    where: {
+      'plan.type': { [Op.in]: opportunity.allowedplans }
+    },
     include: [...[opportunity.lgaId ? {
       model: models.localgovernment,
       attributes: [],

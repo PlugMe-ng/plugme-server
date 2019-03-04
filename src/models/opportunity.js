@@ -33,6 +33,9 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.ENUM,
       values: ['available', 'pending', 'done'],
       defaultValue: 'available'
+    },
+    allowedplans: {
+      type: DataTypes.ARRAY(DataTypes.ENUM('basic', 'professional', 'business')),
     }
   }, {});
 

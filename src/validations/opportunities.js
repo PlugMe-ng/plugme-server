@@ -19,7 +19,8 @@ const opportunityUploadRules = {
   professionalDirection: 'required|string|max:200',
   tags: 'array|required|max:3',
   budget: 'required|numeric',
-  deadline: 'required|date'
+  deadline: 'required|date',
+  allowedplans: 'array|in:basic,professional,business'
 };
 
 const opportunityReviewRules = {
@@ -49,6 +50,10 @@ class Validate {
     const now = Date.now();
     if (new Date(req.body.deadline).getTime() < now) {
       return res.sendFailure([`Invalid deadline - date must be after ${new Date(now).toDateString()}`]);
+    }
+    // validatorjs does not work for empty array, cause for this manual validation
+    if (req.body.allowedplans && req.body.allowedplans.length < 1) {
+      return res.sendFailure(['allowedplans cannot be empty']);
     }
     validation.passes(() => next());
   }
