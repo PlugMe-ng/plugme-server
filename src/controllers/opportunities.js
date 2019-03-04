@@ -82,6 +82,9 @@ const opportunityApplicationChecks = async (opportunity, user) => {
   if (!opportunity.allowedplans.includes[user.plan.type]) {
     throw new Error(`This opportunity is only available for ${opportunity.achieversPlanTypes} users`);
   }
+  if (opportunity.verifiedAchieversOnly && !user.profileVerified) {
+    throw new Error('Please verify your portfolio to get plugged to this opportunities');
+  }
   const userSkills = (await user.getSkills({
     joinTableAttributes: []
   })).map(skill => skill.id);
@@ -126,7 +129,8 @@ const notifyUsers = async (opportunity) => {
   const recipients = (await models.User.findAll({
     attributes: ['id'],
     where: {
-      'plan.type': { [Op.in]: opportunity.allowedplans }
+      'plan.type': { [Op.in]: opportunity.allowedplans },
+      ...(opportunity.verifiedAchieversOnly && { profileVerified: true })
     },
     include: [...[opportunity.lgaId ? {
       model: models.localgovernment,

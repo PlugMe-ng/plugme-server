@@ -36,6 +36,10 @@ module.exports = (sequelize, DataTypes) => {
     },
     allowedplans: {
       type: DataTypes.ARRAY(DataTypes.ENUM('basic', 'professional', 'business')),
+    },
+    verifiedAchieversOnly: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false
     }
   }, {});
 
