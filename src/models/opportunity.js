@@ -9,10 +9,6 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       allowNull: false
     },
-    positionNeeded: {
-      type: DataTypes.STRING,
-      allowNull: false
-    },
     responsibilities: {
       type: DataTypes.TEXT,
       allowNull: false
@@ -67,6 +63,10 @@ module.exports = (sequelize, DataTypes) => {
     });
     opportunity.hasMany(models.review);
     opportunity.belongsTo(models.localgovernment, { foreignKey: 'lgaId' });
+    opportunity.belongsTo(models.occupation, {
+      as: 'positionNeeded',
+      foreignKey: 'occupationId'
+    });
   };
   return opportunity;
 };

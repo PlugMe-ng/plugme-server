@@ -270,6 +270,15 @@ export default new class {
             attributes: ['id', 'name'],
           }]
         }, {
+          model: models.occupation,
+          as: 'positionNeeded',
+          attributes: [], // available for filtering only
+          ...(filter.positionNeeded && {
+            where: {
+              positionNeeded: filter.positionNeeded
+            }
+          })
+        }, {
           model: models.tag,
           as: 'tags',
           attributes: ['id', 'title'],
@@ -348,6 +357,10 @@ export default new class {
             model: models.country,
             attributes: ['id', 'name']
           }]
+        }, {
+          model: models.occupation,
+          as: 'positionNeeded',
+          attributes: ['id', 'title']
         }, {
           model: models.User,
           as: 'achiever',
