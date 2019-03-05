@@ -6,6 +6,7 @@ import helpers, { events } from '../helpers';
 import models from '../models';
 import config from '../config';
 import { usersSearchIndex } from '../search_indexing';
+import notifications from './notifications';
 
 
 const getUserMetaUpdate = (user, reqBody) => {
@@ -594,14 +595,16 @@ export default new class {
       const { User: user } = verificationRequest;
       await verificationRequest.update({ status, comment });
       await user.update({ profileVerified: status === 'approved' });
-      return res.sendSuccessAndNotify({
+      notifications.create({
+        author: req.userObj,
         event: status === 'approved'
           ? events.APPROVED_VERIFICATION_REQUEST
           : events.REJECTED_VERIFICATION_REQUEST,
         recipients: [user.id],
         entity: verificationRequest,
         includeEmail: true
-      }, {
+      });
+      return res.sendSuccessAndLog(verificationRequest, {
         message: 'Operation successful'
       });
     } catch (error) {
