@@ -541,37 +541,47 @@ export default new class {
    */
   getProfileVerifications = async (req, res) => {
     const { limit, offset } = req.meta.pagination;
-    const { attribute, order } = req.meta.sort;
     const { where: filter } = req.meta.filter;
+    const { attribute, order } = req.meta.sort;
 
-    const data = await models.profileVerification.findAndCountAll({
-      limit,
-      offset,
-      order: [[attribute, order]],
-      where: {
-        ...(filter.status && { status: filter.status })
-      },
-      include: [{
-        model: models.User,
-        attributes: ['id', 'username', 'email', 'fullName', 'plan', 'occupationId', 'locationId'],
+    let data;
+    try {
+      data = await models.profileVerification.findAndCountAll({
+        limit,
+        offset,
+        order: [
+          [...(attribute === 'fullName'
+            ? [models.User, attribute]
+            : [attribute]),
+          order],
+          ['createdAt', order]],
         where: {
-          ...(filter.plan && { 'plan.type': filter.plan })
+          ...(filter.status && { status: filter.status })
         },
         include: [{
-          model: models.occupation,
-          attributes: [],
+          model: models.User,
+          attributes: ['id', 'username', 'email', 'fullName', 'plan', 'occupationId', 'locationId'],
           where: {
-            ...(filter.occupation && { id: filter.occupation })
-          }
-        }, {
-          model: models.location,
-          attributes: [],
-          where: {
-            ...(filter.location && { id: filter.location })
-          }
+            ...(filter.plan && { 'plan.type': filter.plan })
+          },
+          include: [{
+            model: models.occupation,
+            attributes: [],
+            where: {
+              ...(filter.occupation && { id: filter.occupation })
+            }
+          }, {
+            model: models.location,
+            attributes: [],
+            where: {
+              ...(filter.location && { id: filter.location })
+            }
+          }]
         }]
-      }]
-    });
+      });
+    } catch (error) {
+      return res.sendFailure([error.message]);
+    }
     return res.sendSuccessWithPaginationMeta(data);
   }
 
