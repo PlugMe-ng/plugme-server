@@ -127,7 +127,7 @@ const notifyUnselectedAchievers = async (opportunity, author) => {
  */
 const notifyUsers = async (opportunity) => {
   const recipients = (await models.User.findAll({
-    attributes: ['id'],
+    attributes: ['id', 'occupationId'],
     where: {
       'plan.type': { [Op.in]: opportunity.allowedplans },
       ...(opportunity.verifiedAchieversOnly && { profileVerified: true })
@@ -143,10 +143,19 @@ const notifyUsers = async (opportunity) => {
     }], {
       model: models.tag,
       as: 'skills',
-      attributes: [],
-      where: { id: opportunity.tags.map(tag => tag.id) }
+      attributes: ['id'],
+      where: { id: opportunity.tags.map(tag => tag.id) },
+      required: false
+    }, {
+      model: models.occupation,
+      attributes: ['id'],
+      required: false,
+      where: { id: opportunity.occupationId }
     }]
-  })).map(user => user.id);
+  }))
+    // sequelize should be able to do this directly, but using filter for now
+    .filter(user => user.skills.length || user.occupation)
+    .map(user => user.id);
   notifications.create({
     author: opportunity.plugger,
     event: events.NEW_OPPORTUNITY,
