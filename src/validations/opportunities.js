@@ -10,13 +10,14 @@ import Validator from 'validatorjs';
 
 import { getErrors } from './';
 import models from '../models';
+import { cache } from '../helpers';
 
 const opportunityUploadRules = {
   title: 'required|string|max:36',
   locationId: 'required|string',
   positionNeeded: 'required|string|max:90',
   responsibilities: 'required|string|max:900',
-  professionalDirection: 'required|string|max:200',
+  professionalDirection: 'required|string|in_professional_directions',
   tags: 'array|required|max:3',
   budget: 'required|numeric',
   deadline: 'required|date',
@@ -27,6 +28,19 @@ const opportunityReviewRules = {
   comment: 'required|string|max:60',
   rating: 'required|integer|between:1,5'
 };
+
+Validator.registerAsync(
+  'in_professional_directions',
+  async (professionalDirection, attribute, req, passes) => {
+    const isInProfessionalDirections =
+      (await cache.sismember('professional_directions', professionalDirection)) === 1;
+    if (!isInProfessionalDirections) {
+      passes(false, 'Specified professionalDirection is invalid');
+      return;
+    }
+    passes();
+  }
+);
 
 /**
 * Middleware for validations
@@ -104,4 +118,5 @@ class Validate {
   }
 }
 
+export { Validator };
 export default new Validate();
