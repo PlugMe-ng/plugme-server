@@ -17,4 +17,10 @@ router.use(auth.authenticateUser, check.currentUserIsAdmin);
 
 router.get('/admin/logs', controller.getAdminLogs);
 router.post('/settings/backgrounds', controller.setBackgrounds);
+
+router.get('/settings/professional-directions', controller.getProfessionalDirections);
+router.post('/settings/professional-directions', controller.addProfessionalDirection);
+router.delete('/settings/professional-directions/:title', controller.deleteProfessionalDirection);
+router.put('/settings/professional-directions/:title', controller.editProfessionalDirection);
+
 export default router;

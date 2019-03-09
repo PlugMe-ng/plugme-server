@@ -14,6 +14,9 @@ sgClient.setApiKey(process.env.SENDGRID_API_KEY);
  * @class Controller
  */
 export default new class {
+  PROFESSIONAL_DIRECTIONS_CACHE_KEY = 'professional_directions'
+  PROFESSIONAL_DIRECTIONS_LOG_NAME = 'Professional Direction'
+
   /**
    * Retrieves admin actions logs
    *
@@ -148,5 +151,87 @@ export default new class {
     } catch (error) {
       return res.sendFailure([error.message]);
     }
+  }
+
+  /**
+   * Handler for adding new professional direction (for opportunities) by admin.
+   *
+   * @param {Express.Request} req - Express Request Object
+   * @param {Express.Response} res - Express Response Object
+   *
+   * @returns {void}
+   */
+  addProfessionalDirection = async (req, res) => {
+    if (!req.body.title || req.body.title.trim().length === 0) {
+      return res.sendFailure(["Invalid value specified for key 'title'"]);
+    }
+    const result = await cache.sadd(this.PROFESSIONAL_DIRECTIONS_CACHE_KEY, req.body.title);
+    if (result === 0) return res.sendFailure([`'${req.body.title}' already exists`]);
+    return res.sendSuccessAndLog({
+      name: this.PROFESSIONAL_DIRECTIONS_LOG_NAME,
+      title: req.body.title
+    }, {
+      message: `Successfully added '${req.body.title}' to professional directions`
+    });
+  }
+
+  /**
+   * Handler for getting professional directions to create new opportunities.
+   *
+   * @param {Express.Request} req - Express Request Object
+   * @param {Express.Response} res - Express Response Object
+   *
+   * @returns {void}
+   */
+  getProfessionalDirections = async (req, res) => {
+    const professionalDirections = await cache.smembers(this.PROFESSIONAL_DIRECTIONS_CACHE_KEY);
+    return res.sendSuccess(professionalDirections);
+  }
+
+  /**
+   * Handler for removing a professional direction by admin.
+   *
+   * @param {Express.Request} req - Express Request Object
+   * @param {Express.Response} res - Express Response Object
+   *
+   * @returns {void}
+   */
+  deleteProfessionalDirection = async (req, res) => {
+    const { title } = req.params;
+    const result = await cache.srem(this.PROFESSIONAL_DIRECTIONS_CACHE_KEY, title);
+    if (result === 0) return res.sendFailure([`${title} does not exist in professional directions`]);
+    return res.sendSuccessAndLog({
+      name: this.PROFESSIONAL_DIRECTIONS_LOG_NAME,
+      title
+    }, {
+      message: `Successfully deleted '${title}' from professional directions`
+    });
+  }
+
+  /**
+   * Handler for modifying a professional direction by admin.
+   *
+   * @param {Express.Request} req - Express Request Object
+   * @param {Express.Response} res - Express Response Object
+   *
+   * @returns {void}
+   */
+  editProfessionalDirection = async (req, res) => {
+    const { title } = req.params;
+    if (!req.body.title || req.body.title.trim().length === 0) {
+      return res.sendFailure(["Invalid value specified for key 'title'"]);
+    }
+    const result = await cache.srem(this.PROFESSIONAL_DIRECTIONS_CACHE_KEY, title);
+    if (result === 0) return res.sendFailure([`'${title}' does not exist in professional directions`]);
+    await cache.sadd(this.PROFESSIONAL_DIRECTIONS_CACHE_KEY, req.body.title);
+    return res.sendSuccessAndLog({
+      name: this.PROFESSIONAL_DIRECTIONS_LOG_NAME,
+      prevValue: title,
+      newValue: req.body.title
+    }, {
+      message: `Successfully edited '${title}'`,
+      prevValue: title,
+      newValue: req.body.title
+    });
   }
 }();

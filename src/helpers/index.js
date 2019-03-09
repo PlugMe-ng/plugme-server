@@ -127,9 +127,16 @@ const getTimeFromNow = days => Date.now() - (3600000 * 24 * days);
  */
 const logAdminAction = (req, actionObject) => {
   try {
-    const actionEntityName = actionObject.constructor.name.toLowerCase();
-    actionObject = actionObject.get();
-    delete actionObject.password;
+    let actionEntityName;
+
+    if (actionObject instanceof models.Sequelize.Model) {
+      actionEntityName = actionObject.constructor.name.toLowerCase();
+      actionObject = actionObject.get();
+      delete actionObject.password;
+    } else {
+      actionEntityName = actionObject.name;
+      delete actionObject.name;
+    }
 
     const meta = {
       url: req.baseUrl,
