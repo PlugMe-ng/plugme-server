@@ -5,7 +5,6 @@
  *
  * @requires NPM:validatorjs
  */
-
 import Validator from 'validatorjs';
 
 import { getErrors } from './';
@@ -21,7 +20,8 @@ const opportunityUploadRules = {
   tags: 'array|required|max:3',
   budget: 'required|numeric',
   deadline: 'required|date',
-  allowedplans: 'array|in:basic,professional,business'
+  allowedplans: 'array|in:basic,professional,business',
+  type: 'string|in_opportunity_types'
 };
 
 const opportunityReviewRules = {
@@ -36,6 +36,19 @@ Validator.registerAsync(
       (await cache.sismember('professional_directions', professionalDirection)) === 1;
     if (!isInProfessionalDirections) {
       passes(false, 'Specified professionalDirection is invalid');
+      return;
+    }
+    passes();
+  }
+);
+
+Validator.registerAsync(
+  'in_opportunity_types',
+  async (type, attribute, req, passes) => {
+    const isInOpportunityTypes =
+      (await cache.sismember('opportunity_types', type)) === 1;
+    if (!isInOpportunityTypes) {
+      passes(false, 'Specified opportunity type is invalid');
       return;
     }
     passes();

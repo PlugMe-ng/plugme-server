@@ -36,6 +36,9 @@ module.exports = (sequelize, DataTypes) => {
     verifiedAchieversOnly: {
       type: DataTypes.BOOLEAN,
       defaultValue: false
+    },
+    type: {
+      type: DataTypes.STRING
     }
   }, {});
 
