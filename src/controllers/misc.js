@@ -17,6 +17,9 @@ export default new class {
   PROFESSIONAL_DIRECTIONS_CACHE_KEY = 'professional_directions'
   PROFESSIONAL_DIRECTIONS_LOG_NAME = 'Professional Direction'
 
+  OPPORTUNITY_TYPES_CACHE_KEY = 'opportunity_types'
+  OPPORTUNITY_TYPES_LOG_NAME = 'Opportunity Type'
+
   /**
    * Retrieves admin actions logs
    *
@@ -199,7 +202,10 @@ export default new class {
   deleteProfessionalDirection = async (req, res) => {
     const { title } = req.params;
     const result = await cache.srem(this.PROFESSIONAL_DIRECTIONS_CACHE_KEY, title);
-    if (result === 0) return res.sendFailure([`${title} does not exist in professional directions`]);
+    if (result === 0) return res.sendFailure([`'${title}' does not exist in professional directions`]);
+    models.opportunity.update({ professionalDirection: '' }, {
+      where: { professionalDirection: title }
+    });
     return res.sendSuccessAndLog({
       name: this.PROFESSIONAL_DIRECTIONS_LOG_NAME,
       title
@@ -217,13 +223,22 @@ export default new class {
    * @returns {void}
    */
   editProfessionalDirection = async (req, res) => {
-    const { title } = req.params;
-    if (!req.body.title || req.body.title.trim().length === 0) {
+    const { title } = req.params; // old title
+    if (!req.body.title || req.body.title.trim().length === 0) { // new title - req.body.title
       return res.sendFailure(["Invalid value specified for key 'title'"]);
     }
     const result = await cache.srem(this.PROFESSIONAL_DIRECTIONS_CACHE_KEY, title);
     if (result === 0) return res.sendFailure([`'${title}' does not exist in professional directions`]);
     await cache.sadd(this.PROFESSIONAL_DIRECTIONS_CACHE_KEY, req.body.title);
+
+    models.opportunity.update({
+      professionalDirection: req.body.title
+    }, {
+      where: {
+        professionalDirection: title
+      }
+    });
+
     return res.sendSuccessAndLog({
       name: this.PROFESSIONAL_DIRECTIONS_LOG_NAME,
       prevValue: title,
@@ -232,6 +247,101 @@ export default new class {
       message: `Successfully edited '${title}'`,
       prevValue: title,
       newValue: req.body.title
+    });
+  }
+
+  /**
+   * Handler for adding new opportunity types (for opportunities) by admin.
+   *
+   * @param {Express.Request} req - Express Request Object
+   * @param {Express.Response} res - Express Response Object
+   *
+   * @returns {void}
+   */
+  createOpportunityType = async (req, res) => {
+    if (!req.body.title || req.body.title.trim().length === 0) {
+      return res.sendFailure(["Invalid value specified for key 'title'"]);
+    }
+    const result = await cache.sadd(this.OPPORTUNITY_TYPES_CACHE_KEY, req.body.title);
+    if (result === 0) return res.sendFailure([`'${req.body.title}' already exists`]);
+    return res.sendSuccessAndLog({
+      name: this.OPPORTUNITY_TYPES_LOG_NAME,
+      title: req.body.title
+    }, {
+      message: `Successfully added '${req.body.title}' to opportunity types`
+    });
+  }
+
+  /**
+   * Handler for getting opportunity types to create new opportunities.
+   *
+   * @param {Express.Request} req - Express Request Object
+   * @param {Express.Response} res - Express Response Object
+   *
+   * @returns {void}
+   */
+  getOpportunityTypes = async (req, res) => {
+    const opportunityTypes = await cache.smembers(this.OPPORTUNITY_TYPES_CACHE_KEY);
+    return res.sendSuccess(opportunityTypes);
+  }
+
+  /**
+   * Handler for modifying an opportunity type by admin.
+   *
+   * @param {Express.Request} req - Express Request Object
+   * @param {Express.Response} res - Express Response Object
+   *
+   * @returns {void}
+   */
+  editOpportunityType = async (req, res) => {
+    const { title } = req.params;
+    if (!req.body.title || req.body.title.trim().length === 0) {
+      return res.sendFailure(["Invalid value specified for key 'title'"]);
+    }
+    const result = await cache.srem(this.OPPORTUNITY_TYPES_CACHE_KEY, title);
+    if (result === 0) return res.sendFailure([`'${title}' does not exist in opportunity types`]);
+
+    await cache.sadd(this.OPPORTUNITY_TYPES_CACHE_KEY, req.body.title);
+
+    models.opportunity.update({
+      type: req.body.title
+    }, {
+      where: {
+        type: title
+      }
+    });
+
+    return res.sendSuccessAndLog({
+      name: this.OPPORTUNITY_TYPES_LOG_NAME,
+      prevValue: title,
+      newValue: req.body.title
+    }, {
+      message: `Successfully edited '${title}'`,
+      prevValue: title,
+      newValue: req.body.title
+    });
+  }
+
+  /**
+   * Handler for removing an opportunity type by admin.
+   *
+   * @param {Express.Request} req - Express Request Object
+   * @param {Express.Response} res - Express Response Object
+   *
+   * @returns {void}
+   */
+  deleteOpportunityType = async (req, res) => {
+    const { title } = req.params;
+    const result = await cache.srem(this.OPPORTUNITY_TYPES_CACHE_KEY, title);
+    if (result === 0) return res.sendFailure([`'${title}' does not exist in opportunity types`]);
+    models.opportunity.update({ type: null }, {
+      where: { type: title }
+    });
+    return res.sendSuccessAndLog({
+      name: this.OPPORTUNITY_TYPES_LOG_NAME,
+      title
+    }, {
+      message: `Successfully deleted '${title}' from opportunity types`
     });
   }
 }();

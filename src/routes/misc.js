@@ -12,15 +12,20 @@ router.get('/settings/backgrounds', controller.getBackgrounds);
 router.post('/payment-webhooks', controller.handleUserSubscription);
 router.use('/settings/banner-ads', bannerAds);
 router.post('/newsletter/subscriptions', controller.subscribeNewsletterRecipient);
+router.get('/settings/professional-directions', controller.getProfessionalDirections);
+router.get('/settings/opportunities/types', controller.getOpportunityTypes);
 
 router.use(auth.authenticateUser, check.currentUserIsAdmin);
 
 router.get('/admin/logs', controller.getAdminLogs);
 router.post('/settings/backgrounds', controller.setBackgrounds);
 
-router.get('/settings/professional-directions', controller.getProfessionalDirections);
 router.post('/settings/professional-directions', controller.addProfessionalDirection);
 router.delete('/settings/professional-directions/:title', controller.deleteProfessionalDirection);
 router.put('/settings/professional-directions/:title', controller.editProfessionalDirection);
+
+router.post('/settings/opportunities/types', controller.createOpportunityType);
+router.put('/settings/opportunities/types/:title', controller.editOpportunityType);
+router.delete('/settings/opportunities/types/:title', controller.deleteOpportunityType);
 
 export default router;
