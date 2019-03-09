@@ -98,8 +98,9 @@ const opportunityApplicationChecks = async (opportunity, user) => {
       break;
     }
   }
-  if (!userCanApply) {
-    throw new Error('You can only get plugged to opportunities that fit your indicated skill set');
+  if (!userCanApply && opportunity.occupationId !== user.occupationId) {
+    throw new Error('You can only get plugged to this job opportunity if you ' +
+      'match the Skills or Position Needed by the Plugger.');
   }
 };
 
@@ -260,6 +261,12 @@ export default new class {
         limit,
         offset,
         where,
+        attributes: {
+          include: [[models.Sequelize.fn(
+            'count',
+            models.Sequelize.col('users_opportunities_applications.opportunityId')
+          ), 'totalPlugEntries']]
+        },
         order: [[attribute, order]],
         include: [{
           model: models.location,
@@ -319,6 +326,10 @@ export default new class {
           })
         }, {
           model: models.review
+        }, {
+          model: models.User,
+          as: 'plugEntries',
+          duplicating: false
         }]
       });
       const pagination = helpers.Misc.generatePaginationMeta(
