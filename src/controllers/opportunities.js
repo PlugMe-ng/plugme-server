@@ -80,7 +80,8 @@ const opportunityApplicationChecks = async (opportunity, user) => {
     throw new Error('Please upload your creative works to get plugged to this opportunity.');
   }
   if (!opportunity.allowedplans.includes[user.plan.type]) {
-    throw new Error(`This opportunity is only available for ${opportunity.achieversPlanTypes} users`);
+    throw new Error('You can only get plugged to this opportunity if ' +
+      'you match the Achiever Needed by the Plugger.');
   }
   if (opportunity.verifiedAchieversOnly && !user.profileVerified) {
     throw new Error('Please verify your portfolio to get plugged to this opportunities');
