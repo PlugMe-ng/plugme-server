@@ -67,21 +67,31 @@ const createOpportunityReviewsChecks = (opportunity, user) => {
  */
 const opportunityApplicationChecks = async (opportunity, user) => {
   const REQUIRED_USER_CONTENTS_COUNT = 1;
+  const errorMessages = {
+    OPPORTUNITY_NOT_FOUND: 'Opportunity with the specified id does not exist',
+    OPPORTUNITY_PLUGGER_NOT_ALLOWED: 'You cannot apply for an opportunity you created',
+    HAS_PENDING_REVIEW: 'Kindly submit all outstanding reviews to get plugged to a new opportunity',
+    OPPORTUNITY_NOT_AVAILABLE: 'This opportunity has passed',
+    VERIFIED_ACHIEVERS_ONLY: 'Please verify your portfolio to get plugged to this opportunities',
+    NOT_MATCHING_ALLOW_PLANS: 'You can only get plugged to this opportunity if ' +
+    'you match the Achiever Needed by the Plugger.',
+    NOT_MATCHING_SKILLS_OCCUPATION: 'You can only get plugged to this job opportunity if you ' +
+    'match the Skills or Position Needed by the Plugger.',
+    NO_MATCHING_CONTENTS: 'You can only get plugged to this job opportunity if you have' +
+    ' an uploaded content that matches the creative skill needed by the Plugger.'
+  };
 
-  if (!opportunity) throw new Error('Opportunity with the specified id does not exist');
+  if (!opportunity) throw new Error(errorMessages.OPPORTUNITY_NOT_FOUND);
   if (opportunity.pluggerId === user.id) {
-    throw new Error('You cannot apply for an opportunity you created');
+    throw new Error(errorMessages.OPPORTUNITY_PLUGGER_NOT_ALLOWED);
   }
-  if (user.hasPendingReview) {
-    throw new Error('Kindly submit all outstanding reviews to get plugged to a new opportunity');
-  }
-  if (opportunity.status !== 'available') throw new Error('This opportunity has passed');
+  if (user.hasPendingReview) throw new Error(errorMessages.HAS_PENDING_REVIEW);
+  if (opportunity.status !== 'available') throw new Error(errorMessages.OPPORTUNITY_NOT_AVAILABLE);
   if (opportunity.verifiedAchieversOnly && !user.profileVerified) {
-    throw new Error('Please verify your portfolio to get plugged to this opportunities');
+    throw new Error(errorMessages.VERIFIED_ACHIEVERS_ONLY);
   }
   if (!opportunity.allowedplans.includes(user.plan.type)) {
-    throw new Error('You can only get plugged to this opportunity if ' +
-      'you match the Achiever Needed by the Plugger.');
+    throw new Error(errorMessages.NOT_MATCHING_ALLOW_PLANS);
   }
 
   let hasAtLeastOneMatchingTag = false;
@@ -98,8 +108,7 @@ const opportunityApplicationChecks = async (opportunity, user) => {
     }
   }
   if (!hasAtLeastOneMatchingTag && opportunity.occupationId !== user.occupationId) {
-    throw new Error('You can only get plugged to this job opportunity if you ' +
-      'match the Skills or Position Needed by the Plugger.');
+    throw new Error(errorMessages.NOT_MATCHING_SKILLS_OCCUPATION);
   }
 
   // has uploaded contents with tags matching opportunity tags
@@ -115,8 +124,7 @@ const opportunityApplicationChecks = async (opportunity, user) => {
     }]
   });
   if (matchingContentsCount < REQUIRED_USER_CONTENTS_COUNT) {
-    throw new Error('You can only get plugged to this job opportunity if you have' +
-      ' an uploaded content that matches the creative skill needed by the Plugger.');
+    throw new Error(errorMessages.NO_MATCHING_CONTENTS);
   }
 };
 
