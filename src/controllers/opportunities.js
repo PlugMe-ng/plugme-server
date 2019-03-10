@@ -76,32 +76,47 @@ const opportunityApplicationChecks = async (opportunity, user) => {
     throw new Error('Kindly submit all outstanding reviews to get plugged to a new opportunity');
   }
   if (opportunity.status !== 'available') throw new Error('This opportunity has passed');
-  if ((await user.countContents()) < REQUIRED_USER_CONTENTS_COUNT) {
-    throw new Error('Please upload your creative works to get plugged to this opportunity.');
-  }
-  if (!opportunity.allowedplans.includes[user.plan.type]) {
-    throw new Error('You can only get plugged to this opportunity if ' +
-      'you match the Achiever Needed by the Plugger.');
-  }
   if (opportunity.verifiedAchieversOnly && !user.profileVerified) {
     throw new Error('Please verify your portfolio to get plugged to this opportunities');
   }
+  if (!opportunity.allowedplans.includes(user.plan.type)) {
+    throw new Error('You can only get plugged to this opportunity if ' +
+      'you match the Achiever Needed by the Plugger.');
+  }
+
+  let hasAtLeastOneMatchingTag = false;
   const userSkills = (await user.getSkills({
     joinTableAttributes: []
   })).map(skill => skill.id);
   const opportunityTags = opportunity.tags.map(tag => tag.id);
 
-  let userCanApply = false;
   for (let i = 0; i < userSkills.length; i += 1) {
     const skill = userSkills[i];
     if (opportunityTags.includes(skill)) {
-      userCanApply = true;
+      hasAtLeastOneMatchingTag = true;
       break;
     }
   }
-  if (!userCanApply && opportunity.occupationId !== user.occupationId) {
+  if (!hasAtLeastOneMatchingTag && opportunity.occupationId !== user.occupationId) {
     throw new Error('You can only get plugged to this job opportunity if you ' +
       'match the Skills or Position Needed by the Plugger.');
+  }
+
+  // has uploaded contents with tags matching opportunity tags
+  const matchingContentsCount = await user.countContents({
+    includeIgnoreAttributes: false,
+    include: [{
+      model: models.tag,
+      attributes: [],
+      as: 'tags',
+      where: {
+        id: opportunity.tags.map(tag => tag.id)
+      }
+    }]
+  });
+  if (matchingContentsCount < REQUIRED_USER_CONTENTS_COUNT) {
+    throw new Error('You can only get plugged to this job opportunity if you have' +
+      ' an uploaded content that matches the creative skill needed by the Plugger.');
   }
 };
 
@@ -262,12 +277,6 @@ export default new class {
         limit,
         offset,
         where,
-        attributes: {
-          include: [[models.Sequelize.fn(
-            'count',
-            models.Sequelize.col('users_opportunities_applications.opportunityId')
-          ), 'totalPlugEntries']]
-        },
         order: [[attribute, order]],
         include: [{
           model: models.location,
