@@ -176,6 +176,18 @@ const notifyUsers = async (opportunity) => {
       attributes: ['id'],
       required: false,
       where: { id: opportunity.occupationId }
+    }, {
+      model: models.content,
+      attributes: ['id'],
+      as: 'contents',
+      required: true,
+      include: [{
+        model: models.tag,
+        as: 'tags',
+        attributes: ['id'],
+        through: { attributes: [] },
+        where: { id: opportunity.tags.map(tag => tag.id) }
+      }]
     }]
   }))
     // sequelize should be able to do this directly, but using filter for now
