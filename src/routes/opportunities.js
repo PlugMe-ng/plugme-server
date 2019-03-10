@@ -18,7 +18,7 @@ const { auth, check } = middleware;
 
 const router = new Router();
 
-router.get('/', controller.get);
+router.get('/', auth.optionalUserAuthentication, controller.get);
 router.get('/:opportunityId', controller.getOpportunityById);
 router.get('/:opportunityId/applications', controller.getOpportunityApplications);
 

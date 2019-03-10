@@ -355,12 +355,22 @@ export default new class {
           })
         }, {
           model: models.review
-        }, {
+        }, ...(helpers.Misc.isAdmin(req.user) ? [{
           model: models.User,
           as: 'plugEntries',
-          duplicating: false
-        }]
+          attributes: ['id'],
+          through: { attributes: [] }
+        }] : [])]
       });
+      // TODO: sequelize should be able to do this directly, but there are issues achieveing it
+      if (helpers.Misc.isAdmin(req.user)) {
+        opportunities.rows = opportunities.rows.map((opportunity) => {
+          opportunity = opportunity.get();
+          opportunity.totalPlugEntries = opportunity.plugEntries.length;
+          delete opportunity.plugEntries;
+          return opportunity;
+        });
+      }
       const pagination = helpers.Misc.generatePaginationMeta(
         req,
         opportunities,
