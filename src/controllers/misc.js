@@ -20,6 +20,9 @@ export default new class {
   OPPORTUNITY_TYPES_CACHE_KEY = 'opportunity_types'
   OPPORTUNITY_TYPES_LOG_NAME = 'Opportunity Type'
 
+  VERIFICATION_DOCS_CACHE_KEY = 'verification_docs'
+  VERIFICATION_DOCS_LOG_NAME = 'Verification Docs'
+
   /**
    * Retrieves admin actions logs
    *
@@ -342,6 +345,104 @@ export default new class {
       title
     }, {
       message: `Successfully deleted '${title}' from opportunity types`
+    });
+  }
+
+  /**
+   * Handler for adding required docs for profile verification based on plan type by admin.
+   *
+   * @param {Express.Request} req - Express Request Object
+   * @param {Express.Response} res - Express Response Object
+   *
+   * @returns {void}
+   */
+  addVerificationDoc = async (req, res) => {
+    const { name: docname, plan: planType } = req.body;
+    if (!['business', 'professional'].includes(planType)) {
+      return res.sendFailure(["'plan' must be in ['business', 'professional']"]);
+    }
+    if (!docname || docname.trim().length === 0) {
+      return res.sendFailure(["Invalid value specified for key 'name'"]);
+    }
+    const result = await cache.sadd(
+      `${this.VERIFICATION_DOCS_CACHE_KEY}:${planType}`,
+      docname
+    );
+    if (result === 0) return res.sendFailure([`'${docname}' already exist in the ${planType} plan`]);
+    return res.sendSuccessAndLog({
+      name: this.VERIFICATION_DOCS_LOG_NAME,
+      plan: planType,
+      docname,
+    }, {
+      message: `Successfully added '${docname}' to verifications docs for ${planType} plan`
+    });
+  }
+
+  /**
+   * Handler for getting required docs for profile verification.
+   *
+   * @param {Express.Request} req - Express Request Object
+   * @param {Express.Response} res - Express Response Object
+   *
+   * @returns {void}
+   */
+  getVerificationDocs = async (req, res) => {
+    const verifDocs = {
+      business: await cache.smembers(`${this.VERIFICATION_DOCS_CACHE_KEY}:business`),
+      professional: await cache.smembers(`${this.VERIFICATION_DOCS_CACHE_KEY}:professional`),
+    };
+    return res.sendSuccess(verifDocs);
+  }
+
+  /**
+   * Handler for editing required docs for profile verification by admin.
+   *
+   * @param {Express.Request} req - Express Request Object
+   * @param {Express.Response} res - Express Response Object
+   *
+   * @returns {void}
+   */
+  editVerificationDoc = async (req, res) => {
+    const { plan: planType, name: docname } = req.params;
+    const { name: newName } = req.body;
+    const result = await cache.srem(`${this.VERIFICATION_DOCS_CACHE_KEY}:${planType}`, docname);
+    if (!result) {
+      return res.sendFailure([`'${docname}' does not exist in 
+        verification docs for '${planType}' plan`]);
+    }
+    await cache.sadd(`${this.VERIFICATION_DOCS_CACHE_KEY}:${planType}`, newName);
+    return res.sendSuccessAndLog({
+      name: this.OPPORTUNITY_TYPES_LOG_NAME,
+      plan: planType,
+      prevValue: docname,
+      newValue: newName
+    }, {
+      message: `Successfully edited '${docname}' in '${planType}' plan'`,
+      prevValue: docname,
+      newValue: newName
+    });
+  }
+
+  /**
+   * Handler for removing a doc name from the list of required docs for profile verfication.
+   *
+   * @param {Express.Request} req - Express Request Object
+   * @param {Express.Response} res - Express Response Object
+   *
+   * @returns {void}
+   */
+  deleteVerificationDoc = async (req, res) => {
+    const { plan: planType, name } = req.params;
+    const result = await cache.srem(`${this.VERIFICATION_DOCS_CACHE_KEY}:${planType}`, name);
+    if (!result) {
+      return res.sendFailure([`'${name}' does not exist in verification docs for ${planType} plan`]);
+    }
+    return res.sendSuccessAndLog({
+      name: this.VERIFICATION_DOCS_LOG_NAME,
+      docname: name,
+      plan: planType
+    }, {
+      message: `Successfully deleted '${name}' from verification docs for ${planType} plan`
     });
   }
 }();

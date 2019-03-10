@@ -14,6 +14,7 @@ router.use('/settings/banner-ads', bannerAds);
 router.post('/newsletter/subscriptions', controller.subscribeNewsletterRecipient);
 router.get('/settings/professional-directions', controller.getProfessionalDirections);
 router.get('/settings/opportunities/types', controller.getOpportunityTypes);
+router.get('/settings/verifications/docs', controller.getVerificationDocs);
 
 router.use(auth.authenticateUser, check.currentUserIsAdmin);
 
@@ -27,5 +28,9 @@ router.put('/settings/professional-directions/:title', controller.editProfession
 router.post('/settings/opportunities/types', controller.createOpportunityType);
 router.put('/settings/opportunities/types/:title', controller.editOpportunityType);
 router.delete('/settings/opportunities/types/:title', controller.deleteOpportunityType);
+
+router.post('/settings/verifications/docs', controller.addVerificationDoc);
+router.put('/settings/verifications/docs/:plan/:name', controller.editVerificationDoc);
+router.delete('/settings/verifications/docs/:plan/:name', controller.deleteVerificationDoc);
 
 export default router;
