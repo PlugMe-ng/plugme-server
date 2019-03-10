@@ -256,7 +256,6 @@ export default new class {
         }]
       });
       notifyUsers(opportunity);
-      searchIndex.sync(opportunity.id);
       return res.sendSuccess(opportunity);
     } catch (error) {
       if (opportunity) opportunity.destroy();
@@ -461,7 +460,6 @@ export default new class {
       await opportunity.addPlugEntry(userObj);
       if (opportunity.plugEntries.length + 1 === MAX_ENTRIES) {
         await opportunity.update({ status: 'pending' });
-        searchIndex.sync(opportunity.id);
       }
       const { plugEntries, ...data } = opportunity.get({ plain: true });
       return res.sendSuccessAndNotify({
@@ -561,7 +559,6 @@ export default new class {
         achieverId: userId
       });
       notifyUnselectedAchievers(opportunity, plugger);
-      searchIndex.sync(opportunity.id);
       return res.sendSuccessAndNotify({
         event: events.OPPORTUNITY_ACHIEVER_SET,
         recipients: [userId],
@@ -621,8 +618,8 @@ export default new class {
         await userWithPendingReview.update({ hasPendingReview: true });
       } else {
         await opportunity.update({ status: 'done' });
+        searchIndex.sync(opportunity.id);
       }
-      searchIndex.sync(opportunity.id);
       return userObj.id === opportunity.pluggerId ?
         res.sendSuccessAndNotify({
           event: events.OPPORTUNITY_REVIEW,
