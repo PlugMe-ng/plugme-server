@@ -11,18 +11,18 @@ import { opportunitiesSearchIndex as searchIndex } from '../search_indexing';
  * duplicate due to network lag
  *
  * @param {Object} userObj - user
- * @param {Object} req - Express request object
+ * @param {Object} reqBody - Express request object
  *
  * @returns {void}
  *
  * @memberOf Controller
  */
-const duplicateOpportunityUploadCheck = async (userObj, req) => {
+const duplicateOpportunityUploadCheck = async (userObj, reqBody) => {
   const lastUploadedOpportunity = (await models.opportunity.findOne({
     attributes: [],
     where: {
       pluggerId: userObj.id,
-      title: req.body.title,
+      title: reqBody.title,
       createdAt: { [Op.gt]: moment().subtract(10, 'minutes').toDate() }
     }
   }));
@@ -78,7 +78,9 @@ const opportunityApplicationChecks = async (opportunity, user) => {
     NOT_MATCHING_SKILLS_OCCUPATION: 'You can only get plugged to this job opportunity if you ' +
     'match the Skills or Position Needed by the Plugger.',
     NO_MATCHING_CONTENTS: 'You can only get plugged to this job opportunity if you have' +
-    ' an uploaded content that matches the creative skill needed by the Plugger.'
+    ' an uploaded content that matches the creative skill needed by the Plugger.',
+    NO_MATCHING_LOCATION: 'You can only get plugged to this opportunity if you ' +
+      'match the Location indicated by the Plugger'
   };
 
   if (!opportunity) throw new Error(errorMessages.OPPORTUNITY_NOT_FOUND);
@@ -126,6 +128,24 @@ const opportunityApplicationChecks = async (opportunity, user) => {
   if (matchingContentsCount < REQUIRED_USER_CONTENTS_COUNT) {
     throw new Error(errorMessages.NO_MATCHING_CONTENTS);
   }
+
+  const userHasMatchingLocation = !!(await models.User.findOne({
+    where: {
+      id: user.id,
+      ...((opportunity.locationId || opportunity.lgaId) && {
+        ...(opportunity.lgaId ? { lgaId: opportunity.lgaId }
+          : { locationId: opportunity.locationId })
+      })
+    }
+  }, {
+    ...(opportunity.countryId && {
+      include: [{
+        model: models.location,
+        where: { countryId: opportunity.countryId }
+      }]
+    })
+  }));
+  if (!userHasMatchingLocation) throw new Error(errorMessages.NO_MATCHING_LOCATION);
 };
 
 const notifyUnselectedAchievers = async (opportunity, author) => {
@@ -152,20 +172,21 @@ const notifyUnselectedAchievers = async (opportunity, author) => {
  */
 const notifyUsers = async (opportunity) => {
   const recipients = (await models.User.findAll({
-    attributes: ['id', 'occupationId'],
     where: {
       'plan.type': { [Op.in]: opportunity.allowedplans },
-      ...(opportunity.verifiedAchieversOnly && { profileVerified: true })
+      ...(opportunity.verifiedAchieversOnly && { profileVerified: true }),
+      ...((opportunity.locationId || opportunity.lgaId) && {
+        ...(opportunity.lgaId ? {
+          lgaId: opportunity.lgaId
+        } : {
+          locationId: opportunity.locationId
+        })
+      })
     },
-    include: [...[opportunity.lgaId ? {
-      model: models.localgovernment,
-      attributes: [],
-      where: { id: opportunity.lgaId }
-    } : {
+    include: [...(opportunity.countryId ? [{
       model: models.location,
-      attributes: [],
-      where: { id: opportunity.locationId }
-    }], {
+      where: { countryId: opportunity.countryId }
+    }] : []), {
       model: models.tag,
       as: 'skills',
       attributes: ['id'],
@@ -218,16 +239,24 @@ export default new class {
   createOpportunity = async (req, res) => {
     let opportunity;
     try {
-      const { tags } = req.body;
+      const { tags, ...reqBody } = req.body;
       const { userObj } = req;
 
       if (userObj.hasPendingReview) {
         throw new Error('Kindly submit all outstanding reviews to publish a new opportunity');
       }
-      await duplicateOpportunityUploadCheck(userObj, req);
+      if (!reqBody.lgaId && !reqBody.locationId && !reqBody.countryId) {
+        throw new Error('Please specify a location for this opportunity');
+      }
+      if (reqBody.lgaId) {
+        delete reqBody.locationId;
+        delete reqBody.countryId;
+      }
+      if (reqBody.locationId) delete reqBody.countryId;
+      await duplicateOpportunityUploadCheck(userObj, reqBody);
 
       opportunity = await models.opportunity.create({
-        ...req.body,
+        ...reqBody,
         status: 'available',
         pluggerId: userObj.id
       });

@@ -70,6 +70,7 @@ module.exports = (sequelize, DataTypes) => {
       as: 'positionNeeded',
       foreignKey: 'occupationId'
     });
+    opportunity.belongsTo(models.country);
   };
   return opportunity;
 };

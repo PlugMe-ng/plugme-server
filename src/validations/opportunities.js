@@ -13,8 +13,6 @@ import { cache } from '../helpers';
 
 const opportunityUploadRules = {
   title: 'required|string|max:36',
-  locationId: 'required|string',
-  positionNeeded: 'required|string|max:90',
   responsibilities: 'required|string|max:900',
   professionalDirection: 'required|string|in_professional_directions',
   tags: 'array|required|max:3',
@@ -74,15 +72,17 @@ class Validate {
       const errors = getErrors(validation, opportunityUploadRules);
       return res.sendFailure(errors);
     });
-    const now = Date.now();
-    if (new Date(req.body.deadline).getTime() < now) {
-      return res.sendFailure([`Invalid deadline - date must be after ${new Date(now).toDateString()}`]);
-    }
-    // validatorjs does not work for empty array, cause for this manual validation
-    if (req.body.allowedplans && req.body.allowedplans.length < 1) {
-      return res.sendFailure(['allowedplans cannot be empty']);
-    }
-    validation.passes(() => next());
+    validation.passes(() => {
+      const now = Date.now();
+      if (new Date(req.body.deadline).getTime() < now) {
+        return res.sendFailure([`Invalid deadline - date must be after ${new Date(now).toDateString()}`]);
+      }
+      // validatorjs does not work for empty array, cause for this manual validation
+      if (req.body.allowedplans && req.body.allowedplans.length < 1) {
+        return res.sendFailure(['allowedplans cannot be empty']);
+      }
+      return next();
+    });
   }
 
   /**
