@@ -296,7 +296,8 @@ export default new class {
 
   /**
    * @method get
-   * @desc This method gets an array of users
+   * @desc This method gets an array of users.
+   * Locations eager load is shitty, I know. Ask the client.
    *
    * @param { object } req request
    * @param { object } res response
@@ -381,6 +382,9 @@ export default new class {
             model: models.occupation,
             attributes: ['id', 'title'],
           }],
+        }, {
+          model: models.review,
+          attributes: ['rating']
         }, ...isAdmin(req.user) ? [{
           model: models.User,
           attributes: ['id', 'username', 'fullName'],
@@ -388,9 +392,6 @@ export default new class {
           ...(filter.achiever && {
             where: { username: { [Op.iLike]: filter.achiever } }
           })
-        }, {
-          model: models.review,
-          attributes: ['id']
         }, {
           model: models.User,
           as: 'plugEntries',
