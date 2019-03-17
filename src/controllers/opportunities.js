@@ -443,9 +443,18 @@ export default new class {
           model: models.tag,
           attributes: ['id', 'title'],
           as: 'tags',
-          through: {
-            attributes: []
-          }
+          through: { attributes: [] }
+        }, {
+          model: models.localgovernment,
+          attributes: ['id', 'name'],
+          include: [{
+            model: models.location,
+            attributes: ['id', 'name'],
+            include: [{
+              model: models.country,
+              attributes: ['id', 'name'],
+            }]
+          }]
         }, {
           model: models.location,
           attributes: ['id', 'name'],
@@ -453,6 +462,9 @@ export default new class {
             model: models.country,
             attributes: ['id', 'name']
           }]
+        }, {
+          model: models.country,
+          attributes: ['id', 'name'],
         }, {
           model: models.occupation,
           as: 'positionNeeded',
@@ -465,9 +477,7 @@ export default new class {
           model: models.review,
         }]
       });
-      if (!opportunity) {
-        throw new Error('Specified opportunity does not exist');
-      }
+      if (!opportunity) throw new Error('Specified opportunity does not exist');
       return res.sendSuccess(opportunity);
     } catch (error) {
       return res.sendFailure([error.message]);
