@@ -6,6 +6,8 @@ import helpers, { events } from '../helpers';
 import notifications from './notifications';
 import { opportunitiesSearchIndex as searchIndex } from '../search_indexing';
 
+const { Misc: { isAdmin } } = helpers;
+
 /**
  * @description Checks that the opportunity being created is not a
  * duplicate due to network lag
@@ -327,31 +329,35 @@ export default new class {
         where,
         order: [[attribute, order]],
         include: [{
+          model: models.localgovernment,
+          attributes: ['id', 'name'],
+          ...(filter.localgovernment && {
+            where: { id: filter.localgovernment }
+          }),
+          include: [{
+            model: models.location,
+            attributes: ['id', 'name'],
+            include: [{
+              model: models.country,
+              attributes: ['id', 'name'],
+            }]
+          }]
+        }, {
           model: models.location,
-          attributes: ['id', 'name', 'countryId'],
-          ...((filter.locationId || filter.countryId) && {
-            where: {
-              ...(filter.locationId && {
-                id: filter.locationId
-              }),
-              ...(filter.countryId && {
-                countryId: filter.countryId
-              })
-            }
+          attributes: ['id', 'name'],
+          ...(filter.location && {
+            where: { id: filter.location }
           }),
           include: [{
             model: models.country,
             attributes: ['id', 'name'],
           }]
         }, {
-          model: models.occupation,
-          as: 'positionNeeded',
-          attributes: [], // available for filtering only
-          ...(filter.positionNeeded && {
-            where: {
-              positionNeeded: filter.positionNeeded
-            }
-          })
+          model: models.country,
+          attributes: ['id', 'name'],
+          ...(filter.country && {
+            where: { id: filter.country }
+          }),
         }, {
           model: models.tag,
           as: 'tags',
@@ -375,7 +381,7 @@ export default new class {
             model: models.occupation,
             attributes: ['id', 'title'],
           }],
-        }, {
+        }, ...isAdmin(req.user) ? [{
           model: models.User,
           attributes: ['id', 'username', 'fullName'],
           as: 'achiever',
@@ -383,16 +389,18 @@ export default new class {
             where: { username: { [Op.iLike]: filter.achiever } }
           })
         }, {
-          model: models.review
-        }, ...(helpers.Misc.isAdmin(req.user) ? [{
+          model: models.review,
+          attributes: ['id']
+        }, {
           model: models.User,
           as: 'plugEntries',
           attributes: ['id'],
           through: { attributes: [] }
-        }] : [])]
+        }] : []
+        ]
       });
       // TODO: sequelize should be able to do this directly, but there are issues achieveing it
-      if (helpers.Misc.isAdmin(req.user)) {
+      if (isAdmin(req.user)) {
         opportunities.rows = opportunities.rows.map((opportunity) => {
           opportunity = opportunity.get();
           opportunity.totalPlugEntries = opportunity.plugEntries.length;
