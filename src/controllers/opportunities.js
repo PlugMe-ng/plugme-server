@@ -44,17 +44,16 @@ const createOpportunityReviewsChecks = (opportunity, user) => {
     throw new Error('Specified opportunity does not exist');
   }
 
-  if (!opportunity.achiever) {
+  if (!opportunity.achieverId) {
     throw new Error('This opportunity does not have an achiever yet');
   }
 
-  if (![opportunity.plugger.id, opportunity.achiever.id].includes(user.id)) {
-    throw new Error('Only the plugger or achiever of this opportunity can post review for it');
+  if (opportunity.pluggerId !== user.id) {
+    throw new Error('Only the plugger of this opportunity can post review for it');
   }
 
-  const reviewersIds = opportunity.reviews.map(review => review.User.id);
-  if (reviewersIds.includes(user.id)) {
-    throw new Error('You have already left a review for this opportuntiy');
+  if (opportunity.reviews.length > 1) {
+    throw new Error('You already left a review for this opportunity');
   }
 };
 
@@ -679,47 +678,29 @@ export default new class {
     try {
       const opportunity = await models.opportunity.findByPk(opportunityId, {
         include: [{
-          model: models.User,
-          as: 'plugger',
-          attributes: ['id']
-        }, {
-          model: models.User,
-          as: 'achiever',
-          attributes: ['id']
-        }, {
           model: models.review,
-          attributes: ['id'],
-          include: [{ model: models.User, attributes: ['id'] }]
+          attributes: ['id']
         }]
       });
 
       createOpportunityReviewsChecks(opportunity, userObj);
 
-      const review = await models.review.create(req.body);
-      await review.setOpportunity(opportunity.id);
-      await review.setUser(userObj.id);
-
+      await models.review.create({
+        ...req.body,
+        opportunityId: opportunity.id,
+        UserId: userObj.id
+      });
       await userObj.update({ hasPendingReview: false });
-      const reviewersIds = [...opportunity.reviews.map(r => r.User.id), userObj.id];
+      await opportunity.update({ status: 'done' });
+      searchIndex.sync(opportunity.id);
 
-      const userWithPendingReview = [opportunity.plugger, opportunity.achiever]
-        .filter(user => !reviewersIds.includes(user.id))[0];
-
-      if (userWithPendingReview) {
-        await userWithPendingReview.update({ hasPendingReview: true });
-      } else {
-        await opportunity.update({ status: 'done' });
-        searchIndex.sync(opportunity.id);
-      }
-      return userObj.id === opportunity.pluggerId ?
-        res.sendSuccessAndNotify({
-          event: events.OPPORTUNITY_REVIEW,
-          entity: opportunity,
-          recipients: [opportunity.achieverId]
-        }, {
-          message: 'Review submitted successfully'
-        }) :
-        res.sendSuccess({ message: 'Review submitted successfully' });
+      return res.sendSuccessAndNotify({
+        event: events.OPPORTUNITY_REVIEW,
+        entity: opportunity,
+        recipients: [opportunity.achieverId]
+      }, {
+        message: 'Review submitted successfully'
+      });
     } catch (error) {
       return res.sendFailure([error.message]);
     }
