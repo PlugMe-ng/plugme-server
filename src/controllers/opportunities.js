@@ -504,7 +504,7 @@ export default new class {
    * @returns { object } response
    */
   opportunityApplication = async (req, res) => {
-    const MAX_ENTRIES = 24;
+    const MAX_ENTRIES = 40;
 
     const { userObj } = req;
     const { opportunityId } = req.params;
