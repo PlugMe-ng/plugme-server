@@ -26,9 +26,7 @@ router.use(auth.authenticateUser);
 
 router.post(
   '/',
-  check.userHasActiveSubscription,
   check.userProfileUpdated,
-  check.userPlanIsSupported([BASIC, BUSINESS]),
   validations.createOpportunity,
   validations.verifyTags,
   controller.createOpportunity
