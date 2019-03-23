@@ -20,7 +20,8 @@
     "remove-build": "./node_modules/.bin/rimraf ./build",
     "start": "node --optimize_for_size --max_old_space_size=920 --gc_interval=100 ./build/server.js",
     "start:dev": "nodemon src/server.js --exec babel-node",
-    "test": "NODE_ENV=test nyc -r=text -r=html mocha test/**/*.js --require babel-register --exit"
+    "test": "NODE_ENV=test nyc -r=text -r=html mocha test/**/*.js --require babel-register --exit",
+    "repl":"babel-node --presets env --plugins transform-class-properties"
   },
   "pre-commit": [
     "eslint"
