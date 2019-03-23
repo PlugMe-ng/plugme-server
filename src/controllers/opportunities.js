@@ -82,7 +82,7 @@ const opportunityApplicationChecks = async (opportunity, user) => {
     ' an uploaded content that matches the creative skill needed by the Plugger.',
     NO_MATCHING_LOCATION: 'You can only get plugged to this opportunity if you ' +
       'match the Location indicated by the Plugger',
-    MAX_OPP_COUNT_THRESHOLD_SURPASSED: 'You have surpassed your monthly limit, ' +
+    OPP_APP_COUNT_THRESHOLD_SURPASSED: 'You have surpassed your monthly limit, ' +
       'please upgrade your plan to get plugged to more jobs.'
   };
 
@@ -90,7 +90,7 @@ const opportunityApplicationChecks = async (opportunity, user) => {
   if (opportunity.pluggerId === user.id) {
     throw new Error(errorMessages.OPPORTUNITY_PLUGGER_NOT_ALLOWED);
   }
-  if (user.hasPendingReview) throw new Error(errorMessages.HAS_PENDING_REVIEW);
+  // if (user.hasPendingReview) throw new Error(errorMessages.HAS_PENDING_REVIEW);
   if (opportunity.status !== 'available') throw new Error(errorMessages.OPPORTUNITY_NOT_AVAILABLE);
   if (opportunity.verifiedAchieversOnly && !user.profileVerified) {
     throw new Error(errorMessages.VERIFIED_ACHIEVERS_ONLY);
@@ -153,7 +153,7 @@ const opportunityApplicationChecks = async (opportunity, user) => {
       }
     });
     if (countMonthToDateAppliedOpp >= MONTHLY_OPP_APP_COUNT_THRESHOLD) {
-      throw new Error(errorMessages.MAX_OPP_COUNT_THRESHOLD_SURPASSED);
+      throw new Error(errorMessages.OPP_APP_COUNT_THRESHOLD_SURPASSED);
     }
   }
 };
