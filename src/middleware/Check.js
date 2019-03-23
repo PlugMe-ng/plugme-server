@@ -105,13 +105,8 @@ export default class Check {
       if (skills && !(await minorTagsOnly(skills))) {
         throw new Error('Skills can only contain minor tags');
       }
-      if (interests) {
-        if (!(await minorTagsOnly(interests))) {
-          throw new Error('Interests can only contain minor tags');
-        }
-        if (user.plan.type === 'basic' && interests.length > 5) {
-          throw new Error('Maximum of 5 interest tags allowed for basic plan users');
-        }
+      if (interests && !(await minorTagsOnly(interests))) {
+        throw new Error('Interests can only contain minor tags');
       }
       if (((occupationId && user.occupationId !== occupationId))
         && user.meta.profileModificationCount > MAX_OCCUPATION_EDIT_COUNT) {
