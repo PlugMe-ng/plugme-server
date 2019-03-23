@@ -6,7 +6,7 @@ import helpers, { events } from '../helpers';
 import notifications from './notifications';
 import { opportunitiesSearchIndex as searchIndex } from '../search_indexing';
 
-const { Misc: { isAdmin } } = helpers;
+const { Misc: { isAdmin, subscriptionPlans } } = helpers;
 
 /**
  * @description Checks that the opportunity being created is not a
@@ -82,7 +82,9 @@ const opportunityApplicationChecks = async (opportunity, user) => {
     NO_MATCHING_CONTENTS: 'You can only get plugged to this job opportunity if you have' +
     ' an uploaded content that matches the creative skill needed by the Plugger.',
     NO_MATCHING_LOCATION: 'You can only get plugged to this opportunity if you ' +
-      'match the Location indicated by the Plugger'
+      'match the Location indicated by the Plugger',
+    MAX_OPP_COUNT_THRESHOLD_SURPASSED: 'You have surpassed your monthly limit, ' +
+      'please upgrade your plan to get plugged to more jobs.'
   };
 
   if (!opportunity) throw new Error(errorMessages.OPPORTUNITY_NOT_FOUND);
@@ -98,19 +100,12 @@ const opportunityApplicationChecks = async (opportunity, user) => {
     throw new Error(errorMessages.NOT_MATCHING_ALLOW_PLANS);
   }
 
-  let hasAtLeastOneMatchingTag = false;
-  const userSkills = (await user.getSkills({
-    joinTableAttributes: []
-  })).map(skill => skill.id);
-  const opportunityTags = opportunity.tags.map(tag => tag.id);
-
-  for (let i = 0; i < userSkills.length; i += 1) {
-    const skill = userSkills[i];
-    if (opportunityTags.includes(skill)) {
-      hasAtLeastOneMatchingTag = true;
-      break;
+  const hasAtLeastOneMatchingTag = (await user.getSkills({
+    joinTableAttributes: [],
+    where: {
+      id: opportunity.tags.map(tag => tag.id)
     }
-  }
+  })).length > 0;
   if (!hasAtLeastOneMatchingTag && opportunity.occupationId !== user.occupationId) {
     throw new Error(errorMessages.NOT_MATCHING_SKILLS_OCCUPATION);
   }
@@ -148,6 +143,20 @@ const opportunityApplicationChecks = async (opportunity, user) => {
     })
   }));
   if (!userHasMatchingLocation) throw new Error(errorMessages.NO_MATCHING_LOCATION);
+
+  if (user.plan.type === subscriptionPlans.PROFESSIONAL.name) {
+    const MONTHLY_OPP_APP_COUNT_THRESHOLD = 10;
+    const countMonthToDateAppliedOpp = await user.countAppliedOpportunities({
+      through: {
+        where: {
+          createdAt: { [Op.between]: [moment().startOf('month').toDate(), moment().toDate()] }
+        }
+      }
+    });
+    if (countMonthToDateAppliedOpp >= MONTHLY_OPP_APP_COUNT_THRESHOLD) {
+      throw new Error(errorMessages.MAX_OPP_COUNT_THRESHOLD_SURPASSED);
+    }
+  }
 };
 
 const notifyUnselectedAchievers = async (opportunity, author) => {
