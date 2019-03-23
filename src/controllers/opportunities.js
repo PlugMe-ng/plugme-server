@@ -250,25 +250,26 @@ export default new class {
     let opportunity;
     try {
       const { tags, ...reqBody } = req.body;
-      const { userObj } = req;
+      const { userObj: user } = req;
 
-      if (userObj.hasPendingReview) {
-        throw new Error('Kindly submit all outstanding reviews to publish a new opportunity');
-      }
       if (!reqBody.lgaId && !reqBody.locationId && !reqBody.countryId) {
         throw new Error('Please specify a location for this opportunity');
+      }
+
+      await duplicateOpportunityUploadCheck(user, reqBody);
+      if ((await user.countOpportunities({ where: { status: 'pending' } })) > 0) {
+        throw new Error('Kindly submit all outstanding reviews to publish a new opportunity');
       }
       if (reqBody.lgaId) {
         delete reqBody.locationId;
         delete reqBody.countryId;
       }
       if (reqBody.locationId) delete reqBody.countryId;
-      await duplicateOpportunityUploadCheck(userObj, reqBody);
 
       opportunity = await models.opportunity.create({
         ...reqBody,
         status: 'available',
-        pluggerId: userObj.id
+        pluggerId: user.id
       });
       await opportunity.setTags(tags);
 
