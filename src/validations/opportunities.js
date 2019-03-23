@@ -23,7 +23,7 @@ const opportunityUploadRules = {
 };
 
 const opportunityReviewRules = {
-  comment: 'required|string|max:60',
+  comment: 'required|string|max:30',
   rating: 'required|integer|between:1,5'
 };
 
