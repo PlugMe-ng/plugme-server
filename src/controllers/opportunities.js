@@ -559,7 +559,7 @@ export default new class {
         include: [{
           model: models.User,
           as: 'plugEntries',
-          through: { attributes: [] },
+          through: { attributes: ['createdAt'] },
           attributes: ['id', 'username', 'fullName', 'photo'],
           include: [{
             model: models.occupation,
@@ -572,22 +572,46 @@ export default new class {
               model: models.comment,
               attributes: ['id']
             }]
+          }, {
+            model: models.opportunity,
+            as: 'achievements',
+            where: { status: 'done' },
+            required: false,
+            attributes: ['id'],
+            include: [{
+              model: models.review,
+              attribute: ['rating', 'UserId']
+            }]
           }]
         }]
       });
       if (!opportunity) throw new Error('Specified opportunity does not exist');
+
       const { plugEntries: users } = opportunity.get({ plain: true });
       users.forEach((user) => {
         user.totalViews = 0;
         user.totalLikes = 0;
         user.totalComments = 0;
+        user.totalAchievements = user.achievements.length;
+        user.averageRating = user.achievements
+          .reduce((ratingsTotal, achievement) =>
+            ratingsTotal + achievement.reviews // there are only two reviews for an opp
+              .filter(review => review.UserId !== user.id)[0].rating, 0)
+          / (user.totalAchievements || 1);
         user.contents.forEach((content) => {
           user.totalViews += content.totalViews;
           user.totalLikes += content.totalLikes;
           user.totalComments += content.comments.length;
         });
         delete user.contents;
+        delete user.achievements;
       });
+      // sort users by averageRating, totalAchievements, createdAt
+      users.sort((userA, userB) => userB.averageRating - userA.averageRating)
+        .sort((userA, userB) => userB.totalAchievements - userA.totalAchievements)
+        .sort((userA, userB) => userB.users_opportunities_applications.createdAt
+          - userA.users_opportunities_applications.createdAt);
+
       return res.sendSuccess(users);
     } catch (error) {
       return res.sendFailure([error.message]);
