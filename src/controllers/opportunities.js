@@ -394,14 +394,14 @@ export default new class {
         }, {
           model: models.review,
           attributes: ['rating']
-        }, ...isAdmin(req.user) ? [{
+        }, {
           model: models.User,
           attributes: ['id', 'username', 'fullName'],
           as: 'achiever',
           ...(filter.achiever && {
             where: { username: { [Op.iLike]: filter.achiever } }
           })
-        }, {
+        }, ...isAdmin(req.user) ? [{
           model: models.User,
           as: 'plugEntries',
           attributes: ['id'],
