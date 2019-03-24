@@ -525,18 +525,24 @@ export default new class {
       await opportunityApplicationChecks(opportunity, userObj);
 
       await opportunity.addPlugEntry(userObj);
-      if (opportunity.plugEntries.length + 1 === MAX_ENTRIES) {
+      const totalPlugEntries = opportunity.plugEntries.length + 1;
+      if (totalPlugEntries === MAX_ENTRIES) {
         await opportunity.update({ status: 'pending' });
       }
+
       const { plugEntries, ...data } = opportunity.get({ plain: true });
-      return res.sendSuccessAndNotify({
-        event: events.OPPORTUNITY_APPLICATION,
-        recipients: [opportunity.pluggerId],
-        entity: opportunity,
-        includeEmail: true
-      }, {
-        message: 'Opportunity plugged successfully'
-      }, 200, { ...data });
+      // send notification for first 4 entries and on multiples of 4
+      return totalPlugEntries < 4 || (totalPlugEntries % 4 === 0)
+        ? res.sendSuccessAndNotify({
+          event: events.OPPORTUNITY_APPLICATION,
+          recipients: [opportunity.pluggerId],
+          entity: opportunity,
+          includeEmail: true
+        }, {
+          message: 'Opportunity plugged successfully'
+        }, 200, { ...data }) : ({
+          message: 'Opportunity plugged successfully'
+        });
     } catch (error) {
       return res.sendFailure([error.message]);
     }
