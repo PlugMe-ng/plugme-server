@@ -9,17 +9,14 @@ import { Router } from 'express';
 
 import middleware from '../middleware';
 import { opportunities as validations } from '../validations';
-import { opportunities as controller } from '../controllers';
-import helpers from '../helpers';
-
-const { Misc: { subscriptionPlans: { BASIC, BUSINESS } } } = helpers;
+import * as controller from '../controllers/opportunities';
 
 const { auth, check } = middleware;
 
 const router = new Router();
 
-router.get('/', auth.optionalUserAuthentication, controller.get);
-router.get('/:opportunityId', controller.getOpportunityById);
+router.get('/', auth.optionalUserAuthentication, controller.getAllOpportunities);
+router.get('/:opportunityId', controller.getOpportunity);
 router.get('/:opportunityId/applications', controller.getOpportunityApplications);
 
 router.use(auth.authenticateUser);
@@ -35,19 +32,19 @@ router.post(
 router.delete(
   '/:opportunityId',
   check.currentUserIsAdmin,
-  controller.delete
+  controller.deleteOpportunity
 );
 
 router.post(
   '/:opportunityId/applications',
   check.userHasActiveSubscription,
-  controller.opportunityApplication
+  controller.addOpportunityApplication
 );
 
 router.post(
   '/:opportunityId/reviews',
   validations.reviewOpportunity,
-  controller.reviewOpportunity,
+  controller.addOpportunityReview,
 );
 
 router.post(
