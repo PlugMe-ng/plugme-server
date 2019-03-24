@@ -14,7 +14,8 @@ export const events = {
   NEW_OPPORTUNITY: 'new_opportunity',
   SUBSCRIPTION_END: 'subscription_end',
   REJECTED_VERIFICATION_REQUEST: 'rejected_verification_request',
-  APPROVED_VERIFICATION_REQUEST: 'approved_verification_request'
+  APPROVED_VERIFICATION_REQUEST: 'approved_verification_request',
+  OPPORTUNITY_DEADLINE_PASSED_NO_ACHIEVER_SET: 'opportunity_deadline_passed_no_achiever_set'
 };
 
 export const eventDescriptions = {
@@ -31,7 +32,8 @@ export const eventDescriptions = {
   [events.OPPORTUNITY_DELETE]: 'Opportunity deleted by admin',
   [events.SUBSCRIPTION_END]: 'Your subscription will expire in 5 days, please renew your subscription',
   [events.REJECTED_VERIFICATION_REQUEST]: 'Unfortunately, your portfolio verification request was declined. Please check your email for more information.',
-  [events.APPROVED_VERIFICATION_REQUEST]: 'Congratulations, your portfolio has been permanently verified.'
+  [events.APPROVED_VERIFICATION_REQUEST]: 'Congratulations, your portfolio has been permanently verified.',
+  [events.OPPORTUNITY_DEADLINE_PASSED_NO_ACHIEVER_SET]: 'Your uploaded job deadline has passed'
 };
 
 export const templateIds = {
@@ -46,6 +48,7 @@ export const templateIds = {
   [events.OPPORTUNITY_APPLICATION]: 'd-4e0f5c6b9dba48c394ed637293f1034e',
   [events.REJECTED_VERIFICATION_REQUEST]: 'd-2b3f0bf59ed148499f7b9d6abfb52a5a',
   [events.APPROVED_VERIFICATION_REQUEST]: 'd-22f7a5c909124a868245c54ade1fef14',
+  [events.OPPORTUNITY_DEADLINE_PASSED_NO_ACHIEVER_SET]: 'd-2e3e8d333ec843a8b24d627a7190d2bc',
   EMAIL_VERIFICATION: 'd-80aa362028504dffa50fcd7cfd17d617',
   PASSWORD_RESET: 'd-755be4a5d84d42379f040f7479562cf2',
 };

@@ -12,7 +12,7 @@ import querystring from 'querystring';
 import url from 'url';
 import schedule from 'node-schedule';
 import moment from 'moment';
-import { UniqueConstraintError, Op } from 'sequelize';
+import { UniqueConstraintError, Op, fn, col, where } from 'sequelize';
 import cloudinary from 'cloudinary';
 
 import models from '../models';
@@ -215,8 +215,39 @@ const sendPlanExpirationNotif = async () => {
   });
 };
 
+/**
+ * Sends a notification with email to pluggers whose uploaded opportunities deadlines have passed,
+ * have plug entries,but with no achiever set.
+ * @returns {void}
+ */
+const sendOpportunityDeadlinePassedNotif = async () => {
+  const yesterday = moment().days(-1);
+  const pluggersIds = (await models.opportunity.findAll({
+    where: {
+      deadline: { [Op.between]: [yesterday.startOf('day').toDate(), yesterday.endOf('day').toDate()] },
+      achieverId: null
+    },
+    attributes: ['pluggerId'],
+    includeIgnoreAttributes: false,
+    group: ['opportunity.id'],
+    having: where(fn('COUNT', (fn('DISTINCT', col('plugEntries.id')))), { [Op.gt]: 0 }),
+    include: [{
+      model: models.User,
+      as: 'plugEntries',
+      attributes: [],
+      through: { attributes: [] }
+    }]
+  })).map(opportunity => opportunity.pluggerId);
+  notifications.create({
+    event: events.OPPORTUNITY_DEADLINE_PASSED_NO_ACHIEVER_SET,
+    recipients: pluggersIds,
+    includeEmail: true
+  });
+};
+
 schedule.scheduleJob({ hour: 0, minute: 0, dayOfWeek: new schedule.Range(0, 6) }, () => {
   sendPlanExpirationNotif();
+  sendOpportunityDeadlinePassedNotif();
 });
 
 /**
