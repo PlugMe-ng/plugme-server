@@ -245,9 +245,39 @@ const sendOpportunityDeadlinePassedNotif = async () => {
   });
 };
 
+/**
+ * Sends a notification with email to pluggers whose uploaded opportunities deadlines have passed,
+ * with no plug entries.
+ * @returns {void}
+ */
+const sendOpportunityDeadlinePassedNotif2 = async () => {
+  const yesterday = moment().days(-1);
+  const pluggersIds = (await models.opportunity.findAll({
+    where: {
+      deadline: { [Op.between]: [yesterday.startOf('day').toDate(), yesterday.endOf('day').toDate()] },
+    },
+    attributes: ['pluggerId'],
+    includeIgnoreAttributes: false,
+    group: ['opportunity.id'],
+    having: where(fn('COUNT', (fn('DISTINCT', col('plugEntries.id')))), { [Op.eq]: 0 }),
+    include: [{
+      model: models.User,
+      as: 'plugEntries',
+      attributes: [],
+      through: { attributes: [] }
+    }]
+  })).map(opportunity => opportunity.pluggerId);
+  notifications.create({
+    event: events.OPPORTUNITY_DEADLINE_PASSED_NO_PLUGS,
+    recipients: pluggersIds,
+    includeEmail: true
+  });
+};
+
 schedule.scheduleJob({ hour: 0, minute: 0, dayOfWeek: new schedule.Range(0, 6) }, () => {
   sendPlanExpirationNotif();
   sendOpportunityDeadlinePassedNotif();
+  sendOpportunityDeadlinePassedNotif2();
 });
 
 /**
