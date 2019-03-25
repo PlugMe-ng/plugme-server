@@ -69,21 +69,22 @@ const createOpportunityReviewsChecks = (opportunity, user) => {
 const opportunityApplicationChecks = async (opportunity, user) => {
   const REQUIRED_USER_CONTENTS_COUNT = 1;
   const errorMessages = {
-    OPPORTUNITY_NOT_FOUND: 'Opportunity with the specified id does not exist',
-    OPPORTUNITY_PLUGGER_NOT_ALLOWED: 'You cannot apply for an opportunity you created',
-    HAS_PENDING_REVIEW: 'Kindly submit all outstanding reviews to get plugged to a new opportunity',
-    OPPORTUNITY_NOT_AVAILABLE: 'This opportunity has passed',
-    VERIFIED_ACHIEVERS_ONLY: 'Please verify your portfolio to get plugged to this opportunities',
-    NOT_MATCHING_ALLOW_PLANS: 'You can only get plugged to this opportunity if ' +
+    OPPORTUNITY_NOT_FOUND: 'Jon with the specified id does not exist',
+    OPPORTUNITY_PLUGGER_NOT_ALLOWED: 'You cannot apply for a job you created',
+    // HAS_PENDING_REVIEW: 'Kindly submit all outstanding reviews to get plugged to a new opportunity',
+    OPPORTUNITY_NOT_AVAILABLE: 'This job has passed',
+    VERIFIED_ACHIEVERS_ONLY: 'Please verify your portfolio to get plugged to this job',
+    NOT_MATCHING_ALLOW_PLANS: 'You can only get plugged to this job when ' +
     'you match the Achiever Needed by the Plugger.',
-    NOT_MATCHING_SKILLS_OCCUPATION: 'You can only get plugged to this job opportunity if you ' +
+    NOT_MATCHING_SKILLS_OCCUPATION: 'You can only get plugged to this job when you ' +
     'match the Skills or Position Needed by the Plugger.',
-    NO_MATCHING_CONTENTS: 'You can only get plugged to this job opportunity if you have' +
-    ' an uploaded content that matches the creative skill needed by the Plugger.',
-    NO_MATCHING_LOCATION: 'You can only get plugged to this opportunity if you ' +
+    NO_MATCHING_CONTENTS: 'You can only get plugged to this job if you have' +
+    ' an uploaded content that matches the skills needed by the Plugger.',
+    NO_MATCHING_LOCATION: 'You can only get plugged to this job when you ' +
       'match the Location indicated by the Plugger',
     OPP_APP_COUNT_THRESHOLD_SURPASSED: 'You have surpassed your monthly limit, ' +
-      'please upgrade your plan to get plugged to more jobs.'
+      'please upgrade your plan to get plugged to more jobs.',
+    OPPORTUNITY_EXPIRED: 'Sorry, the deadline for this job has passed.'
   };
 
   if (!opportunity) throw new Error(errorMessages.OPPORTUNITY_NOT_FOUND);
@@ -92,6 +93,7 @@ const opportunityApplicationChecks = async (opportunity, user) => {
   }
   // if (user.hasPendingReview) throw new Error(errorMessages.HAS_PENDING_REVIEW);
   if (opportunity.status !== 'available') throw new Error(errorMessages.OPPORTUNITY_NOT_AVAILABLE);
+  if (moment().isAfter(opportunity.deadline)) throw new Error(errorMessages.OPPORTUNITY_EXPIRED);
   if (opportunity.verifiedAchieversOnly && !user.profileVerified) {
     throw new Error(errorMessages.VERIFIED_ACHIEVERS_ONLY);
   }
