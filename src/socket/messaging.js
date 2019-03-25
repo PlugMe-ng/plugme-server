@@ -4,6 +4,7 @@ import { where, fn, col, Op } from 'sequelize';
 import models from '../models';
 import { notifsIO } from '../server';
 import config from '../config';
+import { sendMail, generateNotifMailPayload, events } from '../helpers';
 
 
 const createConversation = async (users) => {
@@ -146,9 +147,27 @@ export default new class {
       returning: true
     });
 
+    const isFirstConvoMsgToday = (await models.message.count({
+      where: {
+        conversationId,
+        createdAt: {
+          [Op.between]: [
+            moment().startOf('day').toDate(),
+            moment().endOf('day').toDate()
+          ]
+        }
+      }
+    })) === 1;
+
     [...rows.map(row => row.participantId), senderId]
-      .forEach((recipient) => {
-        notifsIO.send('new_message', recipient, message);
+      .forEach(async (recipientId) => {
+        notifsIO.send('new_message', recipientId, message);
+        if (isFirstConvoMsgToday && recipientId !== senderId) {
+          sendMail(generateNotifMailPayload({
+            event: events.NEW_INBOX_MSG,
+            recipient: await models.User.findByPk(recipientId, { attributes: ['email'] })
+          }));
+        }
       });
   }
 

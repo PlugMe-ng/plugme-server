@@ -298,6 +298,7 @@ const deleteImagesFromCloud = (urls) => {
 
 export { eventDescriptions, events, generateNotifMailPayload } from './notifications';
 export { default as cache } from './caching';
+export { default as sendMail } from './mailing';
 
 export default {
   Misc: {

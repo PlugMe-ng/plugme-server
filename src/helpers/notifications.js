@@ -16,7 +16,8 @@ export const events = {
   REJECTED_VERIFICATION_REQUEST: 'rejected_verification_request',
   APPROVED_VERIFICATION_REQUEST: 'approved_verification_request',
   OPPORTUNITY_DEADLINE_PASSED_NO_ACHIEVER_SET: 'opportunity_deadline_passed_no_achiever_set',
-  OPPORTUNITY_DEADLINE_PASSED_NO_PLUGS: 'opportunity_deadline_passed_no_plugs'
+  OPPORTUNITY_DEADLINE_PASSED_NO_PLUGS: 'opportunity_deadline_passed_no_plugs',
+  NEW_INBOX_MSG: 'new_inbox_msg'
 };
 
 export const eventDescriptions = {
@@ -54,6 +55,7 @@ export const templateIds = {
   [events.OPPORTUNITY_DEADLINE_PASSED_NO_PLUGS]: 'd-d000080592d64bff9b1957c9439766a2',
   EMAIL_VERIFICATION: 'd-80aa362028504dffa50fcd7cfd17d617',
   PASSWORD_RESET: 'd-755be4a5d84d42379f040f7479562cf2',
+  [events.NEW_INBOX_MSG]: 'd-31b628b8bc8d4fa1b09ce4625efb1ecd'
 };
 
 /**
@@ -124,6 +126,11 @@ const generateMailData = ({
     case events.APPROVED_VERIFICATION_REQUEST:
       data = {
         fullName: recipient.fullName
+      };
+      break;
+    case events.NEW_INBOX_MSG:
+      data = {
+        link: `${config.FE_URL}/inbox`
       };
       break;
     default:
