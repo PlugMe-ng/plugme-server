@@ -221,7 +221,7 @@ const sendPlanExpirationNotif = async () => {
  * @returns {void}
  */
 const sendOpportunityDeadlinePassedNotif = async () => {
-  const yesterday = moment().days(-1);
+  const yesterday = moment().subtract(1, 'day');
   const pluggersIds = (await models.opportunity.findAll({
     where: {
       deadline: { [Op.between]: [yesterday.startOf('day').toDate(), yesterday.endOf('day').toDate()] },
@@ -251,7 +251,7 @@ const sendOpportunityDeadlinePassedNotif = async () => {
  * @returns {void}
  */
 const sendOpportunityDeadlinePassedNotif2 = async () => {
-  const yesterday = moment().days(-1);
+  const yesterday = moment().subtract(1, 'day');
   const pluggersIds = (await models.opportunity.findAll({
     where: {
       deadline: { [Op.between]: [yesterday.startOf('day').toDate(), yesterday.endOf('day').toDate()] },
