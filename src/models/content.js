@@ -19,7 +19,8 @@ module.exports = (sequelize, DataTypes) => {
     },
     mediaType: {
       type: DataTypes.ENUM,
-      values: ['image', 'video'],
+      values: ['image', 'video', 'audio'],
+      allowNull: false
     },
     totalViews: {
       type: DataTypes.INTEGER,

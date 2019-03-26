@@ -16,7 +16,7 @@ const contentCreationRules = {
   description: 'required|string',
   mediaUrls: 'array',
   tags: 'array|required|max:3',
-  mediaType: 'required_with:mediaUrls|in:video,image'
+  mediaType: 'required_with:mediaUrls|in:video,image,audio'
 };
 
 const addCommentRules = {
