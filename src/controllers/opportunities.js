@@ -368,7 +368,7 @@ export default new class {
           }]
         }, {
           model: models.location,
-          attributes: ['id', 'name'],
+          attributes: ['id', 'name', 'countryId'],
           ...(filter.location && {
             where: { id: filter.location }
           }),
