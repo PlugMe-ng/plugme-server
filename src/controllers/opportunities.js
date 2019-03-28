@@ -330,7 +330,7 @@ export default new class {
 
     const where = {
       ...(filter.budget && { budget: { [Op.lte]: filter.budget } }),
-      ...(filter.status && { status: { [Op.iLike]: filter.status } }),
+      ...(filter.status && { status: filter.status }),
       ...(filter.type && { type: { [Op.iLike]: filter.type } }),
       ...(filter.professionalDirection && {
         professionalDirection: { [Op.iLike]: filter.professionalDirection }
