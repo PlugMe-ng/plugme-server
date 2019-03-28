@@ -17,7 +17,8 @@ export const events = {
   APPROVED_VERIFICATION_REQUEST: 'approved_verification_request',
   OPPORTUNITY_DEADLINE_PASSED_NO_ACHIEVER_SET: 'opportunity_deadline_passed_no_achiever_set',
   OPPORTUNITY_DEADLINE_PASSED_NO_PLUGS: 'opportunity_deadline_passed_no_plugs',
-  NEW_INBOX_MSG: 'new_inbox_msg'
+  NEW_INBOX_MSG: 'new_inbox_msg',
+  FIRST_OPPORTUNITY_UPLOAD: 'first_opportunity_upload'
 };
 
 export const eventDescriptions = {
@@ -36,7 +37,8 @@ export const eventDescriptions = {
   [events.REJECTED_VERIFICATION_REQUEST]: 'Unfortunately, your portfolio verification request was declined. Please check your email for more information.',
   [events.APPROVED_VERIFICATION_REQUEST]: 'Congratulations, your portfolio has been permanently verified.',
   [events.OPPORTUNITY_DEADLINE_PASSED_NO_ACHIEVER_SET]: 'Your uploaded job deadline has passed with no achiever selected',
-  [events.OPPORTUNITY_DEADLINE_PASSED_NO_PLUGS]: 'Your uploaded job deadline has passed with no plug entries'
+  [events.OPPORTUNITY_DEADLINE_PASSED_NO_PLUGS]: 'Your uploaded job deadline has passed with no plug entries',
+  [events.FIRST_OPPORTUNITY_UPLOAD]: 'Your first job was published successfully'
 };
 
 export const templateIds = {
@@ -55,7 +57,8 @@ export const templateIds = {
   [events.OPPORTUNITY_DEADLINE_PASSED_NO_PLUGS]: 'd-d000080592d64bff9b1957c9439766a2',
   EMAIL_VERIFICATION: 'd-80aa362028504dffa50fcd7cfd17d617',
   PASSWORD_RESET: 'd-755be4a5d84d42379f040f7479562cf2',
-  [events.NEW_INBOX_MSG]: 'd-31b628b8bc8d4fa1b09ce4625efb1ecd'
+  [events.NEW_INBOX_MSG]: 'd-31b628b8bc8d4fa1b09ce4625efb1ecd',
+  [events.FIRST_OPPORTUNITY_UPLOAD]: 'd-7ee5867ba3b64b73b3f87dd8c18a2193'
 };
 
 /**

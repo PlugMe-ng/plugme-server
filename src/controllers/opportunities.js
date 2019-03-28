@@ -298,6 +298,14 @@ export default new class {
         }]
       });
       notifyUsers(opportunity);
+      if ((await user.countOpportunities()) === 1) {
+        notifications.create({
+          event: events.FIRST_OPPORTUNITY_UPLOAD,
+          recipients: [user.id],
+          entity: opportunity,
+          includeEmail: true
+        });
+      }
       return res.sendSuccess(opportunity);
     } catch (error) {
       if (opportunity) opportunity.destroy();
