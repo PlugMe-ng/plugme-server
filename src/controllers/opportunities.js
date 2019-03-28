@@ -406,8 +406,7 @@ export default new class {
             attributes: ['id', 'title'],
           }],
         }, {
-          model: models.review,
-          attributes: ['rating']
+          model: models.review
         }, {
           model: models.User,
           attributes: ['id', 'username', 'fullName'],
