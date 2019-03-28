@@ -259,7 +259,7 @@ export default new class {
       }
 
       await duplicateOpportunityUploadCheck(user, reqBody);
-      if ((await user.countOpportunities({ where: { status: 'pending' } })) > 0) {
+      if ((await user.countOpportunities({ where: { status: 'pending', achieverId: { [Op.ne]: null } } })) > 0) {
         throw new Error('Kindly submit all outstanding reviews to publish a new opportunity');
       }
       if (reqBody.lgaId) {
