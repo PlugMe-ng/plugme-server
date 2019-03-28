@@ -307,8 +307,7 @@ export default new class {
 
   /**
    * @method get
-   * @desc This method gets an array of users.
-   * Locations eager load is shitty, I know. Ask the client.
+   * @desc Handles retrieving opportuntities.
    *
    * @param { object } req request
    * @param { object } res response
@@ -323,14 +322,19 @@ export default new class {
 
     const where = {
       ...(filter.budget && { budget: { [Op.lte]: filter.budget } }),
-      ...(filter.status && { status: filter.status.toLowerCase() }),
+      ...(filter.status && { status: { [Op.iLike]: filter.status } }),
+      ...(filter.type && { type: { [Op.iLike]: filter.type } }),
+      ...(filter.professionalDirection && {
+        professionalDirection: { [Op.iLike]: filter.professionalDirection }
+      }),
+      ...(filter.positionNeeded && { occupationId: filter.positionNeeded }),
+      ...(filter.createdAt && { createdAt: { [Op.between]: filter.createdAt.split(',') } }),
       ...(query && {
         [Op.or]: [
           { title: { [Op.iLike]: `%${query}%` } },
           { responsibilities: { [Op.iLike]: `%${query}%` } }
         ]
-      }),
-      ...(filter.createdAt && { createdAt: { [Op.between]: filter.createdAt.split(',') } })
+      })
     };
 
     try {
