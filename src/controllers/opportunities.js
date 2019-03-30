@@ -336,6 +336,7 @@ export default new class {
         professionalDirection: { [Op.iLike]: filter.professionalDirection }
       }),
       ...(filter.positionNeeded && { occupationId: filter.positionNeeded }),
+      ...(filter.location && { locationId: filter.location }),
       ...(filter.createdAt && { createdAt: { [Op.between]: filter.createdAt.split(',') } }),
       ...(query && {
         [Op.or]: [
@@ -355,9 +356,6 @@ export default new class {
         include: [{
           model: models.localgovernment,
           attributes: ['id', 'name'],
-          ...(filter.localgovernment && {
-            where: { id: filter.localgovernment }
-          }),
           include: [{
             model: models.location,
             attributes: ['id', 'name'],
@@ -369,8 +367,11 @@ export default new class {
         }, {
           model: models.location,
           attributes: ['id', 'name', 'countryId'],
-          ...(filter.location && {
-            where: { id: filter.location }
+          ...((filter.location || filter.country) && {
+            where: {
+              ...(filter.location ?
+                { id: filter.location } : { countryId: filter.country })
+            }
           }),
           include: [{
             model: models.country,
@@ -378,10 +379,7 @@ export default new class {
           }]
         }, {
           model: models.country,
-          attributes: ['id', 'name'],
-          ...(filter.country && {
-            where: { id: filter.country }
-          }),
+          attributes: ['id', 'name']
         }, {
           model: models.tag,
           as: 'tags',
