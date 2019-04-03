@@ -346,13 +346,15 @@ export default new class {
       })
     };
 
+    const sort = [...attribute === 'rating' ? [models.opportunity.associations.reviews] : [], attribute, order];
+
     try {
       const opportunities = await models.opportunity.findAndCountAll({
         distinct: true,
         limit,
         offset,
         where,
-        order: [[attribute, order]],
+        order: [sort],
         include: [{
           model: models.localgovernment,
           attributes: ['id', 'name'],
