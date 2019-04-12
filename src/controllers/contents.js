@@ -202,7 +202,7 @@ export default new class {
         }, {
           model: models.User,
           as: 'author',
-          attributes: ['fullName', 'username', 'id'],
+          attributes: ['fullName', 'username', 'id', 'photo'],
           ...(filter.author && {
             where: { username: { [Op.iLike]: filter.author } }
           })
